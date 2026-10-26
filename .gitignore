@@ -1,0 +1,17 @@
+# Generated / temporary artifacts
+connection_log.txt
+record.mp4
+screen.png
+test_push.txt
+test_pull.txt
+manual_rec.mp4
+build/
+dist/*.spec
+__pycache__/
+*.pyc
+__pycache__/
+*.egg-info/
+.DS_Store
+.vscode/
+.idea/
+cmdline-tools.zip

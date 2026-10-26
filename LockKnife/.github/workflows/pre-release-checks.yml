@@ -1,0 +1,116 @@
+name: pre-release checks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - name: Install cargo-deny
+        run: cargo install cargo-deny
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      - run: uv sync --extra dev --extra full --frozen
+      - run: uv run python scripts/check_repository_hygiene.py
+      - name: Scan the complete Git history for secrets
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: uv run maturin develop
+      - run: uv run lockknife --version
+      - run: uv run lockknife --cli --help
+      - run: uv run python lockknife/core/version.py check
+      - run: uv run cargo test --workspace
+      - run: uv run cargo fmt --all --check
+      - run: uv run cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - run: cargo deny check
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run ty check
+      - run: uv run pytest --cov=lockknife --cov=lockknife_headless_cli --cov-report=term-missing
+      - run: uv run bandit -c bandit.yaml -r lockknife lockknife_headless_cli --severity-level medium
+      - run: uv run pip-audit
+
+  build-check:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
+        with:
+          command: build
+          args: -m lockknife-core/Cargo.toml --release --out dist
+      - name: Verify built wheel
+        shell: bash
+        run: |
+          for artifact in dist/*.whl; do
+            python scripts/verify_distribution.py "$artifact"
+          done
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: check-wheels-${{ matrix.os }}
+          path: dist/*
+          retention-days: 3
+
+  sdist-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      - uses: dtolnay/rust-toolchain@6bed0761d98439e5a578e2877258200ad565ba87 # stable
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1
+        with:
+          command: sdist
+          args: -m lockknife-core/Cargo.toml --out dist
+      - name: Verify built source distribution
+        shell: bash
+        run: |
+          for artifact in dist/*.tar.gz; do
+            python scripts/verify_distribution.py "$artifact"
+          done
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: check-sdist
+          path: dist/*.tar.gz
+          retention-days: 3

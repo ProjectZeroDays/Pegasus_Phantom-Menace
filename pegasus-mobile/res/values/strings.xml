@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pegasus Mobile</string>
+    <string name="device_model">Model: %s</string>
+    <string name="android_version">Android: %s</string>
+</resources>
