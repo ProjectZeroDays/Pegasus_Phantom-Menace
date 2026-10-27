@@ -1,8 +1,8 @@
 """
 Forensics module plugin entry point.
 """
-from pegasus_v2.modules.base import BaseModule
-from pegasus_v2.core.plugin import PluginMetadata
+from pegasus.modules.base import BaseModule
+from pegasus.core.plugin import PluginMetadata
 
 
 class ForensicsModule(BaseModule):

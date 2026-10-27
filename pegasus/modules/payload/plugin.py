@@ -1,8 +1,8 @@
 """
 Payload module plugin entry point.
 """
-from pegasus_v2.modules.payload.module import PayloadModule
-from pegasus_v2.core.plugin import PluginMetadata
+from pegasus.modules.payload.module import PayloadModule
+from pegasus.core.plugin import PluginMetadata
 
 metadata = PluginMetadata(
     name="payload",

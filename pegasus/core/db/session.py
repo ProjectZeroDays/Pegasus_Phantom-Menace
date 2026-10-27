@@ -16,8 +16,8 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-from pegasus_v2.core.config import get_settings
-from pegasus_v2.core.db.models import Base
+from pegasus.core.config import get_settings
+from pegasus.core.db.models import Base
 
 logger = logging.getLogger("pegasus.db")
 
@@ -128,7 +128,7 @@ async def init_db() -> None:
 
 async def _seed_default_data() -> None:
     """Seed default vulnerability database and settings."""
-    from pegasus_v2.core.db.models import Vulnerability
+    from pegasus.core.db.models import Vulnerability
     from sqlalchemy import select
 
     async with get_session() as session:

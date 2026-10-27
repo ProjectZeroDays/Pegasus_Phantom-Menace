@@ -1,7 +1,7 @@
 """
 Pegasus Phantom Menace v2 - Modules Package
 """
-from pegasus_v2.core.plugin import Plugin, PluginMetadata, HookType, CommandInfo, UIComponent
+from pegasus.core.plugin import Plugin, PluginMetadata, HookType, CommandInfo, UIComponent
 
 __all__ = [
     "Plugin",

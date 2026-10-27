@@ -16,7 +16,7 @@ from rich.prompt import Prompt, Confirm
 from rich.table import Table
 from rich.panel import Panel
 
-from pegasus_v2.core.plugin import (
+from pegasus.core.plugin import (
     Plugin,
     PluginMetadata,
     CommandInfo,
@@ -25,7 +25,7 @@ from pegasus_v2.core.plugin import (
     command,
     ui_component,
 )
-from pegasus_v2.core.config import get_settings
+from pegasus.core.config import get_settings
 
 
 class BaseModule(Plugin, ABC):

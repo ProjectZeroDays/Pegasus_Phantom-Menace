@@ -78,7 +78,7 @@ Pegasus Phantom Menace v2 is a comprehensive Android device management and secur
 ```bash
 # Clone the repository
 git clone https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace.git
-cd Pegasus_Phantom-Menace/pegasus_v2
+cd Pegasus_Phantom-Menace/pegasus
 
 # Create virtual environment
 python -m venv venv
@@ -89,10 +89,10 @@ source venv/bin/activate  # Linux/macOS
 pip install -r requirements.txt
 
 # Initialize workspace and database
-python -m pegasus_v2.core.__main__ init
+python -m pegasus.core.__main__ init
 
 # Run Pegasus
-python -m pegasus_v2.core.__main__
+python -m pegasus.core.__main__
 ```
 
 ### Or install as a package
@@ -144,7 +144,7 @@ pegasus serve
 ## Architecture
 
 ```
-pegasus_v2/
+pegasus/
 ├── core/              # Core framework (config, plugin, db, auth)
 ├── modules/           # Feature modules (device, payload, session, etc.)
 ├── ui/                # User interfaces (web, tui, cli)
@@ -160,7 +160,7 @@ pegasus_v2/
 Pegasus uses a plugin-based architecture. Each module is a separate plugin that can be loaded, unloaded, or replaced independently:
 
 ```python
-from pegasus_v2.core.plugin import Plugin, PluginMetadata
+from pegasus.core.plugin import Plugin, PluginMetadata
 
 class MyModule(Plugin):
     metadata = PluginMetadata(
@@ -226,18 +226,18 @@ pytest
 pytest tests/unit
 
 # Run with coverage
-pytest --cov=pegasus_v2 --cov-report=html
+pytest --cov=pegasus --cov-report=html
 
 # Run security scanning
-bandit -r pegasus_v2/
-semgrep --config auto pegasus_v2/
+bandit -r pegasus/
+semgrep --config auto pegasus/
 ```
 
 ## Release
 
 ```bash
 # Build executable
-pyinstaller --onefile --noupx --name Pegasus-v2.0 --icon=assets/icon.ico pegasus_v2/core/__main__.py
+pyinstaller --onefile --noupx --name Pegasus-v2.0 --icon=assets/icon.ico pegasus/core/__main__.py
 
 # Create release
 git tag v2.0.0

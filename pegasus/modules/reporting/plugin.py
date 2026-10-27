@@ -1,8 +1,8 @@
 """
 Reporting module plugin entry point.
 """
-from pegasus_v2.modules.reporting.module import ReportingModule
-from pegasus_v2.core.plugin import PluginMetadata
+from pegasus.modules.reporting.module import ReportingModule
+from pegasus.core.plugin import PluginMetadata
 
 metadata = PluginMetadata(
     name="reporting",

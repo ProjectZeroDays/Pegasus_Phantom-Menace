@@ -12,8 +12,8 @@ from rich.prompt import Prompt, Confirm
 from rich.table import Table
 from rich.panel import Panel
 
-from pegasus_v2.modules.base import BaseModule
-from pegasus_v2.core.plugin import CommandInfo, UIComponent, hook, command, ui_component, HookType
+from pegasus.modules.base import BaseModule
+from pegasus.core.plugin import CommandInfo, UIComponent, hook, command, ui_component, HookType
 
 
 class SessionModule(BaseModule):

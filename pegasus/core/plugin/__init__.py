@@ -16,7 +16,7 @@ from functools import lru_cache
 
 from pydantic import BaseModel, Field
 
-from pegasus_v2.core.config import get_settings
+from pegasus.core.config import get_settings
 
 
 class PluginStatus(Enum):
@@ -548,8 +548,8 @@ def get_plugin_manager() -> PluginManager:
     """Get the global plugin manager instance."""
     global plugin_manager
     if plugin_manager is None:
-        from pegasus_v2.core.config import get_settings
-        from pegasus_v2.core.config import get_settings as get_settings_func
+        from pegasus.core.config import get_settings
+        from pegasus.core.config import get_settings as get_settings_func
         settings = get_settings_func()
         context = AppContext(settings)
         global plugin_manager
@@ -560,7 +560,7 @@ def get_plugin_manager() -> PluginManager:
 def initialize_plugin_system() -> PluginManager:
     """Initialize the plugin system and load all plugins."""
     global plugin_manager
-    from pegasus_v2.core.config import get_settings
+    from pegasus.core.config import get_settings
     settings = get_settings()
     context = AppContext(settings)
     plugin_manager = PluginManager(context)

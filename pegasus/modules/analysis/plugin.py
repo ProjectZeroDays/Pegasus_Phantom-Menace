@@ -1,8 +1,8 @@
 """
 CVE Scanner module plugin entry point.
 """
-from pegasus_v2.modules.analysis.module import CVEScannerModule
-from pegasus_v2.core.plugin import PluginMetadata
+from pegasus.modules.analysis.module import CVEScannerModule
+from pegasus.core.plugin import PluginMetadata
 
 metadata = PluginMetadata(
     name="cve_scanner",

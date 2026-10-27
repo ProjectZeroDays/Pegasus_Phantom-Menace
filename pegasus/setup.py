@@ -28,8 +28,8 @@ setup(
         "Topic :: Security",
         "Topic :: System :: Networking :: Monitoring",
     ],
-    package_dir={"": "pegasus_v2"},
-    packages=find_packages(where="pegasus_v2"),
+    package_dir={"": "pegasus"},
+    packages=find_packages(where="pegasus"),
     python_requires=">=3.11",
     install_requires=[
         "rich>=13.7.0",
@@ -78,7 +78,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "pegasus=pegasus_v2.core.__main__:main",
+            "pegasus=pegasus.core.__main__:main",
         ],
     },
     include_package_data=True,

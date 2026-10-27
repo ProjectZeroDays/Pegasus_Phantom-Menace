@@ -92,11 +92,11 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pegasus_v2*"]
+include = ["pegasus*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["pegasus_v2/tests"]
+testpaths = ["pegasus/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -118,7 +118,7 @@ select = ["E", "F", "I", "UP", "B", "C4", "PTH", "SIM", "T20", "ARG", "PL", "TRY
 ignore = ["E501", "B008", "C901"]
 per-file-ignores = {
     "tests/*": ["S101", "S106"],
-    "pegasus_v2/tests/*": ["S101", "S106"],
+    "pegasus/tests/*": ["S101", "S106"],
 }
 
 [tool.mypy]
@@ -138,7 +138,7 @@ warn_unreachable = true
 strict_optional = true
 
 [tool.coverage.run]
-source = ["pegasus_v2"]
+source = ["pegasus"]
 omit = ["*/tests/*", "*/migrations/*", "*/scripts/*"]
 
 [tool.coverage.report]
@@ -158,4 +158,4 @@ report = ["term-missing", "html", "xml"]
 xml = "coverage.xml"
 
 [tool.setuptools.package-dir]
-"" = "pegasus_v2"
+"" = "pegasus"

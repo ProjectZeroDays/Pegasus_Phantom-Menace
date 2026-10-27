@@ -1,8 +1,8 @@
 """
 Pegasus Phantom Menace v2 - Core Package
 """
-from pegasus_v2.core.config import get_settings, Settings
-from pegasus_v2.core.plugin import (
+from pegasus.core.config import get_settings, Settings
+from pegasus.core.plugin import (
     Plugin,
     PluginMetadata,
     PluginManager,
@@ -13,7 +13,7 @@ from pegasus_v2.core.plugin import (
     initialize_plugin_system,
     get_plugin_manager,
 )
-from pegasus_v2.core.db.session import (
+from pegasus.core.db.session import (
     init_db,
     close_db,
     get_session,

@@ -14,14 +14,14 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from pegasus_v2.core.config import get_settings, Settings
-from pegasus_v2.core.plugin import (
+from pegasus.core.config import get_settings, Settings
+from pegasus.core.plugin import (
     initialize_plugin_system,
     get_plugin_manager,
     HookType,
     CommandInfo,
 )
-from pegasus_v2.core.db.session import init_db, close_db, get_session
+from pegasus.core.db.session import init_db, close_db, get_session
 
 console = Console()
 
@@ -85,7 +85,7 @@ def list_plugins() -> None:
 
 def show_main_menu() -> None:
     """Show the main menu with all available commands."""
-    from pegasus_v2.core.plugin import get_plugin_manager
+    from pegasus.core.plugin import get_plugin_manager
     pm = get_plugin_manager()
     commands = pm.context.commands
 

@@ -1,8 +1,8 @@
 """
 Session module plugin entry point.
 """
-from pegasus_v2.modules.session.module import SessionModule
-from pegasus_v2.core.plugin import PluginMetadata
+from pegasus.modules.session.module import SessionModule
+from pegasus.core.plugin import PluginMetadata
 
 metadata = PluginMetadata(
     name="session",

@@ -16,9 +16,9 @@ from rich.prompt import Prompt, IntPrompt
 from rich.table import Table
 from rich.panel import Panel
 
-from pegasus_v2.modules.base import BaseModule
-from pegasus_v2.core.plugin import CommandInfo, UIComponent, hook, command, ui_component, HookType
-from pegasus_v2.core.config import get_settings
+from pegasus.modules.base import BaseModule
+from pegasus.core.plugin import CommandInfo, UIComponent, hook, command, ui_component, HookType
+from pegasus.core.config import get_settings
 
 
 class PayloadModule(BaseModule):
@@ -62,7 +62,7 @@ class PayloadModule(BaseModule):
 
     async def cmd_payload_gen(self, *args) -> None:
         """Generate a single msfvenom payload."""
-        from pegasus_v2.core.config import get_settings
+        from pegasus.core.config import get_settings
         settings = get_settings()
 
         payloads = {
@@ -119,7 +119,7 @@ class PayloadModule(BaseModule):
 
     async def cmd_payload_mass(self, *args) -> None:
         """Generate multiple payloads with different ports."""
-        from pegasus_v2.core.config import get_settings
+        from pegasus.core.config import get_settings
         settings = get_settings()
 
         lhost = self.prompt("LHOST", default="127.0.0.1")
@@ -155,7 +155,7 @@ class PayloadModule(BaseModule):
 
     async def cmd_payload_dna(self, *args) -> None:
         """Manage DNA tracking registry."""
-        from pegasus_v2.core.config import get_settings
+        from pegasus.core.config import get_settings
         dna_dir = self.context.get_dna_dir()
         registry_file = dna_dir / "registry.json"
 

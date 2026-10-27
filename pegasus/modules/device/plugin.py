@@ -1,8 +1,8 @@
 """
 Device module plugin entry point.
 """
-from pegasus_v2.modules.device.module import DeviceModule
-from pegasus_v2.core.plugin import PluginMetadata
+from pegasus.modules.device.module import DeviceModule
+from pegasus.core.plugin import PluginMetadata
 
 metadata = PluginMetadata(
     name="device",
