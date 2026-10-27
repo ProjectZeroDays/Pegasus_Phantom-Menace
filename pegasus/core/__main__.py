@@ -22,7 +22,7 @@ from pegasus.core.plugin import (
     CommandInfo,
 )
 from pegasus.core.db.session import init_db, close_db, get_session
-from pegasus.modules.integrations import initialize_slash_commands, slash_command_manager
+from pegasus.modules.integrations import slash_command_manager, initialize_slash_commands
 
 console = Console()
 
@@ -311,28 +311,44 @@ def version() -> None:
     console.print(f"License: {settings.app.name}")
 
 
+def _get_scm() -> SlashCommandManager:
+    """Get or initialize slash command manager."""
+    from pegasus.modules.integrations import slash_command_manager as _scm_mod
+    global slash_command_manager
+    if slash_command_manager is None:
+        pm = get_plugin_manager()
+        scm = initialize_slash_commands(pm.context)
+        slash_command_manager = scm
+    else:
+        scm = slash_command_manager
+    return scm
+
+
 @cli.group()
 def slash() -> None:
     """Slash commands - Pegasus high-level commands."""
     pass
+    """Get or initialize slash command manager."""
+    global slash_command_manager
+    if slash_command_manager is None:
+        pm = get_plugin_manager()
+        scm = initialize_slash_commands(pm.context)
+    else:
+        scm = slash_command_manager
+    return scm
 
 
 @slash.command("slash-help")
 def slash_help() -> None:
     """Show all available slash commands."""
-    scm = slash_command_manager
-    if not slash_command_manager:
-        console.print("[yellow]Initializing slash commands...[/yellow]")
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     scm.show_help()
 
 
 @slash.command("adb-devices")
 def slash_adb_devices() -> None:
     """List connected ADB devices."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("adb-devices"))
 
@@ -340,9 +356,7 @@ def slash_adb_devices() -> None:
 @slash.command("fastboot-devices")
 def slash_fastboot_devices() -> None:
     """List fastboot devices."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("fastboot-devices"))
 
@@ -350,9 +364,7 @@ def slash_fastboot_devices() -> None:
 @slash.command("wireless-adb")
 def slash_wireless_adb() -> None:
     """Wireless ADB connect with QR code and zeroclick bypass."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("wireless-adb"))
 
@@ -360,9 +372,7 @@ def slash_wireless_adb() -> None:
 @slash.command("troubleshoot")
 def slash_troubleshoot() -> None:
     """AI-powered runtime issue detection and debugging."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("troubleshoot"))
 
@@ -370,9 +380,7 @@ def slash_troubleshoot() -> None:
 @slash.command("test")
 def slash_test() -> None:
     """Run exhaustive test scripts."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("test"))
 
@@ -380,9 +388,7 @@ def slash_test() -> None:
 @slash.command("netscan")
 def slash_netscan() -> None:
     """Network device and service discovery."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("netscan"))
 
@@ -390,9 +396,7 @@ def slash_netscan() -> None:
 @slash.command("btscan")
 def slash_btscan() -> None:
     """Bluetooth proximity scanning."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("btscan"))
 
@@ -400,9 +404,7 @@ def slash_btscan() -> None:
 @slash.command("wifiscan")
 def slash_wifiscan() -> None:
     """WiFi beacon scanning."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("wifiscan"))
 
@@ -410,9 +412,7 @@ def slash_wifiscan() -> None:
 @slash.command("nmap-scan")
 def slash_nmap_scan() -> None:
     """Comprehensive nmap network scan with PDF report."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("nmap-scan"))
 
@@ -420,9 +420,7 @@ def slash_nmap_scan() -> None:
 @slash.command("tshark")
 def slash_tshark() -> None:
     """TShark packet capture and analysis."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("tshark"))
 
@@ -430,9 +428,7 @@ def slash_tshark() -> None:
 @slash.command("wireshark")
 def slash_wireshark() -> None:
     """Wireshark packet capture and analysis."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("wireshark"))
 
@@ -440,9 +436,7 @@ def slash_wireshark() -> None:
 @slash.command("frp-bypass")
 def slash_frp_bypass() -> None:
     """FRP bypass for Android devices."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("frp-bypass"))
 
@@ -450,9 +444,7 @@ def slash_frp_bypass() -> None:
 @slash.command("exploit")
 def slash_exploit() -> None:
     """General exploitation framework."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("exploit"))
 
@@ -460,9 +452,7 @@ def slash_exploit() -> None:
 @slash.command("post-exploitation")
 def slash_post_exploitation() -> None:
     """Post-exploitation automation."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("post-exploitation"))
 
@@ -470,9 +460,7 @@ def slash_post_exploitation() -> None:
 @slash.command("generate-payload")
 def slash_generate_payload() -> None:
     """Generate exploitation payloads."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("generate-payload"))
 
@@ -480,9 +468,7 @@ def slash_generate_payload() -> None:
 @slash.command("audit-security")
 def slash_audit_security() -> None:
     """Security audit."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("audit-security"))
 
@@ -490,9 +476,7 @@ def slash_audit_security() -> None:
 @slash.command("harden-app")
 def slash_harden_app() -> None:
     """Harden application."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("harden-app"))
 
@@ -500,9 +484,7 @@ def slash_harden_app() -> None:
 @slash.command("harden-device")
 def slash_harden_device() -> None:
     """Harden device."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("harden-device"))
 
@@ -510,9 +492,7 @@ def slash_harden_device() -> None:
 @slash.command("kill-switch")
 def slash_kill_switch() -> None:
     """Kill switch activation."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("kill-switch"))
 
@@ -520,9 +500,7 @@ def slash_kill_switch() -> None:
 @slash.command("dump-credentials")
 def slash_dump_credentials() -> None:
     """Dump credentials from device."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("dump-credentials"))
 
@@ -530,9 +508,7 @@ def slash_dump_credentials() -> None:
 @slash.command("crack-hashes")
 def slash_crack_hashes() -> None:
     """Cryptographic hash cracking."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("crack-hashes"))
 
@@ -540,9 +516,7 @@ def slash_crack_hashes() -> None:
 @slash.command("crack-passwords")
 def slash_crack_passwords() -> None:
     """Password cracking."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("crack-passwords"))
 
@@ -550,9 +524,7 @@ def slash_crack_passwords() -> None:
 @slash.command("brute-force")
 def slash_brute_force() -> None:
     """Brute force attacks."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("brute-force"))
 
@@ -560,9 +532,7 @@ def slash_brute_force() -> None:
 @slash.command("create-rat-agent")
 def slash_create_rat_agent() -> None:
     """Create RAT agent."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-rat-agent"))
 
@@ -570,9 +540,7 @@ def slash_create_rat_agent() -> None:
 @slash.command("create-exploit")
 def slash_create_exploit() -> None:
     """Create custom exploits."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-exploit"))
 
@@ -580,9 +548,7 @@ def slash_create_exploit() -> None:
 @slash.command("wipe-logs")
 def slash_wipe_logs() -> None:
     """Wipe system logs."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("wipe-logs"))
 
@@ -590,9 +556,7 @@ def slash_wipe_logs() -> None:
 @slash.command("edit-logs")
 def slash_edit_logs() -> None:
     """Edit system logs."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("edit-logs"))
 
@@ -600,9 +564,7 @@ def slash_edit_logs() -> None:
 @slash.command("create-exe")
 def slash_create_exe() -> None:
     """Create Windows EXE."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-exe"))
 
@@ -610,9 +572,7 @@ def slash_create_exe() -> None:
 @slash.command("create-ipa")
 def slash_create_ipa() -> None:
     """Create iOS IPA."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-ipa"))
 
@@ -620,9 +580,7 @@ def slash_create_ipa() -> None:
 @slash.command("create-deb")
 def slash_create_deb() -> None:
     """Create Debian DEB."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-deb"))
 
@@ -630,9 +588,7 @@ def slash_create_deb() -> None:
 @slash.command("create-dmg")
 def slash_create_dmg() -> None:
     """Create macOS DMG."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-dmg"))
 
@@ -640,9 +596,7 @@ def slash_create_dmg() -> None:
 @slash.command("create-apk")
 def slash_create_apk() -> None:
     """Create Android APK."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-apk"))
 
@@ -650,9 +604,7 @@ def slash_create_apk() -> None:
 @slash.command("create-flatpack")
 def slash_create_flatpack() -> None:
     """Create Linux Flatpak."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-flatpack"))
 
@@ -660,9 +612,7 @@ def slash_create_flatpack() -> None:
 @slash.command("create-snap")
 def slash_create_snap() -> None:
     """Create Linux Snap."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-snap"))
 
@@ -670,9 +620,7 @@ def slash_create_snap() -> None:
 @slash.command("zip")
 def slash_create_zip() -> None:
     """Create ZIP archive."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("zip"))
 
@@ -680,9 +628,7 @@ def slash_create_zip() -> None:
 @slash.command("tar")
 def slash_create_tar() -> None:
     """Create TAR archive."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("tar"))
 
@@ -690,9 +636,7 @@ def slash_create_tar() -> None:
 @slash.command("rar")
 def slash_create_rar() -> None:
     """Create RAR archive."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("rar"))
 
@@ -700,9 +644,7 @@ def slash_create_rar() -> None:
 @slash.command("create-vault")
 def slash_create_vault() -> None:
     """Create encrypted vault."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("create-vault"))
 
@@ -710,9 +652,7 @@ def slash_create_vault() -> None:
 @slash.command("open-vault")
 def slash_open_vault() -> None:
     """Open encrypted vault."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("open-vault"))
 
@@ -720,9 +660,7 @@ def slash_open_vault() -> None:
 @slash.command("crack-vault")
 def slash_crack_vault() -> None:
     """Crack encrypted vault."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("crack-vault"))
 
@@ -730,9 +668,7 @@ def slash_crack_vault() -> None:
 @slash.command("docs")
 def slash_docs() -> None:
     """Update all documentation including GitHub Wiki."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("docs"))
 
@@ -740,9 +676,7 @@ def slash_docs() -> None:
 @slash.command("improve")
 def slash_improve() -> None:
     """Continuous improvement and refactoring."""
-    scm = slash_command_manager
-    if not scm:
-        scm = initialize_slash_commands(get_plugin_manager().context)
+    scm = _get_scm()
     import asyncio
     asyncio.run(scm.execute("improve"))
 
