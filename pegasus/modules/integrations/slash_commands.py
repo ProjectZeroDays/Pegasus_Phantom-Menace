@@ -29,8 +29,8 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from pegasus_v2.core.config import get_settings, get_workspace, get_payloads_dir, get_reports_dir, get_logs_dir
-from pegasus_v2.core.plugin import Plugin, PluginMetadata, HookType
+from pegasus.core.config import get_settings, get_workspace, get_payloads_dir, get_reports_dir, get_logs_dir
+from pegasus.core.plugin import Plugin, PluginMetadata, HookType
 
 console = Console()
 

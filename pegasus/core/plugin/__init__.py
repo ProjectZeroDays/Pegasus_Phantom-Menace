@@ -43,7 +43,6 @@ class HookType(Enum):
     REPORT_GENERATED = "report_generated"
     EXPLOIT_EXECUTED = "exploit_executed"
     AI_QUERY = "ai_query"
-    REPORT_GENERATED = "report_generated"
     PRE_EXPLOIT = "pre_exploit"
     POST_EXPLOIT = "post_exploit"
     PRE_PAYLOAD_GEN = "pre_payload_gen"
@@ -549,10 +548,8 @@ def get_plugin_manager() -> PluginManager:
     global plugin_manager
     if plugin_manager is None:
         from pegasus.core.config import get_settings
-        from pegasus.core.config import get_settings as get_settings_func
-        settings = get_settings_func()
+        settings = get_settings()
         context = AppContext(settings)
-        global plugin_manager
         plugin_manager = PluginManager(context)
     return plugin_manager
 
