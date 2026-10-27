@@ -1,0 +1,15 @@
+{
+  "skill": "pegasus-slash-commands",
+  "version": "1.0.0",
+  "description": "Pegasus Phantom Menace v2.0 slash command framework for OpenFable",
+  "author": "ProjectZeroDays",
+  "category": "security",
+  "entry_point": ".openfable-skills/pegasus-slash-commands.json",
+  "workflows": [
+    ".openfable-skills/workflows/full-security-audit.json",
+    ".openfable-skills/workflows/payload-chain.json",
+    ".openfable-skills/workflows/device-assessment.json"
+  ],
+  "commands": 36,
+  "installation": "skill install .openfable-skills/pegasus-slash-commands.json"
+}

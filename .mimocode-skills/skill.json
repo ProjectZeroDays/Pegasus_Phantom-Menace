@@ -1,0 +1,15 @@
+{
+  "skill": "pegasus-slash-commands",
+  "version": "1.0.0",
+  "description": "Pegasus Phantom Menace v2.0 slash command framework for Mimicode",
+  "author": "ProjectZeroDays",
+  "category": "security",
+  "entry_point": ".mimocode-skills/pegasus-slash-commands.json",
+  "workflows": [
+    ".mimocode-skills/workflows/full-security-audit.json",
+    ".mimocode-skills/workflows/payload-chain.json",
+    ".mimocode-skills/workflows/device-assessment.json"
+  ],
+  "commands": 36,
+  "installation": "skill install .mimocode-skills/pegasus-slash-commands.json"
+}

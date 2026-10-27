@@ -1,0 +1,44 @@
+{
+  "skill": "pegasus-slash-commands",
+  "version": "1.0.0",
+  "description": "Pegasus Phantom Menace v2.0 slash command framework for Mimicode coding agent",
+  "author": "ProjectZeroDays",
+  "category": "security",
+  "triggers": [
+    "/ruflo", "/genius-mode", "/god-mode", "/godmode",
+    "/adb-devices", "/fastboot-devices", "/wireless-adb",
+    "/troubleshoot", "/test",
+    "/netscan", "/btscan", "/wifiscan", "/nmap-scan",
+    "/tshark", "/wireshark",
+    "/frp-bypass", "/exploit", "/post-exploitation", "/generate-payload",
+    "/dump-credentials", "/crack-hashes", "/crack-passwords", "/brute-force",
+    "/create-rat-agent", "/create-exploit", "/audit-security", "/harden-app",
+    "/harden-device", "/kill-switch",
+    "/wipe-logs", "/edit-logs",
+    "/create-exe", "/create-ipa", "/create-deb", "/create-dmg", "/create-apk",
+    "/create-flatpack", "/create-snap", "/zip", "/tar", "/rar",
+    "/create-vault", "/open-vault", "/crack-vault",
+    "/docs", "/improve"
+  ],
+  "execution": {
+    "command": "python -m pegasus.core.__main__ slash <command>",
+    "cwd": "<project_root>/pegasus"
+  },
+  "installation": {
+    "clone": "git clone https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace.git",
+    "setup": "pip install -r pegasus/requirements.txt && python -m pegasus.core.__main__ init"
+  },
+  "categories": {
+    "system": ["ruflo", "genius-mode", "god-mode"],
+    "device": ["adb-devices", "fastboot-devices", "wireless-adb"],
+    "debug": ["troubleshoot", "test"],
+    "network": ["netscan", "btscan", "wifiscan", "nmap-scan"],
+    "packet": ["tshark", "wireshark"],
+    "exploit": ["frp-bypass", "exploit", "post-exploitation", "generate-payload"],
+    "credentials": ["dump-credentials", "crack-hashes", "crack-passwords", "brute-force", "create-rat-agent", "create-exploit", "audit-security", "harden-app", "harden-device", "kill-switch"],
+    "logs": ["wipe-logs", "edit-logs"],
+    "build": ["create-exe", "create-ipa", "create-deb", "create-dmg", "create-apk", "create-flatpack", "create-snap", "zip", "tar", "rar"],
+    "vault": ["create-vault", "open-vault", "crack-vault"],
+    "docs": ["docs", "improve"]
+  }
+}
