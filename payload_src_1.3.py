@@ -827,6 +827,14 @@ def _load_net_module():
         print(RED + "[!] pegasus_net.py not found - keep it in the same folder as this script." + RESET)
         return None
 
+def _load_extra_module():
+    try:
+        import pegasus_extra
+        return pegasus_extra
+    except ImportError:
+        print(RED + "[!] pegasus_extra.py not found - keep it in the same folder as this script." + RESET)
+        return None
+
 def option_scan_network():
     net = _load_net_module()
     if net:
@@ -836,6 +844,11 @@ def option_wireless_pair():
     net = _load_net_module()
     if net:
         net.pair_connect_menu()
+
+def option_extra_features():
+    extra = _load_extra_module()
+    if extra:
+        extra.interactive_extra()
 
 # ----------------- Menu / Main Loop -----------------
 def show_menu():
@@ -853,6 +866,7 @@ def show_menu():
     print(CYAN + f"[23] View Device Connection History" + RESET)
     print(YELLOW + f"[24] Scan Network for ADB Devices\n")
     print(YELLOW + f"[25] Pair & Connect (Wireless ADB)" + RESET)
+    print(YELLOW + f"[26] Extra Features (High-Value) — AI, Reports, CVE, Dashboard, Telegram, etc." + RESET)
     print("\n")
 
 def dependencies_check():
@@ -873,7 +887,7 @@ def main():
         print_banner()
         show_menu()
         try:
-            choice = input(GREEN + "Select an option (1-25) or q to quit: " + RESET).strip().lower()
+            choice = input(GREEN + "Select an option (1-26) or q to quit: " + RESET).strip().lower()
         except EOFError:
             choice = "q"
         if choice == "q":
@@ -910,12 +924,13 @@ def main():
             "22": cyber_defence_mode,
             "23": option_view_connection_history,
             "24": option_scan_network,
-            "25": option_wireless_pair
+            "25": option_wireless_pair,
+            "26": option_extra_features
         }
         if choice in options:
             options[choice]()
         else:
-            print(RED + "Invalid option. Choose 1-25 or q." + RESET)
+            print(RED + "Invalid option. Choose 1-26 or q." + RESET)
         try:
             input("\nPress Enter to return to menu...")
         except EOFError:

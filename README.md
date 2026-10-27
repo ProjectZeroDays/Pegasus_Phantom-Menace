@@ -28,6 +28,7 @@
 |--------|---------|-------------|
 | 24 | **Scan Network for ADB** | mDNS + TCP 5555 scan; discovers wireless endpoints |
 | 25 | **Pair & Connect** | Android 11+ wireless pairing with one-time code |
+| 26 | **Extra Features (High-Value)** | 17 sub-features: AI Assistant, Report Generator, CVE Scanner, Live Dashboard, Telegram, Campaign Manager, Steganography, Mass Payload, DNA Tracker, AI Mutator, QR Delivery, SSL Bypass, Listener Monitor, ngrok, Network Forwarding, Network Scanner, and more |
 
 ---
 
@@ -65,6 +66,31 @@ assets/icons/
   android/android_*.png            -> Source for mipmap build
   screenshots/screenshot_*.png     -> README docs
 ```
+
+---
+
+### 🚀 Extra Features (Option 26) — High-Value Capabilities
+
+Integrated from DeadDroid v2.0 — 17 sub-features:
+
+| Sub-Option | Feature | Description |
+|-----------|---------|-------------|
+| 1 | **AI Assistant (Claude)** | Real-time pentest guidance via Claude AI |
+| 2 | **Report Generator (HTML)** | Professional pentest reports with findings |
+| 3 | **Android CVE Scanner** | Vulnerability fingerprinting via ADB + NVD API |
+| 4 | **Live Dashboard** | Real-time device monitoring TUI |
+| 5 | **Telegram Remote Control** | Push alerts + remote command execution |
+| 6 | **Campaign Manager** | Organize penetration test assessments |
+| 7 | **Steganography Delivery** | Hide payload URLs in images (LSB) |
+| 8 | **Mass Payload Generator** | Batch payload generation with DNA tags |
+| 9 | **Payload DNA Tracker** | Unique payload tracking system |
+| 10 | **AI Mutation Engine** | AV evasion suggestions via Claude |
+| 11 | **QR Payload Delivery** | Generate QR codes for payload URLs |
+| 12 | **SSL Pinning Bypass** | Frida script generator |
+| 13 | **Listener Health Monitor** | Port polling with alerts |
+| 14 | **ngrok Tunnel Manager** | TCP/HTTP tunnel management |
+| 15 | **Network & Port Forwarding** | socat/SSH/iptables forwarding |
+| 16 | **Network Scanner (nmap)** | Host discovery and port scanning |
 
 ---
 
