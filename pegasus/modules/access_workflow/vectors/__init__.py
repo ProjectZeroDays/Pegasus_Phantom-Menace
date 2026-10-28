@@ -1,1 +1,1 @@
-"""Pegasus Access Workflow Module - Vectors"""
+"""Vector scanners package for access workflow module."""
