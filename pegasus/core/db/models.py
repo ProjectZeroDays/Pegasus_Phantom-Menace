@@ -1,7 +1,5 @@
-"""
-Pegasus Phantom Menace v2 - Database Models
-SQLAlchemy ORM models for all core entities.
-"""
+#!/usr/bin/env python3
+"""Pegasus Phantom Menace v2 - Database Models"""
 from __future__ import annotations
 
 import enum
@@ -31,10 +29,6 @@ from sqlalchemy.sql import func
 
 Base = declarative_base()
 
-
-# ============================================================================
-# Enum Types
-# ============================================================================
 
 class DeviceStatus(str, enum.Enum):
     CONNECTED = "connected"
@@ -107,12 +101,7 @@ class ConnectionStatus(str, enum.Enum):
     UNKNOWN = "unknown"
 
 
-# ============================================================================
-# Core Models
-# ============================================================================
-
 class Device(Base):
-    """Android device registry."""
     __tablename__ = "devices"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -127,8 +116,8 @@ class Device(Base):
     ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
     mac_address: Mapped[Optional[str]] = mapped_column(String(17), nullable=True)
     battery_level: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    storage_total: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # bytes
-    storage_free: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # bytes
+    storage_total: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    storage_free: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     is_rooted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_debuggable: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     last_connected: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -139,11 +128,10 @@ class Device(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    # Relationships
     sessions: Mapped[list["Session"]] = relationship("Session", back_populates="device", cascade="all, delete-orphan")
     connections: Mapped[list["ConnectionLog"]] = relationship("ConnectionLog", back_populates="device", cascade="all, delete-orphan")
     findings: Mapped[list["Finding"]] = relationship("Finding", back_populates="device", cascade="all, delete-orphan")
-    vulnerabilities: Mapped[list["Vulnerability"]] = relationship("Vulnerability", back_populates="device", cascade="all, delete-orphan")
+    vulnerabilities: Mapped[list["DeviceVulnerability"]] = relationship("DeviceVulnerability", back_populates="device", cascade="all, delete-orphan")
     payloads: Mapped[list["Payload"]] = relationship("Payload", back_populates="device", cascade="all, delete-orphan")
     screenshots: Mapped[list["Screenshot"]] = relationship("Screenshot", back_populates="device", cascade="all, delete-orphan")
     extractions: Mapped[list["Extraction"]] = relationship("Extraction", back_populates="device", cascade="all, delete-orphan")
@@ -155,7 +143,6 @@ class Device(Base):
 
 
 class Session(Base):
-    """Meterpreter/Shell session records."""
     __tablename__ = "sessions"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -167,7 +154,7 @@ class Session(Base):
     local_port: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     remote_ip: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
     remote_port: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    tunnel_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)  # adb, ngrok, direct
+    tunnel_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     keepalive_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     keepalive_interval: Mapped[int] = mapped_column(Integer, default=60, nullable=False)
     command_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -176,7 +163,6 @@ class Session(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     closed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    # Relationships
     device: Mapped[Device] = relationship("Device", back_populates="sessions")
     commands: Mapped[list["SessionCommand"]] = relationship("SessionCommand", back_populates="session", cascade="all, delete-orphan")
 
@@ -187,7 +173,6 @@ class Session(Base):
 
 
 class SessionCommand(Base):
-    """Commands executed in sessions."""
     __tablename__ = "session_commands"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -198,7 +183,6 @@ class SessionCommand(Base):
     duration_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # Relationships
     session: Mapped[Session] = relationship("Session", back_populates="commands")
 
     __table_args__ = (
@@ -207,7 +191,6 @@ class SessionCommand(Base):
 
 
 class ConnectionLog(Base):
-    """Device connection history."""
     __tablename__ = "connection_logs"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -218,7 +201,6 @@ class ConnectionLog(Base):
     connected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     disconnected_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    # Relationships
     device: Mapped[Device] = relationship("Device", back_populates="connections")
 
     __table_args__ = (
@@ -226,12 +208,7 @@ class ConnectionLog(Base):
     )
 
 
-# ============================================================================
-# Payload Models
-# ============================================================================
-
 class Payload(Base):
-    """Generated payload records."""
     __tablename__ = "payloads"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -253,7 +230,6 @@ class Payload(Base):
     metadata_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # Relationships
     device: Mapped[Optional[Device]] = relationship("Device", back_populates="payloads")
     campaign: Mapped[Optional["Campaign"]] = relationship("Campaign", back_populates="payloads")
 
@@ -263,12 +239,7 @@ class Payload(Base):
     )
 
 
-# ============================================================================
-# Finding & Vulnerability Models
-# ============================================================================
-
 class Finding(Base):
-    """Security findings from scans."""
     __tablename__ = "findings"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -287,7 +258,6 @@ class Finding(Base):
     is_false_positive: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # Relationships
     device: Mapped[Device] = relationship("Device", back_populates="findings")
     campaign: Mapped[Optional["Campaign"]] = relationship("Campaign", back_populates="findings")
 
@@ -298,7 +268,6 @@ class Finding(Base):
 
 
 class Vulnerability(Base):
-    """Vulnerability database entries."""
     __tablename__ = "vulnerabilities"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -315,6 +284,8 @@ class Vulnerability(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    devices: Mapped[list["DeviceVulnerability"]] = relationship("DeviceVulnerability", back_populates="vulnerability")
+
     __table_args__ = (
         Index("idx_vulnerabilities_severity", "severity"),
         Index("idx_vulnerabilities_cve", "cve_id"),
@@ -322,7 +293,6 @@ class Vulnerability(Base):
 
 
 class DeviceVulnerability(Base):
-    """Many-to-many: devices and their vulnerabilities."""
     __tablename__ = "device_vulnerabilities"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -332,17 +302,11 @@ class DeviceVulnerability(Base):
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     detected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    __table_args__ = (
-        UniqueConstraint("device_id", "vulnerability_id", name="uq_device_vulnerability"),
-    )
+    device: Mapped["Device"] = relationship("Device", back_populates="vulnerabilities")
+    vulnerability: Mapped["Vulnerability"] = relationship("Vulnerability", back_populates="devices")
 
-
-# ============================================================================
-# Screenshot & Extraction Models
-# ============================================================================
 
 class Screenshot(Base):
-    """Device screenshot records."""
     __tablename__ = "screenshots"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -353,37 +317,29 @@ class Screenshot(Base):
     height: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     format: Mapped[str] = mapped_column(String(20), default="png", nullable=False)
     captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    is_anonymous: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)  # auto-deleted from device
+    is_anonymous: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    # Relationships
     device: Mapped[Device] = relationship("Device", back_populates="screenshots")
 
 
 class Extraction(Base):
-    """File/data extraction records."""
     __tablename__ = "extractions"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     device_id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("devices.id", ondelete="CASCADE"), nullable=False, index=True)
     source_path: Mapped[str] = mapped_column(String(500), nullable=False)
     destination_path: Mapped[str] = mapped_column(String(500), nullable=False)
-    extraction_type: Mapped[str] = mapped_column(String(100), nullable=False)  # sms, contacts, media, call_logs, etc.
+    extraction_type: Mapped[str] = mapped_column(String(100), nullable=False)
     file_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     total_size_bytes: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     status: Mapped[str] = mapped_column(String(50), default="completed", nullable=False)
     error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     extracted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # Relationships
     device: Mapped[Device] = relationship("Device", back_populates="extractions")
 
 
-# ============================================================================
-# Campaign Models
-# ============================================================================
-
 class Campaign(Base):
-    """Penetration test campaigns."""
     __tablename__ = "campaigns"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -399,7 +355,6 @@ class Campaign(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    # Relationships
     targets: Mapped[list["CampaignTarget"]] = relationship("CampaignTarget", back_populates="campaign", cascade="all, delete-orphan")
     payloads: Mapped[list[Payload]] = relationship("Payload", back_populates="campaign")
     findings: Mapped[list[Finding]] = relationship("Finding", back_populates="campaign")
@@ -412,17 +367,15 @@ class Campaign(Base):
 
 
 class CampaignTarget(Base):
-    """Campaign targets."""
     __tablename__ = "campaign_targets"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     campaign_id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False, index=True)
-    target_type: Mapped[str] = mapped_column(String(50), nullable=False)  # device, ip, domain, app
+    target_type: Mapped[str] = mapped_column(String(50), nullable=False)
     target_value: Mapped[str] = mapped_column(String(500), nullable=False)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    # Relationships
     campaign: Mapped[Campaign] = relationship("Campaign", back_populates="targets")
 
     __table_args__ = (
@@ -430,12 +383,7 @@ class CampaignTarget(Base):
     )
 
 
-# ============================================================================
-# Report Models
-# ============================================================================
-
 class Report(Base):
-    """Generated reports."""
     __tablename__ = "reports"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -453,7 +401,6 @@ class Report(Base):
     generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     download_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-    # Relationships
     campaign: Mapped[Optional[Campaign]] = relationship("Campaign", back_populates="reports")
     report_findings: Mapped[list["ReportFinding"]] = relationship("ReportFinding", back_populates="report", cascade="all, delete-orphan")
 
@@ -464,31 +411,28 @@ class Report(Base):
 
 
 class ReportFinding(Base):
-    """Many-to-many: reports and findings."""
     __tablename__ = "report_findings"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     report_id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("reports.id", ondelete="CASCADE"), nullable=False, index=True)
     finding_id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("findings.id", ondelete="CASCADE"), nullable=False, index=True)
 
+    report: Mapped["Report"] = relationship("Report", back_populates="report_findings")
+    finding: Mapped["Finding"] = relationship("Finding")
+
     __table_args__ = (
         UniqueConstraint("report_id", "finding_id", name="uq_report_finding"),
     )
 
 
-# ============================================================================
-# User & Auth Models
-# ============================================================================
-
 class User(Base):
-    """Application users."""
     __tablename__ = "users"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     username: Mapped[str] = mapped_column(String(100), unique=True, index=True, nullable=False)
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[str] = mapped_column(String(50), default="analyst", nullable=False)  # admin, analyst, viewer
+    role: Mapped[str] = mapped_column(String(50), default="analyst", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_2fa_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     two_factor_secret: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
@@ -503,7 +447,6 @@ class User(Base):
 
 
 class AuditLog(Base):
-    """Audit trail for all actions."""
     __tablename__ = "audit_logs"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -522,21 +465,16 @@ class AuditLog(Base):
     )
 
 
-# ============================================================================
-# Intelligence Models
-# ============================================================================
-
 class IOC(Base):
-    """Indicators of Compromise."""
     __tablename__ = "iocs"
 
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
-    ioc_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)  # ip, domain, hash, url, file
+    ioc_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     value: Mapped[str] = mapped_column(String(500), nullable=False, index=True)
     threat_type: Mapped[str] = mapped_column(String(100), nullable=False)
     severity: Mapped[str] = mapped_column(String(50), nullable=False)
     confidence: Mapped[int] = mapped_column(Integer, default=50, nullable=False)
-    source: Mapped[str] = mapped_column(String(100), nullable=False)  # virustotal, otx, manual, etc.
+    source: Mapped[str] = mapped_column(String(100), nullable=False)
     first_seen: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     last_seen: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     metadata_json: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)

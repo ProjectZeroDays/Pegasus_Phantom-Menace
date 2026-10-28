@@ -292,7 +292,7 @@ class PluginManager:
     def discover_plugins(self, plugin_dirs: List[Path]) -> List[str]:
         """Discover available plugins in the given directories."""
         plugins = []
-        for plugin_dir in settings.plugins.plugin_dirs:
+        for plugin_dir in self.context.settings.plugins.plugin_dirs:
             if not plugin_dir.exists():
                 continue
             for item in plugin_dir.iterdir():

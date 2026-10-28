@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="750" height="1334" viewBox="0 0 750 1334">
+  <!-- PWA standalone view (mobile) -->
+  <rect width="750" height="1334" fill="#FFFFFF"/>
+  
+  <!-- PWA header (standalone, no browser chrome) -->
+  <rect width="750" height="50" fill="#0D1117"/>
+  <text x="30" y="33" font-family="sans-serif" font-weight="bold" font-size="18" fill="#FF3D00">PEGASUS</text>
+  <text x="200" y="33" font-family="sans-serif" font-size="16" fill="#C9D1D9">Dashboard • PWA</text>
+  
+  <!-- Content area -->
+  <rect width="750" height="1284" fill="#FFFFFF"/>
+  
+  <!-- Device agent info -->
+  <rect x="30" y="80" width="690" height="140" fill="#F2F2F7" rx="12"/>
+  <text x="50" y="110" font-family="monospace" font-size="14" fill="#FF3D00">Device Agent: PWA Standalone (Mobile Web)</text>
+  <text x="50" y="135" font-family="monospace" font-size="14" fill="#666666">Remote Bridge: emulator-5554 (Android 14, API 34)</text>
+  <text x="50" y="160" font-family="monospace" font-size="14" fill="#999999">ADB Bridge: Active  •  FRP: Locked  •  Battery: 87%</text>
+  
+  <!-- Quick actions -->
+  <text x="30" y="250" font-family="sans-serif" font-weight="bold" font-size="18" fill="#000000">Quick Actions</text>
+  <rect x="30" y="275" width="330" height="130" fill="#F2F2F7" rx="12"/>
+  <text x="50" y="305" font-family="sans-serif" font-weight="bold" font-size="16" fill="#FF3D00">Scan Network</text>
+  <text x="50" y="330" font-family="sans-serif" font-size="13" fill="#666666">mDNS + TCP 5555 discovery</text>
+  <rect x="390" y="275" width="330" height="130" fill="#F2F2F7" rx="12"/>
+  <text x="410" y="305" font-family="sans-serif" font-weight="bold" font-size="16" fill="#FF3D00">Pair Device</text>
+  <text x="410" y="330" font-family="sans-serif" font-size="13" fill="#666666">Wireless ADB pairing</text>
+  
+  <!-- Connected devices -->
+  <text x="30" y="430" font-family="sans-serif" font-weight="bold" font-size="18" fill="#000000">Connected Devices</text>
+  <rect x="30" y="455" width="690" height="90" fill="#F2F2F7" rx="12"/>
+  <text x="50" y="485" font-family="sans-serif" font-weight="bold" font-size="16" fill="#34C759">● emulator-5554</text>
+  <text x="50" y="510" font-family="sans-serif" font-size="13" fill="#666666">Android 14  •  API 34  •  10.0.2.15:5555</text>
+  <text x="620" y="485" font-family="sans-serif" font-size="13" fill="#999999">Authorized</text>
+  
+  <!-- PWA bottom nav -->
+  <rect x="30" y="1210" width="690" height="70" fill="#FFFFFF"/>
+  <line x1="30" y1="1210" x2="720" y2="1210" stroke="#E5E5EA" stroke-width="1"/>
+  <rect x="45" y="1218" width="120" height="54" fill="#FF3D00" rx="12"/>
+  <text x="90" y="1242" font-family="sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle">Dashboard</text>
+  <rect x="177" y="1226" width="120" height="38" fill="#FFFFFF" rx="10"/>
+  <text x="220" y="1248" font-family="sans-serif" font-size="12" fill="#999999" text-anchor="middle">Devices</text>
+  <rect x="309" y="1226" width="120" height="38" fill="#FFFFFF" rx="10"/>
+  <text x="352" y="1248" font-family="sans-serif" font-size="12" fill="#999999" text-anchor="middle">Scan</text>
+  <rect x="441" y="1226" width="120" height="38" fill="#FFFFFF" rx="10"/>
+  <text x="484" y="1248" font-family="sans-serif" font-size="12" fill="#999999" text-anchor="middle">Tools</text>
+  <rect x="573" y="1226" width="120" height="38" fill="#FFFFFF" rx="10"/>
+  <text x="616" y="1248" font-family="sans-serif" font-size="12" fill="#999999" text-anchor="middle">More</text>
+</svg>

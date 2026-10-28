@@ -6,7 +6,7 @@
 
 **Android Device Management & Security Audit Tool — v1.4**
 
-**License:** MIT | **Access Code:** `R0om2fb9!`
+**License:** MIT
 
 </div>
 
@@ -15,10 +15,10 @@
 ## ✅ Current State (v1.4)
 
 - **Executable (EXE):** `dist/Pegasus-v1.4.exe` (Windows native, icon embedded via PyInstaller, version info embedded)
-- **Mobile (APK):** `pegasus-mobile/` — native Android companion with `ic_launcher` wired in `mipmap-*` folders; build via `build_apk.bat`
+- **Mobile (APK):** `pegasus-mobile/` — native Kotlin Android companion with embedded WebView loading the Pegasus dashboard, native bottom nav menu (Dashboard, Devices, Scan, Tools, More); build via `./gradlew assembleDebug`
 - **Icons / Media assets:** Organized in `assets/icons/` (Windows `.ico`, Android `mipmap-*`, macOS `.icns`, Web favicons, iOS sizes, source PNG)
 - **Source:** `pegasus_v_1.4.py` (rebuilt BLOB payload), `payload_src_1.3.py` (editable source), `pegasus_net.py` (options 24/25)
-- **Screenshots:** `assets/screenshots/screenshot_cli_v14.png`, `screenshot_exe_version.png`, `screenshot_apk_project.png`
+- **Screenshots:** `assets/screenshots/screenshot_android_mobile.svg`, `screenshot_ios_pwa.svg`, `screenshot_web_desktop.svg`, `screenshot_pwa_mobile.svg`
 
 ---
 
@@ -34,14 +34,17 @@
 
 ## 📸 Screenshots
 
-### CLI — Updated Main Menu (v1.4)
-![CLI v1.4](assets/screenshots/screenshot_cli_v14.png)
+### Android — Native Kotlin Mobile App (WebView + Bottom Nav)
+![Android Mobile](assets/screenshots/screenshot_android_mobile.svg)
 
-### EXE — Native Windows Build Info
-![EXE v1.4](assets/screenshots/screenshot_exe_version.png)
+### iOS — PWA in Safari (iOS-style Bottom Tab Bar)
+![iOS PWA](assets/screenshots/screenshot_ios_pwa.svg)
 
-### APK — Native Android Companion Source
-![APK Source](assets/screenshots/screenshot_apk_project.png)
+### Web — Desktop Browser Dashboard
+![Web Desktop](assets/screenshots/screenshot_web_desktop.svg)
+
+### PWA — Standalone Mobile Web View
+![PWA Mobile](assets/screenshots/screenshot_pwa_mobile.svg)
 
 ---
 
@@ -50,7 +53,7 @@
 | Platform | Asset Path | Icon Wired? |
 |----------|-----------|-------------|
 | Windows EXE | `dist/Pegasus-v1.4.exe` | ✅ `pegasus_icon.ico` embedded via PyInstaller `--icon` |
-| Android APK | `pegasus-mobile/res/mipmap-*/ic_launcher.png` | ✅ Manifest `@mipmap/ic_launcher`; using 48/72/144/192/512 sizes |
+| Android APK | `pegasus-mobile/app/src/main/res/mipmap-*/ic_launcher.png` | ✅ Manifest `@mipmap/ic_launcher`; using 48/72/144/192/512 sizes |
 | macOS (future) | `assets/icons/macos/pegasus.icns` | ✅ Source icon ready |
 | Web / Favicon | `assets/icons/web/favicon-*.png` + `pegasus_icon.png` | ✅ Source logo ready |
 
@@ -64,7 +67,7 @@ assets/icons/
   web/pegasus_icon.png             -> README/logo source
   macos/pegasus.icns               -> macOS app bundle
   android/android_*.png            -> Source for mipmap build
-  screenshots/screenshot_*.png     -> README docs
+  screenshots/screenshot_*.svg     -> README docs (Android, iOS, Web, PWA)
 ```
 
 ---

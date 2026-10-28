@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pegasus Mobile</string>
+    <string name="pegasus_base_url">https://pegasus.projectzerodays.app</string>
+    <string name="pegasus_load_error">Unable to load Pegasus dashboard: %1$s</string>
+    <string name="pegasus_retry">Retry</string>
+    <string name="pegasus_open_in_browser">Open in browser</string>
+    <string name="loading_pegasus">Loading Pegasus dashboard...</string>
+
+    <!-- Bottom navigation menu labels -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_devices">Devices</string>
+    <string name="nav_scan">Scan</string>
+    <string name="nav_tools">Tools</string>
+    <string name="nav_more">More</string>
+</resources>

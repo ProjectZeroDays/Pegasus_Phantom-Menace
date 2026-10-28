@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <!-- Desktop browser view -->
+  <rect width="1200" height="800" fill="#0D1117"/>
+  
+  <!-- Browser chrome -->
+  <rect width="1200" height="50" fill="#161B22"/>
+  <circle cx="20" cy="25" r="3" fill="#FF5F56"/>
+  <circle cx="35" cy="25" r="3" fill="#FEBD2C"/>
+  <circle cx="50" cy="25" r="3" fill="#27C93F"/>
+  <text x="90" y="33" font-family="sans-serif" font-size="13" fill="#C9D1D9">pegasus.projectzerodays.app — Pegasus Dashboard</text>
+  
+  <!-- Address bar -->
+  <rect x="20" y="60" width="1160" height="36" fill="#0D1117" rx="8"/>
+  <text x="40" y="82" font-family="monospace" font-size="13" fill="#58A6FF">https://pegasus.projectzerodays.app/dashboard</text>
+  
+  <!-- Main content -->
+  <rect x="20" y="110" width="1160" height="660" fill="#0D1117"/>
+  
+  <!-- Dashboard header -->
+  <text x="40" y="150" font-family="sans-serif" font-weight="bold" font-size="32" fill="#FF3D00">PEGASUS</text>
+  <text x="280" y="150" font-family="sans-serif" font-size="20" fill="#8B949E">Phantom Menace v1.4 — Web Dashboard</text>
+  
+  <!-- Device agent info -->
+  <rect x="40" y="190" width="540" height="140" fill="#161B22" rx="12"/>
+  <text x="60" y="220" font-family="monospace" font-size="15" fill="#58A6FF">Device Agent: Chrome 120 (Desktop Web)</text>
+  <text x="60" y="245" font-family="monospace" font-size="14" fill="#C9D1D9">Remote Bridge: emulator-5554 (Android 14, API 34)</text>
+  <text x="60" y="270" font-family="monospace" font-size="14" fill="#8B949e">ADB: Connected  •  USB Debugging: Off  •  FRP: Locked</text>
+  <text x="60" y="295" font-family="monospace" font-size="14" fill="#8B949e">Model: sdk_gphone_x86_64  •  Battery: 87%  •  Storage: 45.2 GB free</text>
+  
+  <!-- Quick actions grid -->
+  <text x="40" y="360" font-family="sans-serif" font-weight="bold" font-size="20" fill="#C9D1D9">Quick Actions</text>
+  <rect x="40" y="385" width="260" height="140" fill="#161B22" rx="12"/>
+  <text x="60" y="415" font-family="sans-serif" font-weight="bold" font-size="17" fill="#FF3D00">Scan Network</text>
+  <text x="60" y="440" font-family="sans-serif" font-size="13" fill="#8B949e">mDNS + TCP 5555 discovery</text>
+  <rect x="320" y="385" width="260" height="140" fill="#161B22" rx="12"/>
+  <text x="340" y="415" font-family="sans-serif" font-weight="bold" font-size="17" fill="#FF3D00">Pair Device</text>
+  <text x="340" y="440" font-family="sans-serif" font-size="13" fill="#8B949e">Wireless ADB pairing</text>
+  <rect x="600" y="385" width="260" height="140" fill="#161B22" rx="12"/>
+  <text x="620" y="415" font-family="sans-serif" font-weight="bold" font-size="17" fill="#FF3D00">FRP Bypass</text>
+  <text x="620" y="440" font-family="sans-serif" font-size="13" fill="#8B949e">Samsung FRP unlock workflow</text>
+  <rect x="880" y="385" width="260" height="140" fill="#161B22" rx="12"/>
+  <text x="900" y="415" font-family="sans-serif" font-weight="bold" font-size="17" fill="#FF3D00">Payload Tools</text>
+  <text x="900" y="440" font-family="sans-serif" font-size="13" fill="#8B949e">Generate reverse TCP/HTTPS payloads</text>
+  
+  <!-- Connected devices -->
+  <text x="40" y="550" font-family="sans-serif" font-weight="bold" font-size="20" fill="#C9D1D9">Connected Devices</text>
+  <rect x="40" y="575" width="540" height="100" fill="#161B22" rx="12"/>
+  <text x="60" y="605" font-family="sans-serif" font-weight="bold" font-size="17" fill="#3FB950">● emulator-5554</text>
+  <text x="60" y="630" font-family="sans-serif" font-size="13" fill="#8B949e">Android 14  •  API 34  •  10.0.2.15:5555</text>
+  <text x="470" y="605" font-family="sans-serif" font-size="13" fill="#8B949e">Authorized</text>
+  
+  <!-- Browser bottom nav (mobile preview in browser) -->
+  <rect x="620" y="575" width="520" height="100" fill="#161B22" rx="12"/>
+  <text x="640" y="605" font-family="sans-serif" font-weight="bold" font-size="17" fill="#C9D1D9">Bottom Nav (Native Mobile)</text>
+  <text x="640" y="630" font-family="sans-serif" font-size="13" fill="#8B949e">Dashboard • Devices • Scan • Tools • More</text>
+</svg>

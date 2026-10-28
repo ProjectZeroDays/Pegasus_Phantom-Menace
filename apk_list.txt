@@ -203,7 +203,7 @@ com.android.internal.display.cutout.emulation.tall
 com.android.systemui.accessibility.accessibilitymenu
 com.google.android.hotspot2.osulogin
 com.android.internal.emulation.pixel_6_pro
-com.projectzerodays.quantumcli.limited
+
 com.google.android.apps.wellbeing
 com.android.traceur
 com.google.android.federatedcompute

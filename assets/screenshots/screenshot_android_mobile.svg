@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="750" height="1334" viewBox="0 0 750 1334">
+  <!-- Android phone frame -->
+  <rect width="750" height="1334" fill="#0D1117" rx="40"/>
+  <rect x="20" y="20" width="710" height="1294" fill="#161B22" rx="30"/>
+  
+  <!-- Status bar -->
+  <rect x="40" y="50" width="670" height="30" fill="#0D1117"/>
+  <text x="50" y="70" font-family="sans-serif" font-size="16" fill="#C9D1D9">Pegasus Mobile</text>
+  <text x="600" y="70" font-family="sans-serif" font-size="16" fill="#8B949E">14:32</text>
+  
+  <!-- WebView content area -->
+  <rect x="40" y="100" width="670" height="1120" fill="#0D1117"/>
+  
+  <!-- Dashboard header -->
+  <text x="60" y="150" font-family="sans-serif" font-weight="bold" font-size="24" fill="#FF3D00">PEGASUS</text>
+  <text x="220" y="150" font-family="sans-serif" font-size="18" fill="#8B949E">Dashboard</text>
+  
+  <!-- Device agent info -->
+  <rect x="60" y="180" width="630" height="120" fill="#161B22" rx="12"/>
+  <text x="80" y="210" font-family="monospace" font-size="14" fill="#58A6FF">Device Agent: emulator-5554 (Android 14, API 34)</text>
+  <text x="80" y="235" font-family="monospace" font-size="14" fill="#C9D1D9">ADB: Connected  •  USB Debugging: Off  •  FRP: Locked</text>
+  <text x="80" y="260" font-family="monospace" font-size="14" fill="#8B949E">Model: sdk_gphone_x86_64  •  Battery: 87%  •  Storage: 45.2 GB free</text>
+  
+  <!-- Quick action cards -->
+  <text x="60" y="330" font-family="sans-serif" font-weight="bold" font-size="18" fill="#C9D1D9">Quick Actions</text>
+  <rect x="60" y="355" width="300" height="130" fill="#161B22" rx="12"/>
+  <text x="80" y="385" font-family="sans-serif" font-weight="bold" font-size="16" fill="#FF3D00">Scan Network</text>
+  <text x="80" y="410" font-family="sans-serif" font-size="13" fill="#8B949e">mDNS + TCP 5555 discovery</text>
+  <rect x="380" y="355" width="300" height="130" fill="#161B22" rx="12"/>
+  <text x="400" y="385" font-family="sans-serif" font-weight="bold" font-size="16" fill="#FF3D00">Pair Device</text>
+  <text x="400" y="410" font-family="sans-serif" font-size="13" fill="#8B949e">Wireless ADB pairing</text>
+  
+  <!-- Connected devices -->
+  <text x="60" y="520" font-family="sans-serif" font-weight="bold" font-size="18" fill="#C9D1D9">Connected Devices</text>
+  <rect x="60" y="545" width="630" height="90" fill="#161B22" rx="12"/>
+  <text x="80" y="575" font-family="sans-serif" font-weight="bold" font-size="16" fill="#3FB950">● emulator-5554</text>
+  <text x="80" y="600" font-family="sans-serif" font-size="13" fill="#8B949e">Android 14  •  API 34  •  10.0.2.15:5555</text>
+  <text x="560" y="575" font-family="sans-serif" font-size="13" fill="#8B949e">Authorized</text>
+  
+  <!-- Bottom native nav -->
+  <rect x="40" y="1200" width="670" height="70" fill="#161B22"/>
+  <rect x="55" y="1208" width="116" height="54" fill="#FF3D00" rx="10"/>
+  <text x="98" y="1232" font-family="sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle">Dashboard</text>
+  <rect x="187" y="1208" width="116" height="54" fill="#161B22" rx="10"/>
+  <text x="230" y="1232" font-family="sans-serif" font-size="12" fill="#8B949E" text-anchor="middle">Devices</text>
+  <rect x="319" y="1208" width="116" height="54" fill="#161B22" rx="10"/>
+  <text x="362" y="1232" font-family="sans-serif" font-size="12" fill="#8B949E" text-anchor="middle">Scan</text>
+  <rect x="451" y="1208" width="116" height="54" fill="#161B22" rx="10"/>
+  <text x="494" y="1232" font-family="sans-serif" font-size="12" fill="#8B949E" text-anchor="middle">Tools</text>
+  <rect x="583" y="1208" width="116" height="54" fill="#161B22" rx="10"/>
+  <text x="626" y="1232" font-family="sans-serif" font-size="12" fill="#8B949E" text-anchor="middle">More</text>
+</svg>

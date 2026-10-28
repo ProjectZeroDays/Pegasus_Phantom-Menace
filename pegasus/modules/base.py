@@ -145,11 +145,11 @@ class BaseModule(Plugin, ABC):
 
     def print_success(self, message: str) -> None:
         """Print a success message."""
-        self._console.print(f"[green]✓[/green] {message}")
+        self._console.print(f"[green]+[/green] {message}")
 
     def print_error(self, message: str) -> None:
         """Print an error message."""
-        self._console.print(f"[red]✗[/red] {message}")
+        self._console.print(f"[red]x[/red] {message}")
 
     def print_warning(self, message: str) -> None:
         """Print a warning message."""

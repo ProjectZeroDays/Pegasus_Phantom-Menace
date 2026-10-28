@@ -11,10 +11,12 @@ from typing import Optional
 import click
 from rich.console import Console
 from rich.panel import Panel
+from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
 
 from pegasus.core.config import get_settings, Settings
+from pegasus.core.license_key import masked_key
 from pegasus.core.plugin import (
     initialize_plugin_system,
     get_plugin_manager,
@@ -32,7 +34,7 @@ def show_banner() -> None:
     banner = Text()
     banner.append("PEGASUS: Phantom Menace\n", style="bold red")
     banner.append("Android Device Management & Security Audit Platform v2.0.0\n", style="bold cyan")
-    banner.append("License: MIT  |  Access Code: R0om2fb9!\n", style="dim yellow")
+    banner.append(f"License: MIT  |  Access Code: {masked_key()}\n", style="dim yellow")
     banner.append("For authorized security testing only.", style="dim white")
 
     console.print(Panel(banner, border_style="red", padding=(1, 2)))
@@ -132,7 +134,7 @@ def cli(ctx: click.Context, debug: bool, config: Optional[str]) -> None:
 @cli.command()
 def init() -> None:
     """Initialize the workspace and database."""
-    console.print("[bold cyan]Initializing Pegasus Phantom Menace v2...[/cyan]")
+    console.print("[bold cyan]Initializing Pegasus Phantom Menace v2...[/bold cyan]")
 
     # Initialize database
     asyncio.run(init_db())
@@ -140,8 +142,8 @@ def init() -> None:
     # Initialize plugin system
     pm = initialize_plugin_system()
 
-    console.print(f"[green]✓[/green] Database initialized")
-    console.print(f"[green]✓[/green] Plugin system loaded ({len(pm.list_plugins())} plugins)")
+    console.print("[green]+[/green] Database initialized", markup=False)
+    console.print(f"[green]+[/green] Plugin system loaded ({len(pm.list_plugins())} plugins)", markup=False)
     console.print("\n[bold green]Ready to use Pegasus![/bold green]")
 
 
@@ -194,9 +196,9 @@ def status() -> None:
     table.add_column("Status", style="green")
     table.add_column("Details", style="white")
 
-    table.add_row("Database", "✓ Connected", settings.database.type)
-    table.add_row("AI Assistant", "✓ Configured" if settings.ai.api_key else "✗ Not configured", settings.ai.model)
-    table.add_row("Metasploit RPC", "✓ Configured", f"{settings.metasploit.rpc_host}:{settings.metasploit.rpc_port}")
+    table.add_row("Database", "+ Connected", settings.database.type)
+    table.add_row("AI Assistant", "+ Configured" if settings.ai.api_key else "x Not configured", settings.ai.model)
+    table.add_row("Metasploit RPC", "+ Configured", f"{settings.metasploit.rpc_host}:{settings.metasploit.rpc_port}")
     table.add_row("Plugins Loaded", str(len(pm.list_plugins())), "")
     table.add_row("Workspace", str(settings.app.workspace), "")
 
@@ -689,7 +691,8 @@ def main() -> None:
         console.print("\n[yellow]Interrupted by user.[/yellow]")
         sys.exit(0)
     except Exception as e:
-        console.print(f"[red]Fatal error: {e}[/red]")
+        import sys as _sys
+        print("Fatal error: " + str(e), file=_sys.stderr)
         if get_settings().app.debug:
             import traceback
             traceback.print_exc()
