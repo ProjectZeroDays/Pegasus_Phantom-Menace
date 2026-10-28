@@ -15,3 +15,11 @@ __pycache__/
 .vscode/
 .idea/
 cmdline-tools.zip
+
+# Android / Gradle
+local.properties
+.gradle/
+pegasus-mobile/.gradle/
+pegasus-mobile/app/build/
+pegasus-mobile/gradle-8.2*/
+pegasus-mobile/gradle-8.2-bin.zip
