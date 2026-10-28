@@ -273,6 +273,16 @@ class AppContext:
         # Register UI components
         for comp in plugin.get_ui_components():
             self.ui_components.append(comp)
+
+    def register_command(self, command: "CommandInfo") -> None:
+        """Register a command with the context."""
+        self.commands[command.name] = command
+        for alias in command.aliases:
+            self.commands[alias] = command
+
+    def register_ui_component(self, component: "UIComponent") -> None:
+        """Register a UI component with the context."""
+        self.ui_components.append(component)
     
     def get_plugin(self, name: str) -> Optional["Plugin"]:
         return self.plugins.get(name)

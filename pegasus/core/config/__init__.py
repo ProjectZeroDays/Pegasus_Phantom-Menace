@@ -148,6 +148,7 @@ class PluginSettings(BaseModel):
         Path(__file__).parent.parent / "plugins" / "core",
         Path(__file__).parent.parent / "plugins" / "community",
         Path(__file__).parent.parent / "plugins" / "enterprise",
+        Path(__file__).parent.parent.parent / "modules",  # pegasus/modules/ for brutdroid, passgen, etc.
     ])
     allow_external: bool = True
 
