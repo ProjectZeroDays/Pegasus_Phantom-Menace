@@ -300,15 +300,15 @@ class PluginManager:
         self._plugin_classes: Dict[str, Type[Plugin]] = {}
     
     def discover_plugins(self, plugin_dirs: List[Path]) -> List[str]:
-        """Discover available plugins in the given directories."""
+        """Discover available plugins in the given directories (recursive)."""
         plugins = []
         for plugin_dir in self.context.settings.plugins.plugin_dirs:
             if not plugin_dir.exists():
                 continue
-            for item in plugin_dir.iterdir():
+            for item in plugin_dir.rglob("*"):
                 if item.is_dir() and (item / "plugin.py").exists():
                     plugins.append(str(item / "plugin.py"))
-                elif item.suffix == ".py" and item.name != "__init__.py":
+                elif item.suffix == ".py" and item.name != "__init__.py" and item.name == "plugin.py":
                     plugins.append(str(item))
         return plugins
     
