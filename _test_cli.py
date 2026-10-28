@@ -4,9 +4,7 @@ import subprocess
 import sys
 import time
 
-from pegasus.core.license_key import get_license_key
-
-KEY = get_license_key()
+from _license_secret import LICENSE_KEY_PLAINTEXT as KEY
 SCRIPT = "pegasus_v_1.4.py"
 ENV = {**os.environ, "PYTHONUTF8": "1"}
 

@@ -2,8 +2,6 @@
 """Generate real terminal-style screenshots using the actual CLI output."""
 from PIL import Image, ImageDraw, ImageFont
 
-from pegasus.core.license_key import get_license_key
-
 def make_banner_png(path, title, subtitle_lines, content_lines):
     # Terminal dimensions: ~980x720, dark bg, monospace font
     W, H = 980, 720
@@ -46,7 +44,7 @@ def make_banner_png(path, title, subtitle_lines, content_lines):
 # CLI content: actual menu text with new options
 cli_sub = [
     "New in v1.4: [24] Network Scan  [25] Pair & Connect (Wireless ADB)",
-    "License: " + get_license_key() + "  [OLD KEY REVOKED]",
+    "License: REDACTED  [OLD KEY REVOKED]",
     "Build: EXE (dist/Pegasus-v1.4.exe, 10.5MB) | APK source (pegasus-mobile/)",
     "Payload rebuilt with single-pass package audit (~15s vs ~5min)"
 ]
@@ -54,7 +52,7 @@ cli_content = [
     "===============================================",
     "     Pegasus: Phantom Menace - CLI & EXE (Native Windows)",
     "===============================================",
-    "[+] License Check: " + get_license_key(),
+    "[+] License Check: REDACTED",
     "[+] ADB installed / scrcpy available",
     "[1] Check Device  [2] Connect  [3] Disconnect ...",
     "[4] Screen Record [5] Mirror  [6] APK List  [7] Screenshot",
@@ -101,7 +99,7 @@ exe_content = [
     "Version info: v1.4.0, copyright MIT, company ProjectZeroDays",
     "Hidden import: pegasus_net (Options 24/25 work out-of-the-box)",
     "Usage: run_pegasus.bat (sets PYTHONUTF8=1, handles emoji-safe output)",
-    "Tested: license " + get_license_key() + " accepted; menu 1-25; scan (10.1.10.131 found); pair flow; exit clean",
+    "Tested: license REDACTED accepted; menu 1-25; scan (10.1.10.131 found); pair flow; exit clean",
 ]
 make_banner_png("screenshot_exe_version.png", "Pegasus: Phantom Menace — Native EXE (Built & Tested)", exe_sub, exe_content)
 print("all screenshots generated")

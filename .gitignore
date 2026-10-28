@@ -23,3 +23,6 @@ pegasus-mobile/.gradle/
 pegasus-mobile/app/build/
 pegasus-mobile/gradle-8.2*/
 pegasus-mobile/gradle-8.2-bin.zip
+
+# License secret (plaintext — never commit)
+_license_secret.py

@@ -2,49 +2,44 @@
 Obfuscated license key storage.
 
 The plaintext access code is NEVER stored in source code, documentation,
-or screenshot assets. It is derived at runtime from an encoded
-representation only when needed for license validation.
+or screenshot assets. Only a SHA-256 hash is stored, and license
+validation is performed by hashing the candidate at runtime and
+comparing digests. The plaintext never appears in this file, in
+README.md, or in any other documentation.
 """
 
 from __future__ import annotations
 
-import base64
+import hashlib
 import hmac
 
 
-# Encoded representation of the license access code.
-# Decodes to the actual key at runtime. The plaintext never appears
-# in this file, in README.md, or in any other documentation.
-_ENCODED_KEY = "UjBvbTJmYjkh"
-
-
-def get_license_key() -> str:
-    """Return the decoded license access code.
-
-    The key is decoded in-memory only and never written to disk or
-    logged in plaintext.
-    """
-    return base64.b64decode(_ENCODED_KEY).decode("utf-8")
+# SHA-256 hash of the license access code.
+# The plaintext is never stored; validation hashes the candidate at
+# runtime and compares digests.
+_LICENSE_KEY_HASH = "0e69ee49bec7089cf2fa9c94d0ead455f2be3553c0484de49d303a0193365e67"
 
 
 def is_license_key(candidate: str) -> bool:
-    """Constant-time comparison against the stored license key.
+    """Constant-time comparison against the stored license key hash.
 
-    Returns True if *candidate* matches the decoded key.
+    Returns True if SHA-256(candidate) matches the stored hash.
+    The plaintext key is never reconstructed in memory.
     """
-    try:
-        expected = get_license_key()
-    except Exception:
+    if not candidate:
         return False
-    return hmac.compare_digest(candidate or "", expected)
+    digest = hashlib.sha256(candidate.encode("utf-8")).hexdigest()
+    return hmac.compare_digest(digest, _LICENSE_KEY_HASH)
 
 
 def masked_key() -> str:
-    """Return a safely masked representation for display/logging.
+    """Return a fully masked representation for display/logging.
 
-    Only the first and last character are shown; the rest is hidden.
+    Only asterisks are shown; no part of the real key is revealed.
     """
-    key = get_license_key()
-    if len(key) <= 2:
-        return "*" * len(key)
-    return key[0] + "*" * (len(key) - 2) + key[-1]
+    return "*********"
+
+
+def verify_license_key(candidate: str) -> bool:
+    """Alias for is_license_key for readability in calling code."""
+    return is_license_key(candidate)
