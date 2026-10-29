@@ -1,0 +1,11 @@
+{
+  "name": "pppv2-build-manifest",
+  "version": "1.0.0",
+  "description": "Deity-level comprehensive build manifest for Pegasus Phantom Menace v2",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "category": "architecture",
+  "trigger": "pppv2",
+  "entry_point": "pppv2-build-manifest.md",
+  "commands": 1,
+  "installation": "skill install pppv2-build-manifest.json"
+}
