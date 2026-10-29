@@ -1,15 +1,11 @@
 {
-  "skill": "pegasus-slash-commands",
+  "name": "pegasus-your-turn",
   "version": "1.0.0",
-  "description": "Pegasus Phantom Menace v2.0 slash command framework for OpenFable",
-  "author": "ProjectZeroDays",
-  "category": "security",
-  "entry_point": ".openfable-skills/pegasus-slash-commands.json",
-  "workflows": [
-    ".openfable-skills/workflows/full-security-audit.json",
-    ".openfable-skills/workflows/payload-chain.json",
-    ".openfable-skills/workflows/device-assessment.json"
-  ],
-  "commands": 36,
-  "installation": "skill install .openfable-skills/pegasus-slash-commands.json"
+  "description": "Deity-level comprehensive breakdown of how to build Pegasus Phantom Menace v2",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "category": "architecture",
+  "trigger": "your-turn",
+  "entry_point": ".openfable-skills/pegasus-your-turn.json",
+  "commands": 1,
+  "installation": "skill install .openfable-skills/pegasus-your-turn.json"
 }

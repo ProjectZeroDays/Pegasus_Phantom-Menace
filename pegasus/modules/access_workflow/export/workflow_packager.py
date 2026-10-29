@@ -6,7 +6,7 @@ usable skills/custom commands for:
 - Mimocode
 - Opencode
 - OpenFable
-- Z-Fable (in C:\\Projects\)
+- Z-Fable (in C:/Projects/)
 - Z-Code
 - Opencode locally
 

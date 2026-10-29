@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pegasus Phantom Menace v2 - C2 Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #FF3D00;
+            --primary-dark: #BF3600;
+            --secondary: #58A6FF;
+            --success: #3FB950;
+            --warning: #D29922;
+            --error: #D73A49;
+            --bg: #0A0B0E;
+            --surface: #161B22;
+            --surface-elev: #1F2430;
+            --text-primary: #C9D1D9;
+            --text-secondary: #8B949E;
+            --border: #30363D;
+        }
+        body { font-family: 'Consolas', monospace; background: var(--bg); color: var(--text-primary); }
+        .app-header {
+            background: linear-gradient(135deg, #161B22, #0D1117);
+            border-bottom: 2px solid var(--primary);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+        }
+        .app-logo { display: flex; align-items: center; gap: 1rem; }
+        .app-icon {
+            width: 48px; height: 48px; background: linear-gradient(135deg, #FF3D00, #BF3600);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; box-shadow: 0 4px 15px rgba(255,61,0,0.4); animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100% { box-shadow: 0 4px 15px rgba(255,61,0,0.4); } 50% { box-shadow: 0 4px 25px rgba(255,61,0,0.7); } }
+        .app-title { font-size: 1.75rem; font-weight: 900; background: linear-gradient(90deg,#FF3D00,#58A6FF);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .app-subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem; }
+        .nav-tabs { display: flex; gap: 0.5rem; }
+        .nav-tab { padding: 0.5rem 1rem; background: var(--surface-elev); border: 1px solid var(--border);
+            color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; cursor: pointer; }
+        .nav-tab:hover { border-color: var(--primary); color: var(--primary); }
+        .container { max-width: 1600px; margin: 2rem auto; padding: 0 2rem; min-height: calc(100vh - 200px); }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--surface-elev); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; }
+        .stat-value { font-size: 2.5rem; font-weight: 900; color: var(--text-primary); }
+        .stat-label { color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; margin-top: 0.5rem; }
+        .devices-panel { background: var(--surface-elev); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 2rem; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: #0A0B0E; border-bottom: 1px solid var(--border); }
+        .panel-title { font-size: 1.1rem; color: var(--primary); font-weight: bold; }
+        .devices-table { width: 100%; border-collapse: collapse; }
+        .devices-table th { text-align: left; padding: 1rem; color: var(--text-secondary); font-size: 0.8rem; border-bottom: 1px solid var(--border); }
+        .devices-table td { padding: 1rem; border-bottom: 1px solid var(--border); }
+        .device-info { display: flex; align-items: center; gap: 1rem; }
+        .device-avatar { width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg,#FF3D00,#58A6FF);
+            display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; }
+        .device-name { font-weight: bold; color: var(--text-primary); font-size: 0.95rem; }
+        .device-model { color: var(--text-secondary); font-size: 0.85rem; }
+        .status-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+        .status-online { background: rgba(63,185,80,0.15); color: var(--success); }
+        .status-warning { background: rgba(210,153,34,0.15); color: var(--warning); }
+        .status-exploited { background: rgba(215,58,73,0.2); color: var(--error); font-weight: bold; }
+        .indicator-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .commands-panel { background: var(--surface-elev); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 2rem; }
+        .commands-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; padding: 1.5rem; }
+        .cmd-card { background: #0A0B0E; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.2s; }
+        .cmd-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,61,0,0.1); }
+        .cmd-name { font-weight: bold; color: var(--text-primary); font-size: 0.9rem; font-family: monospace; }
+        .cmd-category { font-size: 0.7rem; padding: 0.2rem 0.5rem; background: rgba(255,61,0,0.1); color: var(--primary); border-radius: 4px; }
+        .cmd-desc { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.75rem; }
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #0A0B0E; border-top: 1px solid var(--border);
+            padding: 0.5rem 2rem; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .bar-left, .bar-right { display: flex; align-items: center; gap: 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <div class="app-logo">
+            <div class="app-icon">🛡️</div>
+            <div>
+                <div class="app-title">PEGASUS PHANTOM MENACE v2</div>
+                <div class="app-subtitle">Autonomous Android Security Audit & Exploitation Platform</div>
+            </div>
+        </div>
+        <div class="nav-tabs">
+            <div class="nav-tab active">Dashboard</div>
+            <div class="nav-tab">Access Workflow</div>
+            <div class="nav-tab">Zero-Click Exploits</div>
+            <div class="nav-tab">Post-Exploitation</div>
+            <div class="nav-tab">Campaigns</div>
+            <div class="nav-tab">Monitoring</div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-value">4</div>
+                <div class="stat-label">Plugins Loaded</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Devices Connected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Active Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">84%</div>
+                <div class="stat-label">Exploit Success Rate</div>
+            </div>
+        </div>
+        <div class="devices-panel">
+            <div class="panel-header">
+                <div class="panel-title">● Connected Devices</div>
+            </div>
+            <table class="devices-table">
+                <thead>
+                    <tr><th>Device</th><th>Model</th><th>Vector</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="device-table-body">
+                    <tr>
+                        <td class="device-info">
+                            <div class="device-avatar">P8</div>
+                            <div class="device-details">
+                                <div class="device-name">emulator-5554</div>
+                                <div class="device-model">Android 14 (API 34)</div>
+                            </div>
+                        </td>
+                        <td><span class="status-pill status-online"><div class="indicator-dot"></div>Online</span></td>
+                        <td>ADB Wireless</td>
+                        <td><span class="status-pill status-success">● Active</span></td>
+                        <td><button class="btn btn-sm">Shell</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="commands-panel">
+            <div class="panel-header"><div class="panel-title">● Quick Command Center</div></div>
+            <div class="commands-grid">
+                <div class="cmd-card">
+                    <div class="cmd-header"><div class="cmd-name">access-autonomous</div><div class="cmd-category">access</div></div>
+                    <div class="cmd-desc">Autonomous exploitation workflow</div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-header"><div class="cmd-name">access-zero-click</div><div class="cmd-category">exploit</div></div>
+                    <div class="cmd-desc">Pixel 8, Samsung S24, Xiaomi, OnePlus</div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-header"><div class="cmd-name">post-exploit-chain</div><div class="cmd-category">post-exploitation</div></div>
+                    <div class="cmd-desc">Full post-exploitation chain</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar">
+        <div class="bar-left">
+            <div class="bar-item"><div class="dot"></div><span>System: Operational</span></div>
+        </div>
+        <div class="bar-right">
+            <div class="bar-item"><span>Pegasus Phantom Menace v2.0</span></div>
+        </div>
+    </div>
+</body>
+</html>
