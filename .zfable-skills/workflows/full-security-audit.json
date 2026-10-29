@@ -4,12 +4,36 @@
   "description": "Complete security audit workflow using Pegasus slash commands",
   "author": "ProjectZeroDays",
   "steps": [
-    { "step": 1, "command": "/audit-security", "description": "Run full security audit on target device" },
-    { "step": 2, "command": "/netscan", "description": "Scan network for devices and services" },
-    { "step": 3, "command": "/nmap-scan", "description": "Comprehensive nmap scan with OS detection" },
-    { "step": 4, "command": "/cve-scan", "description": "Scan device for CVEs via ADB" },
-    { "step": 5, "command": "/report-gen", "description": "Generate HTML security report" },
-    { "step": 6, "command": "/docs", "description": "Update documentation with findings" }
+    {
+      "step": 1,
+      "command": "/audit-security",
+      "description": "Run full security audit on target device"
+    },
+    {
+      "step": 2,
+      "command": "/netscan",
+      "description": "Scan network for devices and services"
+    },
+    {
+      "step": 3,
+      "command": "/nmap-scan",
+      "description": "Comprehensive nmap scan with OS detection"
+    },
+    {
+      "step": 4,
+      "command": "/cve-scan",
+      "description": "Scan device for CVEs via ADB"
+    },
+    {
+      "step": 5,
+      "command": "/report-gen",
+      "description": "Generate HTML security report"
+    },
+    {
+      "step": 6,
+      "command": "/docs",
+      "description": "Update documentation with findings"
+    }
   ],
   "triggers": ["full-audit", "security-audit", "penetration-test"],
   "output": "pegasus/.reports/"

@@ -1,15 +1,39 @@
 {
-  "workflow": "pegasus-device-assessment",
+  "workflow": "pegasus-full-device-assessment",
   "version": "1.0.0",
   "description": "Complete device assessment workflow - connect, scan, audit, report",
   "author": "ProjectZeroDays",
   "steps": [
-    { "step": 1, "command": "/adb-devices", "description": "List connected ADB devices" },
-    { "step": 2, "command": "/wireless-adb", "description": "Connect to device wirelessly via QR code" },
-    { "step": 3, "command": "/cve-scan", "description": "Scan device for CVEs" },
-    { "step": 4, "command": "/netscan", "description": "Scan network for other devices" },
-    { "step": 5, "command": "/report-gen", "description": "Generate assessment report" },
-    { "step": 6, "command": "/docs", "description": "Update documentation" }
+    {
+      "step": 1,
+      "command": "/adb-devices",
+      "description": "List connected ADB devices"
+    },
+    {
+      "step": 2,
+      "command": "/wireless-adb",
+      "description": "Connect to device wirelessly via QR code"
+    },
+    {
+      "step": 3,
+      "command": "/cve-scan",
+      "description": "Scan device for CVEs"
+    },
+    {
+      "step": 4,
+      "command": "/netscan",
+      "description": "Scan network for other devices"
+    },
+    {
+      "step": 5,
+      "command": "/report-gen",
+      "description": "Generate assessment report"
+    },
+    {
+      "step": 6,
+      "command": "/docs",
+      "description": "Update documentation"
+    }
   ],
   "triggers": ["device-assessment", "device-audit", "full-assessment"],
   "output": "pegasus/.reports/"

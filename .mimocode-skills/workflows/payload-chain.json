@@ -4,11 +4,31 @@
   "description": "Complete payload generation and delivery workflow",
   "author": "ProjectZeroDays",
   "steps": [
-    { "step": 1, "command": "/generate-payload", "description": "Generate msfvenom payload" },
-    { "step": 2, "command": "/payload-dna", "description": "Create DNA tracking tag for payload" },
-    { "step": 3, "command": "/qr", "description": "Generate QR code for payload delivery" },
-    { "step": 4, "command": "/ssl-bypass", "description": "Generate Frida SSL pinning bypass script" },
-    { "step": 5, "command": "/qr", "description": "Package payload with delivery mechanism" }
+    {
+      "step": 1,
+      "command": "/generate-payload",
+      "description": "Generate msfvenom payload"
+    },
+    {
+      "step": 2,
+      "command": "/payload-dna",
+      "description": "Create DNA tracking tag for payload"
+    },
+    {
+      "step": 3,
+      "command": "/qr",
+      "description": "Generate QR code for payload delivery"
+    },
+    {
+      "step": 4,
+      "command": "/ssl-bypass",
+      "description": "Generate Frida SSL pinning bypass script"
+    },
+    {
+      "step": 5,
+      "command": "/qr",
+      "description": "Package payload with delivery mechanism"
+    }
   ],
   "triggers": ["payload-chain", "payload-generation", "create-payload"],
   "output": "pegasus/payloads/"

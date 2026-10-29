@@ -1,0 +1,17 @@
+{
+  "workflow": "pegasus-god-mode-activate",
+  "version": "1.0.0",
+  "description": "God Mode activation - enables unrestricted full-access mode with complete system visibility, unrestricted command execution, unrestricted file system access, unrestricted network access, and all safety constraints disabled for maximum penetration testing capability.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "activate_god_mode",
+      "description": "Activate God Mode - maximum privileges with unrestricted access to all system resources",
+      "action": "Activate God Mode - maximum privileges with unrestricted access to all system resources",
+      "output": "god_mode_activated.json"
+    }
+  ],
+  "triggers": ["god-mode", "god-mode-activate"],
+  "output": "god_mode_activated.json"
+}

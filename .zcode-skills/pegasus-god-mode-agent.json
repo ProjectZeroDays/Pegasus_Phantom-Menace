@@ -1,0 +1,15 @@
+{
+  "name": "pegasus-god-mode-agent",
+  "version": "2.0.0",
+  "description": "God Mode agent - unrestricted full-access mode with complete system visibility, unrestricted command execution, unrestricted file system access, unrestricted network access, and all safety constraints disabled for maximum penetration testing capability.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "category": "system",
+  "trigger": "god-mode",
+  "entry_point": "pegasus-god-mode-agent.json",
+  "commands": 1,
+  "workflows": [
+    ".opencode-skills/workflows/god-mode-activate.json",
+    ".opencode-skills/workflows/god-mode-execute.json"
+  ],
+  "installation": "skill install .opencode-skills/pegasus-god-mode-agent.json"
+}

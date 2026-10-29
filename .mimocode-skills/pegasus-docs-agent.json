@@ -1,0 +1,16 @@
+{
+  "name": "pegasus-docs-agent",
+  "version": "2.0.0",
+  "description": "Documentation agent that generates exhaustive, comprehensive documentation including README.md files, GitHub Wiki pages, API documentation, inline code comments, architectural diagrams, deployment guides, and contributor guides.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "category": "documentation",
+  "trigger": "docs-agent",
+  "entry_point": "pegasus-docs-agent.json",
+  "commands": 1,
+  "workflows": [
+    ".opencode-skills/workflows/docs-agent-audit.json",
+    ".opencode-skills/workflows/docs-agent-generate.json",
+    "pegasus/modules/access_workflow/workflows/_docs_agent_workflow.json"
+  ],
+  "installation": "skill install .opencode-skills/pegasus-docs-agent.json"
+}

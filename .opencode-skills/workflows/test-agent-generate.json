@@ -1,0 +1,38 @@
+{
+  "workflow": "pegasus-test-agent-generate",
+  "version": "1.0.0",
+  "description": "Autonomous test generation and execution workflow - generates exhaustive test scripts, executes them against the codebase, fixes failing tests iteratively until 100% pass rate is achieved.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "generate_tests",
+      "description": "Generate comprehensive test cases for every function, class, method, and endpoint discovered during discovery phase",
+      "action": "Write pytest test cases covering happy paths, edge cases, boundary conditions, error handling, concurrency, and security scenarios",
+      "output": "generated_tests.py"
+    },
+    {
+      "step": 2,
+      "action": "execute_tests",
+      "description": "Execute all generated tests against the codebase, capture pass/fail results, collect error messages and stack traces",
+      "action": "Execute pytest test suite, capture all failures, errors, timeouts, and assertion errors",
+      "output": "test_results.json"
+    },
+    {
+      "step": 3,
+      "action": "fix_failures",
+      "description": "Analyze test failures, fix source code to resolve failures, re-run tests until 100% pass rate",
+      "action": "Analyze test failures, fix source code to resolve failures, re-run tests until 100% pass rate achieved",
+      "output": "test_results_final.json"
+    },
+    {
+      "step": 4,
+      "action": "generate_coverage_report",
+      "description": "Generate comprehensive test coverage report",
+      "action": "Generate coverage report showing line coverage, branch coverage, function coverage, and untested code",
+      "output": "coverage_report.html"
+    }
+  ],
+  "triggers": ["test-agent", "test-agent-generate"],
+  "output": "test_results_final.json"
+}

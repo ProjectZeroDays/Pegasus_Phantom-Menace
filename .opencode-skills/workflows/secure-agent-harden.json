@@ -1,0 +1,31 @@
+{
+  "workflow": "pegasus-secure-agent-harden",
+  "version": "1.0.0",
+  "description": "Security hardening workflow - applies security fixes, hardens configurations, implements security best practices.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "fix_vulnerabilities",
+      "description": "Fix all identified vulnerabilities in code and dependencies",
+      "action": "Fix all identified vulnerabilities in code and dependencies",
+      "output": "vulnerability_fixes.json"
+    },
+    {
+      "step": 2,
+      "action": "harden_configurations",
+      "description": "Harden all configurations with security best practices",
+      "action": "Harden all configurations with security best practices including removing hardcoded secrets, enabling encryption, and setting proper access controls",
+      "output": "hardened_configs.json"
+    },
+    {
+      "step": 3,
+      "action": "verify_security",
+      "description": "Verify all security fixes with penetration testing and vulnerability scanning",
+      "action": "Verify all security fixes with penetration testing and vulnerability scanning",
+      "output": "security_verification.json"
+    }
+  ],
+  "triggers": ["secure-agent", "secure-agent-harden"],
+  "output": "security_hardening_report.json"
+}

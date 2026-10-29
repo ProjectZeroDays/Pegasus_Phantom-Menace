@@ -1,44 +1,127 @@
 {
-  "skill": "pegasus-slash-commands",
-  "version": "1.0.0",
-  "description": "Pegasus Phantom Menace v2.0 slash command framework for Mimicode coding agent",
+  "name": "pegasus-slash-commands",
+  "version": "2.0.0",
+  "description": "Pegasus Phantom Menace v2.0 slash command framework - 50+ security and device management commands including autonomous agents",
   "author": "ProjectZeroDays",
-  "category": "security",
-  "triggers": [
-    "/ruflo", "/genius-mode", "/god-mode", "/godmode",
-    "/adb-devices", "/fastboot-devices", "/wireless-adb",
-    "/troubleshoot", "/test",
-    "/netscan", "/btscan", "/wifiscan", "/nmap-scan",
-    "/tshark", "/wireshark",
-    "/frp-bypass", "/exploit", "/post-exploitation", "/generate-payload",
-    "/dump-credentials", "/crack-hashes", "/crack-passwords", "/brute-force",
-    "/create-rat-agent", "/create-exploit", "/audit-security", "/harden-app",
-    "/harden-device", "/kill-switch",
-    "/wipe-logs", "/edit-logs",
-    "/create-exe", "/create-ipa", "/create-deb", "/create-dmg", "/create-apk",
-    "/create-flatpack", "/create-snap", "/zip", "/tar", "/rar",
-    "/create-vault", "/open-vault", "/crack-vault",
-    "/docs", "/improve"
+  "commands": [
+    {
+      "name": "ruflo",
+      "description": "Toggle Ruflo mode on/off",
+      "category": "system",
+      "command": "/ruflo"
+    },
+    {
+      "name": "genius-mode",
+      "description": "Activate Genius Mode - full agent autonomy",
+      "category": "system",
+      "command": "/genius-mode"
+    },
+    {
+      "name": "god-mode",
+      "description": "Activate God Mode - maximum privileges",
+      "category": "system",
+      "command": "/god-mode"
+    },
+    {
+      "name": "godmode",
+      "description": "Alias for /god-mode",
+      "category": "system",
+      "command": "/godmode"
+    },
+    {
+      "name": "adb-devices",
+      "description": "List connected ADB devices",
+      "category": "device",
+      "command": "/adb-devices"
+    },
+    {
+      "name": "fastboot-devices",
+      "description": "List fastboot devices",
+      "category": "device",
+      "command": "/fastboot-devices"
+    },
+    {
+      "name": "wireless-adb",
+      "description": "Wireless ADB connect with QR code and zeroclick bypass",
+      "category": "device",
+      "command": "/wireless-adb"
+    },
+    {
+      "name": "troubleshoot",
+      "description": "AI-powered runtime issue detection and debugging",
+      "category": "debug",
+      "command": "/troubleshoot"
+    },
+    {
+      "name": "test",
+      "description": "Run exhaustive test scripts",
+      "category": "debug",
+      "command": "/test"
+    },
+    {
+      "name": "test-agent",
+      "description": "Autonomous test agent - analyze codebase, generate exhaustive test scripts, run and fix",
+      "category": "testing",
+      "command": "/test-agent"
+    },
+    {
+      "name": "debug-agent",
+      "description": "Autonomous debug agent - analyze codebase, trace errors, fix bugs",
+      "category": "debug",
+      "command": "/debug-agent"
+    },
+    {
+      "name": "secure-agent",
+      "description": "Autonomous security agent - audit, harden, and secure the application",
+      "category": "security",
+      "command": "/secure-agent"
+    },
+    {
+      "name": "refract-agent",
+      "description": "Autonomous refactoring agent - analyze, refactor, and improve code quality",
+      "category": "refactoring",
+      "command": "/refract-agent"
+    },
+    {
+      "name": "docs-agent",
+      "description": "Autonomous documentation agent - generate exhaustive documentation",
+      "category": "documentation",
+      "command": "/docs-agent"
+    },
+    {
+      "name": "production-agent",
+      "description": "Autonomous production readiness agent - gap analysis and hardening",
+      "category": "production",
+      "command": "/production-agent"
+    },
+    {
+      "name": "god-mode-agent",
+      "description": "Autonomous god mode agent - unrestricted access mode",
+      "category": "system",
+      "command": "/god-mode-agent"
+    },
+    {
+      "name": "dashboard",
+      "description": "Start web dashboard GUI for Pegasus Phantom Menace",
+      "category": "web",
+      "command": "/dashboard"
+    },
+    {
+      "name": "docs",
+      "description": "Update all documentation including GitHub Wiki",
+      "category": "docs",
+      "command": "/docs"
+    },
+    {
+      "name": "improve",
+      "description": "Continuous improvement and refactoring",
+      "category": "docs",
+      "command": "/improve"
+    }
   ],
-  "execution": {
-    "command": "python -m pegasus.core.__main__ slash <command>",
-    "cwd": "<project_root>/pegasus"
-  },
   "installation": {
-    "clone": "git clone https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace.git",
-    "setup": "pip install -r pegasus/requirements.txt && python -m pegasus.core.__main__ init"
-  },
-  "categories": {
-    "system": ["ruflo", "genius-mode", "god-mode"],
-    "device": ["adb-devices", "fastboot-devices", "wireless-adb"],
-    "debug": ["troubleshoot", "test"],
-    "network": ["netscan", "btscan", "wifiscan", "nmap-scan"],
-    "packet": ["tshark", "wireshark"],
-    "exploit": ["frp-bypass", "exploit", "post-exploitation", "generate-payload"],
-    "credentials": ["dump-credentials", "crack-hashes", "crack-passwords", "brute-force", "create-rat-agent", "create-exploit", "audit-security", "harden-app", "harden-device", "kill-switch"],
-    "logs": ["wipe-logs", "edit-logs"],
-    "build": ["create-exe", "create-ipa", "create-deb", "create-dmg", "create-apk", "create-flatpack", "create-snap", "zip", "tar", "rar"],
-    "vault": ["create-vault", "open-vault", "crack-vault"],
-    "docs": ["docs", "improve"]
+    "command": "pip install -r pegasus/requirements.txt",
+    "usage": "python -m pegasus.core.__main__ slash <command>",
+    "interactive": "python -m pegasus.core.__main__ menu"
   }
 }
