@@ -279,6 +279,12 @@
       "description": "Continuous improvement and refactoring",
       "category": "docs",
       "command": "/improve"
+    },
+    {
+      "name": "dashboard",
+      "description": "Start web dashboard GUI for Pegasus Phantom Menace",
+      "category": "web",
+      "command": "/dashboard"
     }
   ],
   "installation": {

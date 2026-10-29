@@ -2,7 +2,9 @@
 Access Workflow module plugin entry point.
 Autonomous vs manual access vector exploitation: ADB, Fastboot, QR pairing, USB.
 """
+
 from pegasus.modules.access_workflow.module import AccessWorkflowModule
+from pegasus.modules.access_workflow.dashboard_server import app as dashboard_app
 from pegasus.core.plugin import PluginMetadata
 
 metadata = PluginMetadata(
@@ -12,10 +14,13 @@ metadata = PluginMetadata(
     author="ProjectZeroDays",
     category="exploit",
     tags=["access", "workflow", "adb", "fastboot", "qr-pairing", "usb", "zero-click", "pixel-8", "post-exploitation"],
-    requires=["rich", "requests"],
+    requires=["rich", "requests", "flask"],
     requires_python=">=3.11",
     entry_point="main",
 )
+
+# Expose the Flask dashboard app for standalone running
+dashboard_app = dashboard_app
 
 
 def create_plugin(context):

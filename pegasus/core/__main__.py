@@ -313,6 +313,43 @@ def version() -> None:
     console.print(f"License: {settings.app.name}")
 
 
+@cli.command()
+@click.option("--host", default="0.0.0.0", help="Host to bind to")
+@click.option("--port", default=5000, help="Port to listen on")
+@click.option("--debug", is_flag=True, help="Enable debug mode")
+def dashboard(host: str, port: int, debug: bool) -> None:
+    """Start the web dashboard server for Pegasus Phantom Menace."""
+    import threading
+    import webbrowser
+
+    from pegasus.modules.access_workflow.dashboard_server import app as dashboard_app
+
+    console.print(f"[bold cyan]Starting Pegasus Dashboard Server...[/bold cyan]")
+    console.print(f"  [green]URL:[/green] http://{host}:{port}")
+    console.print(f"  [green]Dashboard:[/green] http://{host}:{port}/")
+
+    def run_server():
+        dashboard_app.run(host=host, port=port, debug=debug, use_reloader=False)
+
+    server_thread = threading.Thread(target=run_server, daemon=True)
+    server_thread.start()
+
+    # Auto-open browser
+    import webbrowser
+    webbrowser.open(f"http://{host}:{port}/")
+
+    console.print(f"[bold green]Dashboard server started at http://{host}:{port}[/bold green]")
+    console.print("[yellow]Press Ctrl+C to stop[/bold yellow]")
+
+    try:
+        while True:
+            import time
+            time.sleep(1)
+    except KeyboardInterrupt:
+        console.print("\n[bold red]Shutting down dashboard server...[/bold red]")
+        sys.exit(0)
+
+
 def _get_scm() -> SlashCommandManager:
     """Get or initialize slash command manager."""
     from pegasus.modules.integrations import slash_command_manager as _scm_mod

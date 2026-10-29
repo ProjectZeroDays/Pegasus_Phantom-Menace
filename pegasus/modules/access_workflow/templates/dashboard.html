@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pegasus Phantom Menace v2 - Dashboard</title>
+    <meta name="theme-color" content="#0A0B0E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Pegasus v2">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-32.png') }}" sizes="32x32">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-192.png') }}" sizes="192x192">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='android_192x192.png') }}" sizes="192x192">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='ios_1024x1024.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF3D00;
+            --primary-dark: #BF3600;
+            --primary-glow: rgba(255, 61, 0, 0.4);
+            --secondary: #58A6FF;
+            --success: #3FB950;
+            --warning: #D29922;
+            --error: #D73A49;
+            --bg: #0A0B0E;
+            --surface: #161B22;
+            --surface-elev: #1F2430;
+            --surface-hover: #21262D;
+            --text-primary: #C9D1D9;
+            --text-secondary: #8B949E;
+            --text-muted: #6E7681;
+            --border: #30363D;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: var(--bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* App Header */
+        .app-header {
+            background: linear-gradient(135deg, #161B22, #0D1117);
+            border-bottom: 2px solid var(--primary);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .app-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #FF3D00, #BF3600);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(255, 61, 0, 0.4); }
+            50% { box-shadow: 0 4px 25px rgba(255, 61, 0, 0.7); }
+        }
+
+        .app-brand {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-title {
+            font-size: 1.75rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(90deg, #FF3D00, #58A6FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-tab {
+            padding: 0.5rem 1rem;
+            background: var(--surface-elev);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover, .nav-tab.active {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(255, 61, 0, 0.1);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            min-height: calc(100vh - 200px);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface-elev);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.5rem;
+        }
+
+        .stat-trend {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--error); }
+
+        /* Device Dashboard Panel */
+        .devices-panel {
+            background: var(--surface-elev);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: #0A0B0E;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #0D1117;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #FF5A3D;
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: #FFFFFF;
+            border-color: var(--error);
+        }
+
+        .devices-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .devices-table th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .devices-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .device-row:hover {
+            background: rgba(255, 61, 0, 0.05);
+        }
+
+        .device-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .device-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #FF3D00, #58A6FF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .device-details {
+            flex: 1;
+        }
+
+        .device-name {
+            font-weight: bold;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .device-model {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .device-meta {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .device-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.7rem;
+            font-size: 0.8rem;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .status-online { background: rgba(63, 185, 80, 0.15); color: var(--success); }
+        .status-warning { background: rgba(210, 153, 34, 0.15); color: var(--warning); }
+        .status-exploited { background: rgba(215, 58, 73, 0.2); color: var(--error); font-weight: bold; }
+
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .indicator-dot.status-offline { background: var(--error); animation: none; }
+        .indicator-dot.status-warning { background: var(--warning); animation: none; }
+
+        /* Commands Panel */
+        .commands-panel {
+            background: var(--surface-elev);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .cmd-card {
+            background: #0A0B0E;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cmd-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 61, 0, 0.1);
+        }
+
+        .cmd-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .cmd-name {
+            font-weight: bold;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: monospace;
+        }
+
+        .cmd-category {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            background: rgba(255, 61, 0, 0.1);
+            color: var(--primary);
+            border-radius: 4px;
+        }
+
+        .cmd-desc {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .cmd-tags {
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .cmd-tag {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.4rem;
+            background: rgba(88, 166, 255, 0.1);
+            color: var(--secondary);
+            border-radius: 4px;
+        }
+
+        /* Bottom Status Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0A0B0E;
+            border-top: 1px solid var(--border);
+            padding: 0.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .bar-left, .bar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+        .dot.status-error { background: var(--error); }
+        .dot.status-warning { background: var(--warning); }
+
+        /* Terminal Overlay */
+        .terminal-overlay {
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background: #0A0B0E;
+            border-top: 1px solid var(--border);
+            height: 0;
+            overflow: hidden;
+            transition: height 0.3s ease;
+            z-index: 999;
+        }
+
+        .terminal-overlay.open {
+            height: 300px;
+        }
+
+        .terminal-header {
+            background: #161B22;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-content {
+            padding: 1rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            white-space: pre-wrap;
+        }
+
+        .terminal-prompt {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .close-terminal {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0D1117;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #30363D;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .commands-grid {
+                grid-template-columns: 1fr;
+            }
+            .bottom-bar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <div class="app-logo">
+            <div class="app-icon">🛡️</div>
+            <div>
+                <div class="app-title">PEGASUS PHANTOM MENACE v2</div>
+                <div class="app-subtitle">Autonomous Android Security Audit & Exploitation Platform</div>
+            </div>
+        </div>
+        <div class="nav-tabs">
+            <div class="nav-tab active">Dashboard</div>
+            <div class="nav-tab">Access Workflow</div>
+            <div class="nav-tab">Zero-Click Exploits</div>
+            <div class="nav-tab">Post-Exploitation</div>
+            <div class="nav-tab">Monitoring</div>
+            <div class="nav-tab">Skills</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-value">4</div>
+                <div class="stat-label">Plugins Loaded</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Devices Connected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Active Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">84%</div>
+                <div class="stat-label">Exploit Success Rate</div>
+            </div>
+        </div>
+
+        <div class="devices-panel">
+            <div class="panel-header">
+                <div class="panel-title">● Connected Devices</div>
+                <div class="panel-actions">
+                    <button class="btn btn-primary">Refresh</button>
+                    <button class="btn">Scan Network</button>
+                    <button class="btn">Pair Device</button>
+                </div>
+            </div>
+            <table class="devices-table">
+                <thead>
+                    <tr><th>Device</th><th>Model</th><th>Vector</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="device-table-body">
+                    <!-- Devices will be populated here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="commands-panel">
+            <div class="panel-header"><div class="panel-title">● Quick Command Center</div></div>
+            <div class="commands-grid">
+                <div class="cmd-card">
+                    <div class="cmd-header"><div class="cmd-name">access-autonomous</div><div class="cmd-category">access</div></div>
+                    <div class="cmd-desc">Autonomous exploitation workflow</div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-header"><div class="cmd-name">access-zero-click</div><div class="cmd-category">exploit</div></div>
+                    <div class="cmd-desc">Pixel 8, Samsung S24, Xiaomi, OnePlus</div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-header"><div class="cmd-name">post-exploit-chain</div><div class="cmd-category">post-exploitation</div></div>
+                    <div class="cmd-desc">Full post-exploitation chain</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="bar-left">
+            <div class="bar-item">
+                <div class="dot"></div><span>System: Operational</span>
+            </div>
+            <div class="bar-item">
+                <div class="dot"></div><span>Database: Connected</span>
+            </div>
+        </div>
+        <div class="bar-right">
+            <div class="bar-item"><span>Pegasus Phantom Menace v2.0</span></div>
+            <div class="bar-item"><span>Authorized Security Testing Only</span></div>
+        </div>
+    </div>
+
+    <div class="terminal-overlay" id="terminalOverlay">
+        <div class="terminal-header">
+            <span style="color: #FF3D00; font-weight: bold;">● PEGASUS TERMINAL</span>
+            <button class="close-terminal" onclick="toggleTerminal()">✕</button>
+        </div>
+        <div class="terminal-content" id="terminalContent">
+            <div class="terminal-line"><span class="terminal-prompt">$</span> Pegasus Phantom Menace v2.0 initialized</div>
+            <div class="terminal-line"><span class="terminal-prompt">$</span> Loading plugins...</div>
+            <div class="terminal-line"><span class="terminal-prompt">$</span> [+] Plugin loaded: access_workflow v2.0.0</div>
+            <div class="terminal-line"><span class="terminal-prompt">$</span> [+] Plugin loaded: brutdroid v2.0.0</div>
+            <div class="terminal-line"><span class="terminal-prompt">$</span> [+] Plugin loaded: passgen v2.0.0</div>
+            <div class="terminal-line"><span class="terminal-prompt">$</span> [+] Plugin loaded: post_exploitation v2.0.0</div>
+            <div class="terminal-line"><span class="terminal-prompt">$</span> Ready. Type a command.</div>
+        </div>
+    </div>
+
+    <script>
+        // Terminal functionality
+        function toggleTerminal() {
+            const terminal = document.getElementById('terminalOverlay');
+            terminal.classList.toggle('open');
+        }
+
+        // Fetch and populate devices
+        async function loadDevices() {
+            try {
+                const response = await fetch('/api/devices');
+                const data = await response.json();
+                const tbody = document.getElementById('device-table-body');
+                tbody.innerHTML = '';
+                
+                data.devices.forEach(device => {
+                    const row = document.createElement('tr');
+                    row.className = 'device-row';
+                    row.innerHTML = `
+                        <td class="device-info">
+                            <div class="device-avatar">${device.name.charAt(0).toUpperCase()}</div>
+                            <div class="device-details">
+                                <div class="device-name">${device.name}</div>
+                                <div class="device-model">${device.model || 'Unknown Model'}</div>
+                                <div class="device-meta">${device.ip_address || ''} • ${device.android_version || ''}</div>
+                            </div>
+                        </td>
+                        <td><span class="status-pill status-online"><div class="indicator-dot"></div>${device.status || 'online'}</span></td>
+                        <td>${device.access_vector || 'Unknown'}</td>
+                        <td><span class="status-pill status-success">● Active</span></td>
+                        <td class="device-actions">
+                            <button class="btn btn-sm">Shell</button>
+                            <button class="btn btn-sm">Pull</button>
+                            <button class="btn btn-sm">Exec</button>
+                        </td>
+                    </tr>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (e) {
+                console.error('Failed to load devices:', e);
+            }
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDevices();
+            setInterval(loadDevices, 30000); // Refresh every 30 seconds
+        });
+    </script>
+</body>
+</html>
