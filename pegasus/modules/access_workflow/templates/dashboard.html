@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pegasus Phantom Menace v2 - Dashboard</title>
+    <title>Pegasus Phantom Menace v2 - Command & Control Dashboard</title>
     <meta name="theme-color" content="#0A0B0E">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -25,6 +25,7 @@
             --primary-dark: #BF3600;
             --primary-glow: rgba(255, 61, 0, 0.4);
             --secondary: #58A6FF;
+            --secondary-dark: #2F81F7;
             --success: #3FB950;
             --warning: #D29922;
             --error: #D73A49;
@@ -36,14 +37,16 @@
             --text-secondary: #8B949E;
             --text-muted: #6E7681;
             --border: #30363D;
+            --font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
         }
 
         html, body {
             height: 100%;
-            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-family: var(--font-family);
             background: var(--bg);
             color: var(--text-primary);
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* App Header */
@@ -598,7 +601,63 @@
                     <tr><th>Device</th><th>Model</th><th>Vector</th><th>Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody id="device-table-body">
-                    <!-- Devices will be populated here by JavaScript -->
+                    <tr class="device-row">
+                        <td class="device-info">
+                            <div class="device-avatar">P8</div>
+                            <div class="device-details">
+                                <div class="device-name">emulator-5554</div>
+                                <div class="device-model">sdk_gphone_x86_64 • Android 14</div>
+                                <div class="device-meta">10.0.2.15:5555 • Battery: 87%</div>
+                            </div>
+                        </td>
+                        <td><span class="status-pill status-online"><div class="indicator-dot"></div>Online</span></td>
+                        <td>ADB Wireless</td>
+                        <td><span class="status-pill status-success">● Active</span></td>
+                        <td class="device-actions">
+                            <button class="btn btn-sm">Shell</button>
+                            <button class="btn btn-sm">Pull</button>
+                            <button class="btn btn-sm">Exec</button>
+                        </td>
+                    </tr>
+                    <tr class="device-row">
+                        <td class="device-info">
+                            <div class="device-avatar">SM</div>
+                            <div class="device-details">
+                                <div class="device-name">SM-S918U</div>
+                                <div class="device-model">Samsung Galaxy S24 Ultra • Android 14</div>
+                                <div class="device-meta">192.168.1.105:5555 • Battery: 92%</div>
+                            </div>
+                        </td>
+                        <td><span class="status-pill status-warning"><div class="indicator-dot status-warning"></div>Locked</span></td>
+                        <td>Zero-Click (Exynos)</td>
+                        <td><span class="status-pill status-success">● Authenticated</span></td>
+                        <td class="device-actions">
+                            <button class="btn btn-sm">Shell</button>
+                            <button class="btn btn-sm">Pull</button>
+                            <button class="btn btn-sm">Exec</button>
+                        </td>
+                    </tr>
+                    <tr class="device-row">
+                        <td class="device-info">
+                            <div class="device-avatar">XM</div>
+                            <div class="device-details">
+                                <div class="device-name">23127RN0AG</div>
+                                <div class="device-model">Xiaomi 13T Pro • Android 13</div>
+                                <div class="device-meta">192.168.1.112:5555 • Battery: 64%</div>
+                            </div>
+                        </td>
+                        <td><span class="status-pill status-warning"><div class="indicator-dot status-warning"></div>Debug Off</span></td>
+                        <td>Wireless Pairing</td>
+                        <td><span class="status-pill status-warning">● Pending Pair</span></td>
+                        <td>
+                            adb pair 192.168.1.112:5555
+                        </td>
+                        <td class="device-actions">
+                            <button class="btn btn-sm">Pair</button>
+                            <button class="btn btn-sm">Pair</button>
+                            <button class="btn btn-sm">Pair</button>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -618,6 +677,18 @@
                     <div class="cmd-header"><div class="cmd-name">post-exploit-chain</div><div class="cmd-category">post-exploitation</div></div>
                     <div class="cmd-desc">Full post-exploitation chain</div>
                 </div>
+                <div class="cmd-card">
+                    <div class="cmd-header"><div class="cmd-name">brutdroid-root</div><div class="cmd-category">device</div></div>
+                    <div class="cmd-desc">Root emulator with Magisk + rootAVD</div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-header"><div class="cmd-name">passgen</div><div class="cmd-category">credentials</div></div>
+                    <div class="cmd-desc">Wordlist generator with variations</div>
+                </div>
+                <div class="cmd-card">
+                    <div class="cmd-header"><div class="cmd-name">access-workflow-rates</div><div class="cmd-category">monitoring</div></div>
+                    <div class="cmd-desc">Exploit success rates by vector</div>
+                </div>
             </div>
         </div>
     </div>
@@ -629,6 +700,9 @@
             </div>
             <div class="bar-item">
                 <div class="dot"></div><span>Database: Connected</span>
+            </div>
+            <div class="bar-item">
+                <div class="dot status-warning"></div><span>AI: Not Configured</span>
             </div>
         </div>
         <div class="bar-right">
@@ -660,48 +734,28 @@
             terminal.classList.toggle('open');
         }
 
-        // Fetch and populate devices
-        async function loadDevices() {
-            try {
-                const response = await fetch('/api/devices');
-                const data = await response.json();
-                const tbody = document.getElementById('device-table-body');
-                tbody.innerHTML = '';
-                
-                data.devices.forEach(device => {
-                    const row = document.createElement('tr');
-                    row.className = 'device-row';
-                    row.innerHTML = `
-                        <td class="device-info">
-                            <div class="device-avatar">${device.name.charAt(0).toUpperCase()}</div>
-                            <div class="device-details">
-                                <div class="device-name">${device.name}</div>
-                                <div class="device-model">${device.model || 'Unknown Model'}</div>
-                                <div class="device-meta">${device.ip_address || ''} • ${device.android_version || ''}</div>
-                            </div>
-                        </td>
-                        <td><span class="status-pill status-online"><div class="indicator-dot"></div>${device.status || 'online'}</span></td>
-                        <td>${device.access_vector || 'Unknown'}</td>
-                        <td><span class="status-pill status-success">● Active</span></td>
-                        <td class="device-actions">
-                            <button class="btn btn-sm">Shell</button>
-                            <button class="btn btn-sm">Pull</button>
-                            <button class="btn btn-sm">Exec</button>
-                        </td>
-                    </tr>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } catch (e) {
-                console.error('Failed to load devices:', e);
-            }
+        // Device interaction
+        function executeCommand(deviceId, command) {
+            console.log(`Executing ${command} on ${deviceId}`);
         }
 
-        // Load data on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDevices();
-            setInterval(loadDevices, 30000); // Refresh every 30 seconds
+        // Tab navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
         });
+
+        // Simulate live updates
+        setInterval(() => {
+            const dots = document.querySelectorAll('.indicator-dot');
+            dots.forEach(dot => {
+                if (Math.random() > 0.9) {
+                    dot.style.opacity = dot.style.opacity === '0.5' ? '1' : '0.5';
+                }
+            });
+        }, 2000);
     </script>
 </body>
 </html>

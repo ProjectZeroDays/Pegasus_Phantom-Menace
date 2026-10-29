@@ -339,7 +339,7 @@ def dashboard(host: str, port: int, debug: bool) -> None:
     webbrowser.open(f"http://{host}:{port}/")
 
     console.print(f"[bold green]Dashboard server started at http://{host}:{port}[/bold green]")
-    console.print("[yellow]Press Ctrl+C to stop[/bold yellow]")
+    console.print("[yellow]Press Ctrl+C to stop[/yellow]")
 
     try:
         while True:
