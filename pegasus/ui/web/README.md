@@ -1,4 +1,4 @@
-# Pegasus Phantom Menace v2 — Web GUI
+# Pegasus Phantom Menace v2.1 — Web GUI
 
 A complete operator console for the Pegasus platform: React + TypeScript + Vite
 front end, Flask API back end, both living inside the Python package so a single

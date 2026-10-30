@@ -6,10 +6,31 @@ All notable changes to Pegasus Phantom Menace. Format follows
 
 ## [2.1.0] — 2026-10-30
 
-Accounts, daemonisation, delivery tooling and full NSO-class parity.
+Accounts, daemonisation, delivery tooling, full NSO-class parity and the
+productionised web GUI.
 
 ### Added
 
+- **Web GUI productionised** — the React/TypeScript console is now packaged
+  into the Python tree (`pegasus/ui/web`) and served by `pegasus serve` from a
+  single process, with a standalone `Pegasus-Web.exe` launcher.
+  - 33 pages: Mission Control, Devices, Monitoring, Access Workflow, Workflow
+    Engine, Zero-Click & CVE, Post-Exploitation, Capability Parity, Delivery,
+    Locations, Geofences, Calls, Contacts, Messages, Browser, Applications,
+    Media, Wi-Fi, Keystrokes, Activity, Keywords, Payloads, Wordlists,
+    Sessions, Campaigns, Reports, Network Scanner, Toolbox, Skills, Plugins,
+    Command Center, Settings.
+  - Background job pipeline with streamed terminal output, progress and
+    cancellation for every ADB, nmap, msfvenom and lifecycle action.
+  - ADB telemetry collectors (contacts, SMS, calls, Chrome history, apps,
+    media, Wi-Fi, GPS, usage, input) cached in `<workspace>/telemetry.db`
+    alongside geofences, keyword tracking and device notes.
+  - Binary-safe media transfer via `adb exec-out`, MIME sniffing and a
+    workspace cache.
+  - `/api/nso/capabilities`, `/api/nso/run/<capability>` and
+    `/api/nso/manifest` endpoints backing the parity page.
+  - 30 backend tests covering routing, registries, jobs, CRUD, capture
+    semantics, telemetry and the frozen-bundle loader.
 - **Accounts and billing** — first-run admin bootstrap (password, passkey,
   optional FIDO2), self-service registration with an admin approval queue,
   USDC one-time/weekly/monthly access, on-chain verification through Blockscout
@@ -30,6 +51,8 @@ Accounts, daemonisation, delivery tooling and full NSO-class parity.
 
 ### Changed
 
+- `pegasus serve` launches the real GUI; the legacy template dashboard moved to
+  `pegasus dashboard` on port 5050.
 - Dashboard rewritten: every counter and chart is sampled from the host or ADB,
   all buttons dispatch real endpoints, and pages stay reachable while exploit
   command internals remain redacted for unactivated accounts.
@@ -40,6 +63,20 @@ Accounts, daemonisation, delivery tooling and full NSO-class parity.
 
 ### Fixed
 
+- **Plugin metadata binding** — module-level `metadata` was never attached to
+  the class in `module.py`, so 10 of 14 plugins failed to load
+  (`type object 'CVEScannerModule' has no attribute 'metadata'`). The loader
+  resolves the factory's target class and binds metadata before instantiation:
+  4 → 14 plugins, 16 → 40 commands.
+- **Frozen-bundle plugin loading** — with no `plugin.py` on disk the loader
+  found nothing; it now falls back to importing the built-in module packages.
+- Plugin discovery de-duplicated by resolved path; async initialisation no
+  longer deadlocks on an already-running loop.
+- Invalid TOML in `pegasus/pyproject.toml` (`per-file-ignores` block) that
+  broke pytest/ruff for the whole repository.
+- Windows launcher `UnicodeEncodeError` on arrow glyphs at startup.
+- Job output was duplicated line-by-line and truncated table cells; capture now
+  writes once, keeps Unicode box drawing, and uses a 180-column width.
 - `access_workflow` package import is lazy, removing the plugin warm-up import
   deadlock.
 - `c2_server` static route resolves absolutely; `telegram_control` long-poll no

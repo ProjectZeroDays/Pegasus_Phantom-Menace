@@ -1,7 +1,7 @@
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(2, 0, 0, 0),
-    prodvers=(2, 0, 0, 0),
+    filevers=(2, 1, 0, 0),
+    prodvers=(2, 1, 0, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -14,7 +14,7 @@ VSVersionInfo(
       StringTable(
         '040904b0',
         [
-          StringStruct('Comments', 'Pegasus Phantom Menace v2.0 Web GUI'),
+          StringStruct('Comments', 'Pegasus Phantom Menace v2.1 Web GUI'),
           StringStruct('CompanyName', 'ProjectZeroDays'),
           StringStruct('FileDescription', 'Pegasus Web GUI - Android Device Management & Security Audit'),
           StringStruct('FileVersion', '2.1.0'),
