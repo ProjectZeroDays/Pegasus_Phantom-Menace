@@ -75,6 +75,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { path: "/workflows", label: "Workflow Engine", icon: Rocket },
       { path: "/zero-click", label: "Zero-Click", icon: Zap },
       { path: "/delivery", label: "Delivery", icon: Radio },
+      { path: "/c2", label: "C2 Dashboard", icon: DeviceHub },
       { path: "/post-exploit", label: "Post-Exploitation", icon: Layers },
       { path: "/capabilities", label: "Capability Parity", icon: Shield },
       { path: "/cve", label: "CVE Scanner", icon: ShieldAlert },

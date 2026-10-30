@@ -665,6 +665,27 @@ def create_app() -> Flask:
             return jsonify({"error": str(exc)}), 400
         return jsonify(result)
 
+    # -- C2 API ----------------------------------------------------------------
+    @app.route("/api/c2/start", methods=["POST"])
+    def api_c2_start():
+        body = request.get_json(silent=True) or {}
+        port = int(body.get("port", 8080))
+        return jsonify({"started": True, "port": port})
+
+    @app.route("/api/c2/stop", methods=["POST"])
+    def api_c2_stop():
+        return jsonify({"stopped": True})
+
+    @app.route("/api/c2/beacon", methods=["POST"])
+    def api_c2_beacon():
+        body = request.get_json(silent=True) or {}
+        return jsonify({"sent": True, "serial": body.get("serial", "")})
+
+    @app.route("/api/c2/kill", methods=["POST"])
+    def api_c2_kill():
+        body = request.get_json(silent=True) or {}
+        return jsonify({"killed": True, "serial": body.get("serial", "")})
+
     # -- admin API ---------------------------------------------------------
     @app.route("/api/admin/approve/<user_id>", methods=["POST"])
     def api_approve(user_id: str):
