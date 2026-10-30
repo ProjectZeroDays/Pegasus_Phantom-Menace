@@ -10,6 +10,7 @@ import WorkflowEngine from "@/pages/WorkflowEngine";
 import ZeroClick from "@/pages/ZeroClick";
 import Delivery from "@/pages/Delivery";
 import Capabilities from "@/pages/Capabilities";
+import C2Dashboard from "@/pages/C2Dashboard";
 import PostExploit from "@/pages/PostExploit";
 import Locations from "@/pages/Locations";
 import Geofences from "@/pages/Geofences";
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="/cve" component={ZeroClick} />
           <Route path="/post-exploit" component={PostExploit} />
           <Route path="/capabilities" component={Capabilities} />
+          <Route path="/c2" component={C2Dashboard} />
           <Route path="/locations" component={Locations} />
           <Route path="/geofences" component={Geofences} />
           <Route path="/calls" component={Calls} />
