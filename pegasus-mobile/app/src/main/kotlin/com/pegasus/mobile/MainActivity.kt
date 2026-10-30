@@ -35,6 +35,11 @@ class MainActivity : AppCompatActivity() {
         R.id.nav_devices to "/devices",
         R.id.nav_scan to "/scan",
         R.id.nav_tools to "/tools",
+        R.id.nav_c2 to "/c2",
+        R.id.nav_delivery to "/delivery",
+        R.id.nav_payloads to "/payloads",
+        R.id.nav_post to "/post-exploit",
+        R.id.nav_campaigns to "/campaigns",
         R.id.nav_more to "/more"
     )
 
