@@ -92,7 +92,7 @@ Section "Application files" SEC_CORE
   SetOutPath "$INSTDIR"
   SetOverwrite on
 
-  File /r /x node_modules /x __pycache__ /x .pytest_cache /x build /x dist "..\..\..\..\pegasus"
+  File /r /x node_modules /x __pycache__ /x .pytest_cache /x build "..\..\..\..\pegasus"
   File "..\..\..\..\run_pegasus.bat"
   File "..\..\..\..\requirements.txt"
   File "..\..\..\..\version.txt"
