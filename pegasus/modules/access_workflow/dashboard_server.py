@@ -536,6 +536,22 @@ def create_app() -> Flask:
         except telegram_control.TelegramError as exc:
             return jsonify({"error": str(exc)}), 400
 
+    @app.route("/api/features/telegram/setup", methods=["POST"])
+    def api_telegram_setup():
+        from pegasus.modules.access_workflow import telegram_control
+
+        body = request.get_json(silent=True) or {}
+        try:
+            return jsonify(telegram_control.setup(body.get("token", ""), body.get("chat_id", "")))
+        except telegram_control.TelegramError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @app.route("/api/features/telegram/stop", methods=["POST"])
+    def api_telegram_stop():
+        from pegasus.modules.access_workflow import telegram_control
+
+        return jsonify({"stopped": telegram_control.stop_bot()})
+
     @app.route("/api/features/frp")
     def api_frp():
         from pegasus.modules.access_workflow import frp_unlock
@@ -747,6 +763,10 @@ def create_app() -> Flask:
         from pegasus.modules.access_workflow import daemon_service
 
         daemon = daemon_service.get_daemon(port=5050)
+        if action == "install":
+            return jsonify(daemon.install_service())
+        if action == "uninstall":
+            return jsonify(daemon.uninstall_service())
         if action not in {"start", "stop", "restart"}:
             return jsonify({"error": "unknown action"}), 400
         getattr(daemon, action)()

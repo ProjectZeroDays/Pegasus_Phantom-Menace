@@ -53,7 +53,7 @@
     <div><label>Parity</label><div class="mono small" id="sysParity">—</div></div>
     <div><label>Database</label><div class="mono small" id="sysDb">—</div></div>
   </div>
-  <div class="row" style="margin-top:10px"><button class="small" id="daemonStart">Start daemon</button><button class="small ghost" id="daemonStop">Stop daemon</button><button class="small ghost" id="logsBtn">Tail logs</button></div>
+  <div class="row" style="margin-top:10px"><button class="small" id="daemonStart">Start daemon</button><button class="small ghost" id="daemonStop">Stop daemon</button><button class="small ghost" id="logsBtn">Tail logs</button><button class="small ghost" onclick="act('/api/admin/daemon/install')">Install service</button></div>
   <pre id="sysLogs" hidden style="margin-top:10px"></pre>
 </div>
 {% endblock %}

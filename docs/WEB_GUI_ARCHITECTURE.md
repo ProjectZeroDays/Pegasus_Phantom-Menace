@@ -236,3 +236,6 @@ commands in `_register_commands` and a UI component path. It appears in
 
 **Add a telemetry kind.** Write a collector, register it in `COLLECTORS`, and
 the generic `/telemetry/<kind>` endpoint serves it.
+
+## Delivery page
+`/delivery` exposes the 17 intent channels, payload server, transcript preview, carrier catalog and send history. Backed by `pegasus/modules/access_workflow/delivery.py` and `catalog.py`; see `docs/DELIVERY.md`.

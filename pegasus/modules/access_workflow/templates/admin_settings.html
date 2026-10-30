@@ -16,4 +16,25 @@
   <select name="registration_open"><option value="1" {{ "selected" if settings.registration_open == "1" }}>yes</option><option value="0" {{ "selected" if settings.registration_open != "1" }}>no</option></select>
   <div style="margin-top:16px"><button type="submit">Save</button></div>
 </form>
+
+<div class="card" style="max-width:620px; margin-top:16px">
+  <h2>Telegram remote control</h2>
+  <p class="muted" style="font-size:13px">Create a bot with @BotFather, message it once, then save the token. The chat ID is discovered automatically if left blank.</p>
+  <label>Bot token</label><input id="tgToken" placeholder="123456:ABC…">
+  <label>Chat ID (optional)</label><input id="tgChat" placeholder="auto-discover">
+  <div class="row" style="margin-top:12px"><button id="tgSave" type="button">Save &amp; connect</button><button class="ghost" id="tgStop" type="button">Stop bot</button></div>
+  <pre id="tgOut" hidden></pre>
+</div>
+
+<script>
+const tgPost = async (url, body) => {
+  const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "X-CSRF-Token": "{{ csrf }}" }, body: JSON.stringify(body || {}) });
+  const data = await response.json();
+  const el = document.getElementById("tgOut");
+  el.hidden = false;
+  el.textContent = JSON.stringify(data, null, 2);
+};
+document.getElementById("tgSave").onclick = () => tgPost("/api/features/telegram/setup", { token: document.getElementById("tgToken").value, chat_id: document.getElementById("tgChat").value });
+document.getElementById("tgStop").onclick = () => tgPost("/api/features/telegram/stop", {});
+</script>
 {% endblock %}
