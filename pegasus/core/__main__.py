@@ -247,9 +247,25 @@ def run(command: tuple) -> None:
 
 @cli.command()
 def serve() -> None:
-    """Start the web GUI server."""
+    """Start the web GUI server (Flask API + built SPA)."""
+    import threading
+    import webbrowser
+
+    from pegasus.ui.web.server import main as serve_main
+
+    host = "127.0.0.1"
+    port = 5000
     console.print("[bold cyan]Starting Pegasus Web GUI...[/bold cyan]")
-    console.print("[yellow]Web GUI available in Phase 3. For now, use the CLI interface.[/yellow]")
+    console.print(f"  [green]URL:[/green] http://{host}:{port}/")
+    console.print(f"  [green]API:[/green] http://{host}:{port}/api/health")
+    threading.Timer(1.2, lambda: webbrowser.open(f"http://{host}:{port}/")).start()
+    serve_main(["--host", host, "--port", str(port)])
+
+
+@cli.command()
+def web() -> None:
+    """Alias for `serve` — launch the web GUI."""
+    serve.callback()  # type: ignore[misc]
 
 
 @cli.command()
@@ -314,32 +330,24 @@ def version() -> None:
 
 
 @cli.command()
-@click.option("--host", default="0.0.0.0", help="Host to bind to")
-@click.option("--port", default=5000, help="Port to listen on")
-@click.option("--debug", is_flag=True, help="Enable debug mode")
-def dashboard(host: str, port: int, debug: bool) -> None:
-    """Start the web dashboard server for Pegasus Phantom Menace."""
+def dashboard() -> None:
+    """Start the legacy Flask C2 dashboard (templates/dashboard.html)."""
     import threading
     import webbrowser
 
     from pegasus.modules.access_workflow.dashboard_server import app as dashboard_app
 
-    console.print(f"[bold cyan]Starting Pegasus Dashboard Server...[/bold cyan]")
-    console.print(f"  [green]URL:[/green] http://{host}:{port}")
-    console.print(f"  [green]Dashboard:[/green] http://{host}:{port}/")
+    host = "127.0.0.1"
+    port = 5050
+    console.print("[bold cyan]Starting legacy Pegasus C2 dashboard...[/bold cyan]")
+    console.print(f"  [green]URL:[/green] http://{host}:{port}/")
+    console.print("[dim]For the full web GUI use: pegasus serve[/dim]")
 
     def run_server():
-        dashboard_app.run(host=host, port=port, debug=debug, use_reloader=False)
+        dashboard_app.run(host=host, port=port, debug=False, use_reloader=False)
 
-    server_thread = threading.Thread(target=run_server, daemon=True)
-    server_thread.start()
-
-    # Auto-open browser
-    import webbrowser
-    webbrowser.open(f"http://{host}:{port}/")
-
-    console.print(f"[bold green]Dashboard server started at http://{host}:{port}[/bold green]")
-    console.print("[yellow]Press Ctrl+C to stop[/yellow]")
+    threading.Thread(target=run_server, daemon=True).start()
+    threading.Timer(1.2, lambda: webbrowser.open(f"http://{host}:{port}/")).start()
 
     try:
         while True:
@@ -357,6 +365,9 @@ def _get_scm() -> SlashCommandManager:
     if slash_command_manager is None:
         pm = get_plugin_manager()
         scm = initialize_slash_commands(pm.context)
+        from pegasus.modules.access_workflow import commands as aw_commands
+
+        aw_commands.register(scm)
         slash_command_manager = scm
     else:
         scm = slash_command_manager
@@ -375,6 +386,43 @@ def slash() -> None:
     else:
         scm = slash_command_manager
     return scm
+
+
+@slash.command("zeroclick-list")
+@click.option("--family", "-f", default=None, help="Filter by device family.")
+@click.option("--transport", "-t", default=None, help="Filter by transport.")
+def slash_zeroclick_list(family: Optional[str], transport: Optional[str]) -> None:
+    """List zero-click exploit vectors."""
+    scm = _get_scm()
+    import asyncio
+
+    argv = []
+    if family:
+        argv += ["--family", family]
+    if transport:
+        argv += ["--transport", transport]
+    asyncio.run(scm.execute("zeroclick-list", argv))
+
+
+@slash.command("zeroclick-run")
+@click.argument("key")
+@click.argument("params", nargs=-1)
+def slash_zeroclick_run(key: str, params: tuple) -> None:
+    """Run a zero-click exploit by registry key."""
+    scm = _get_scm()
+    import asyncio
+
+    asyncio.run(scm.execute("zeroclick-run", [key, *params]))
+
+
+@slash.command("zeroclick-sweep")
+@click.argument("family", required=False)
+def slash_zeroclick_sweep(family: Optional[str]) -> None:
+    """Run every zero-click vector for a device family."""
+    scm = _get_scm()
+    import asyncio
+
+    asyncio.run(scm.execute("zeroclick-sweep", [family] if family else []))
 
 
 @slash.command("slash-help")
