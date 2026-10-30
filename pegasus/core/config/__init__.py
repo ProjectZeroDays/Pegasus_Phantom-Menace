@@ -17,7 +17,7 @@ from pydantic import BaseModel
 class AppSettings(BaseModel):
     """Application-level settings."""
     name: str = "Pegasus Phantom Menace"
-    version: str = "2.0.0"
+    version: str = "2.1.0"
     debug: bool = False
     workspace: Path = Path.home() / ".pegasus"
     log_level: str = "INFO"
