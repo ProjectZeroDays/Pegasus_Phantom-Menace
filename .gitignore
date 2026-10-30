@@ -23,6 +23,7 @@ cmdline-tools.zip
 # Web GUI
 pegasus/ui/web/node_modules/
 pegasus/ui/web/*.tsbuildinfo
+build_web.log
 
 # Android / Gradle
 local.properties

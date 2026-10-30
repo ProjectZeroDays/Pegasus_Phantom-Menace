@@ -5,25 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Pegasus Phantom Menace{% endblock %}</title>
 <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='pegasus.svg') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='pegasus-icon.png') }}">
 <style>
   :root {
-    --bg: #0b0d10; --panel: #12161c; --panel-2: #171d25; --line: #232b36;
-    --text: #e6ebf2; --muted: #8b98a9; --accent: #ff5c39; --accent-2: #ffb03a;
-    --ok: #3ddc97; --warn: #ffb03a; --bad: #ff4d6d; --radius: 12px;
+    --bg: #060a11; --panel: #0c1421; --panel-2: #111c2d; --line: #1c2b40;
+    --text: #e6f0fb; --muted: #8aa0b8; --accent: #58a6ff; --accent-2: #8ecbff;
+    --ok: #3ddc97; --warn: #e3b341; --bad: #ff5d73; --radius: 12px;
     --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: radial-gradient(1200px 600px at 80% -10%, #1b1114 0%, var(--bg) 55%);
+  body { margin: 0; background: radial-gradient(1200px 620px at 82% -12%, #0b2138 0%, var(--bg) 58%);
          color: var(--text); font: 15px/1.55 system-ui, -apple-system, Segoe UI, sans-serif; min-height: 100vh; }
   a { color: var(--accent-2); text-decoration: none; }
   header { display: flex; align-items: center; gap: 18px; padding: 14px 22px; border-bottom: 1px solid var(--line);
-           background: rgba(11,13,16,.85); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 20; }
+           background: rgba(6,10,17,.85); backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 20; }
   .brand { font-weight: 800; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; font-size: 13px; }
   .brand span { color: var(--text); font-weight: 500; letter-spacing: 0; text-transform: none; margin-left: 8px; }
   nav { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; align-items: center; }
   nav a, nav form button { color: var(--muted); font-size: 13px; padding: 7px 11px; border-radius: 8px; border: 0; background: transparent; cursor: pointer; }
   nav a:hover, nav form button:hover { color: var(--text); background: var(--panel-2); }
-  nav a.active { color: var(--accent); background: #241416; }
+  nav a.active { color: var(--accent); background: #0d2237; }
   .pill { font-size: 11px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
   .pill.ok { color: var(--ok); border-color: #1c4a37; background: #0e2019; }
   .pill.bad { color: var(--bad); border-color: #4a1c28; background: #200e13; }
@@ -37,7 +39,7 @@
   .stat { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .stat small { font-size: 12px; color: var(--muted); font-weight: 500; }
   .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  button, .btn { background: var(--accent); color: #180a07; border: 0; border-radius: 9px; padding: 9px 15px;
+  button, .btn { background: var(--accent); color: #04121f; border: 0; border-radius: 9px; padding: 9px 15px;
                  font-weight: 650; font-size: 13px; cursor: pointer; }
   button:hover, .btn:hover { filter: brightness(1.08); }
   button.ghost, .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
@@ -70,7 +72,7 @@
 </head>
 <body>
 <header>
-  <div class="brand">Pegasus<span>Phantom Menace</span></div>
+  <div class="row" style="gap:9px"><img src="{{ url_for('static', filename='pegasus.svg') }}" alt="" width="30" height="30"><div class="brand">Pegasus<span>Phantom Menace</span></div></div>
   <nav>
     <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' }}">Dashboard</a>
     {% if user and user.role == 'admin' %}

@@ -1298,6 +1298,87 @@ def create_app() -> Flask:
             return ok({"manifest": {}, "error": str(exc)})
 
     # =====================================================================
+    # Delivery channels and payload catalog
+    # =====================================================================
+    @app.get("/api/delivery/channels")
+    def delivery_channels():
+        from pegasus.modules.access_workflow import delivery
+
+        return ok({"channels": delivery.list_channels(), "server": delivery.server_info()})
+
+    @app.post("/api/delivery/send")
+    def delivery_send():
+        from pegasus.modules.access_workflow import delivery
+
+        body = request.get_json(silent=True) or {}
+        try:
+            return ok(delivery.send(
+                body.get("channel", ""), body.get("target", ""), body.get("url", ""),
+                serial=body.get("serial") or None, auto_send=bool(body.get("auto_send")),
+            ))
+        except (delivery.DeliveryError, OSError, subprocess.TimeoutExpired) as exc:  # noqa: BLE001
+            return fail(str(exc))
+
+    @app.post("/api/delivery/serve")
+    def delivery_serve():
+        from pegasus.modules.access_workflow import delivery
+
+        body = request.get_json(silent=True) or {}
+        try:
+            return ok(delivery.start_server(int(body.get("port", 8080))))
+        except delivery.DeliveryError as exc:
+            return fail(str(exc))
+
+    @app.delete("/api/delivery/serve")
+    def delivery_stop():
+        from pegasus.modules.access_workflow import delivery
+
+        return ok(delivery.stop_server())
+
+    @app.post("/api/delivery/stage")
+    def delivery_stage():
+        from pegasus.modules.access_workflow import delivery
+
+        body = request.get_json(silent=True) or {}
+        try:
+            delivery.start_server(int(body.get("port", 8080)))
+            return ok(delivery.stage_file(body.get("path", "")))
+        except (delivery.DeliveryError, OSError) as exc:
+            return fail(str(exc))
+
+    @app.get("/api/delivery/history")
+    def delivery_history():
+        from pegasus.modules.access_workflow import delivery
+
+        return ok({"events": delivery.history()})
+
+    @app.post("/api/delivery/audio")
+    def delivery_audio():
+        from pegasus.modules.access_workflow import delivery
+
+        body = request.get_json(silent=True) or {}
+        transcript = delivery.transcript_for(body.get("url", ""))
+        path = delivery.synth_audio(transcript)
+        return ok({"path": str(path), "size": path.stat().st_size, "transcript": transcript})
+
+    @app.get("/api/catalog")
+    def catalog_list():
+        from pegasus.modules.access_workflow import catalog
+
+        return ok({"vectors": catalog.list_vectors(request.args.get("category"), request.args.get("search")), "categories": catalog.categories()})
+
+    @app.post("/api/catalog/build")
+    def catalog_build():
+        from pegasus.modules.access_workflow import catalog
+
+        body = request.get_json(silent=True) or {}
+        try:
+            result = catalog.build_and_stage(body.get("key", "")) if body.get("stage") else catalog.build(body.get("key", ""))
+        except (catalog.CatalogError, OSError, ImportError) as exc:
+            return fail(str(exc))
+        return ok(result)
+
+    # =====================================================================
     # Static SPA
     # =====================================================================
     @app.get("/")

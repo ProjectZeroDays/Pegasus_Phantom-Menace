@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import {
   Activity, ArrowUpRight, Battery, Camera, Cpu, Database, Globe, HardDrive,
-  MapPin, MessageSquare, Phone, RefreshCw, Rocket, ShieldAlert, Smartphone,
+  MapPin, MessageSquare, Phone, Radio, RefreshCw, Rocket, ShieldAlert, Smartphone,
   TerminalSquare, Users, Zap,
 } from "lucide-react";
 import { useApi, api } from "@/lib/api";
@@ -132,6 +132,9 @@ export default function MissionControl() {
             <Button size="sm" onClick={() => { void refreshDevices(); summary.refresh(); }}>
               <RefreshCw size={13} /> Refresh
             </Button>
+            <Link href="/delivery" className="btn btn-sm">
+              <Radio size={13} /> Deploy carrier
+            </Link>
             <Link href="/access" className="btn btn-primary btn-sm">
               <Rocket size={13} /> Launch access workflow
             </Link>

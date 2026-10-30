@@ -530,3 +530,56 @@ def get_setting_safe(key: str, default: str = "") -> str:
     """Read a setting without needing a live session handle."""
     with session_scope() as session:
         return get_setting(session, key, default)
+
+# ---------------------------------------------------------------------------
+# Admin user controls
+# ---------------------------------------------------------------------------
+
+
+def admin_set_tier(user_id: str, service_type: str, days: Optional[int] = None) -> User:
+    return activate_tier(user_id, service_type, days=days)
+
+
+def admin_toggle_active(user_id: str) -> User:
+    with session_scope() as session:
+        user = session.get(User, _uuid(user_id))
+        if not user:
+            raise AuthError("User not found")
+        user.is_active = not user.is_active
+        session.flush()
+        session.refresh(user)
+        return user
+
+
+def admin_reset_passkey(user_id: str) -> str:
+    temp = secrets.token_urlsafe(18)
+    with session_scope() as session:
+        user = session.get(User, _uuid(user_id))
+        if not user:
+            raise AuthError("User not found")
+        user.passkey_hash = hash_passkey(temp)
+        session.flush()
+    return temp
+
+
+def admin_set_wallet(user_id: str, wallet: str) -> User:
+    if wallet and not WALLET_RE.match(wallet):
+        raise AuthError("Wallet must be a 0x-prefixed 40-hex address")
+    with session_scope() as session:
+        user = session.get(User, _uuid(user_id))
+        if not user:
+            raise AuthError("User not found")
+        user.wallet_address = wallet or None
+        session.flush()
+        session.refresh(user)
+        return user
+
+
+def admin_delete_user(user_id: str) -> None:
+    with session_scope() as session:
+        user = session.get(User, _uuid(user_id))
+        if not user:
+            raise AuthError("User not found")
+        if user.role == "admin":
+            raise AuthError("Cannot delete the admin account")
+        session.delete(user)

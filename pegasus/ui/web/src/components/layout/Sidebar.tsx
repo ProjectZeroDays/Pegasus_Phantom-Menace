@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronDown, ChevronRight, Shield, Smartphone, RefreshCw } from "lucide-react";
 import { NAV_GROUPS } from "@/nav";
+import { PEGASUS_VECTOR } from "@/lib/brand";
 import { useApp } from "@/state/AppContext";
 import { cn } from "@/lib/utils";
 import { Badge, Button } from "@/components/ui";
@@ -37,13 +38,14 @@ export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: 
               width: 34,
               height: 34,
               borderRadius: 9,
-              background: "linear-gradient(135deg,#ff3d00,#bf3600)",
+              background: "linear-gradient(135deg,#0d2237,#06101c)",
               display: "grid",
               placeItems: "center",
-              boxShadow: "0 4px 14px rgba(255,61,0,.35)",
+              boxShadow: "0 4px 14px rgba(88,166,255,.35)",
+              overflow: "hidden",
             }}
           >
-            <Shield size={18} color="#0a0b0e" />
+            <img src={PEGASUS_VECTOR} alt="Pegasus" width={34} height={34} />
           </div>
           <div>
             <div

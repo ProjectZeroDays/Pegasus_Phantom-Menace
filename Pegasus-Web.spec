@@ -62,6 +62,7 @@ hiddenimports = [
     "PIL.Image",
     "requests",
     "jinja2.ext",
+    "anthropic",
     # Pegasus packages loaded lazily at runtime.
     "pegasus.ui.web.backend.app",
     "pegasus.ui.web.backend.capture",

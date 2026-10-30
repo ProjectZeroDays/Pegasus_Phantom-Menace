@@ -8,6 +8,7 @@ import Monitoring from "@/pages/Monitoring";
 import AccessWorkflow from "@/pages/AccessWorkflow";
 import WorkflowEngine from "@/pages/WorkflowEngine";
 import ZeroClick from "@/pages/ZeroClick";
+import Delivery from "@/pages/Delivery";
 import Capabilities from "@/pages/Capabilities";
 import PostExploit from "@/pages/PostExploit";
 import Locations from "@/pages/Locations";
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/access" component={AccessWorkflow} />
           <Route path="/workflows" component={WorkflowEngine} />
           <Route path="/zero-click" component={ZeroClick} />
+          <Route path="/delivery" component={Delivery} />
           <Route path="/cve" component={ZeroClick} />
           <Route path="/post-exploit" component={PostExploit} />
           <Route path="/capabilities" component={Capabilities} />

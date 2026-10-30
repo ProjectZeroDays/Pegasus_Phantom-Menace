@@ -118,9 +118,15 @@ markers = [
 [tool.ruff]
 line-length = 120
 target-version = "py311"
-select = ["E", "F", "I", "UP", "B", "C4", "PTH", "SIM", "T20", "ARG", "PL", "TRY", "NPY", "RSE", "RET", "FLY", "TD", "PT", "ISC", "ICN", "PIE", "TCH", "INT", "ERA", "PD", "PGH", "FUR", "NPY"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "PTH", "SIM", "T20", "ARG", "PL", "TRY", "NPY", "RSE", "RET", "FLY", "TD", "PT", "ISC", "ICN", "PIE", "TCH", "INT", "ERA", "PD", "PGH", "FURB"]
 ignore = ["E501", "B008", "C901"]
-per-file-ignores = { "tests/*" = ["S101", "S106"], "pegasus/tests/*" = ["S101", "S106"] }
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S106", "PT018", "PLR2004", "ARG001"]
+"modules/access_workflow/delivery.py" = ["TRY003", "PLR2004", "PLW1510", "PLR0913", "PLR0917", "ARG001"]
+"modules/access_workflow/catalog.py" = ["TRY003", "PLR2004", "PLW1510", "PLR0912", "PLR0913"]
 
 [tool.mypy]
 python_version = "3.11"

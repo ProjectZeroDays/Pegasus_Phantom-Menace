@@ -1,13 +1,68 @@
 {% extends "base.html" %}
 {% block title %}Users · Pegasus{% endblock %}
 {% block content %}
-<h1>Users</h1>
-<p class="lede">Every account, approval state, tier and expiry.</p>
+<meta name="csrf" content="{{ csrf }}">
+<h1>User control</h1>
+<p class="lede">Approval state, tier, expiry, wallet, passkey and suspension. Every action is immediate.</p>
+
 <div class="card">
-  <table><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Approval</th><th>Tier</th><th>Expires</th><th>Active</th></tr></thead><tbody>
+  <table><thead><tr><th>User</th><th>Approval</th><th>Tier / expiry</th><th>Wallet</th><th>Controls</th></tr></thead><tbody>
   {% for item in users %}
-  <tr><td>{{ item.username }}{% if item.is_demo %} <span class="pill">demo</span>{% endif %}</td><td class="mono">{{ item.email }}</td><td>{{ item.role }}</td><td>{{ item.approval_status }}</td><td>{{ item.access_tier }}</td><td class="muted">{{ item.access_expires_at.strftime("%Y-%m-%d") if item.access_expires_at else "—" }}</td><td>{{ "yes" if item.is_active else "no" }}</td></tr>
+  <tr>
+    <td>{{ item.username }}{% if item.is_demo %} <span class="pill">demo</span>{% endif %}<div class="muted mono small">{{ item.email }}</div><div class="muted small">{{ item.role }}{% if not item.is_active %} · suspended{% endif %}</div></td>
+    <td>{{ item.approval_status }}</td>
+    <td><span class="pill {{ 'ok' if item.access_tier != 'none' }}">{{ item.access_tier }}</span><div class="muted small">{{ item.access_expires_at.strftime("%Y-%m-%d") if item.access_expires_at else "—" }}</div></td>
+    <td class="mono small">{{ item.wallet_address or "—" }}</td>
+    <td>
+      <div class="row">
+        <select class="tier" data-id="{{ item.id }}" style="width:auto">
+          {% for tier in ['one_time','weekly','monthly','none'] %}<option value="{{ tier }}" {{ "selected" if item.access_tier == tier }}>{{ tier }}</option>{% endfor %}
+        </select>
+        <button class="small" data-tier="{{ item.id }}">Apply</button>
+        <button class="small ghost" data-active="{{ item.id }}">{{ 'Suspend' if item.is_active else 'Restore' }}</button>
+        <button class="small ghost" data-passkey="{{ item.id }}">Reset passkey</button>
+        <button class="small ghost" data-wallet="{{ item.id }}">{{ 'Change wallet' if item.wallet_address else 'Set wallet' }}</button>
+        {% if item.role != 'admin' %}<button class="small ghost" data-delete="{{ item.id }}">Delete</button>{% endif %}
+      </div>
+    </td>
+  </tr>
   {% endfor %}
   </tbody></table>
 </div>
+<pre id="out" hidden style="margin-top:14px"></pre>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const csrf = document.querySelector('meta[name="csrf"]').content;
+const $ = (id) => document.getElementById(id);
+const show = (value) => { $('out').hidden = false; $('out').textContent = JSON.stringify(value, null, 2); };
+const post = async (url, body, method = 'POST') => {
+  const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf }, body: body ? JSON.stringify(body) : undefined });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || response.statusText);
+  return data;
+};
+document.addEventListener('click', async (event) => {
+  const id = event.target.dataset.tier || event.target.dataset.active || event.target.dataset.passkey || event.target.dataset.wallet || event.target.dataset.delete;
+  if (!id) return;
+  try {
+    if (event.target.dataset.tier) {
+      const tier = document.querySelector('.tier[data-id="' + id + '"]').value;
+      show(await post('/api/admin/users/' + id + '/tier', { tier, days: tier === 'none' ? 0 : undefined }));
+    } else if (event.target.dataset.active) {
+      show(await post('/api/admin/users/' + id + '/active', {}));
+    } else if (event.target.dataset.passkey) {
+      show(await post('/api/admin/users/' + id + '/passkey', {}));
+    } else if (event.target.dataset.wallet) {
+      const value = prompt('New wallet (0x…)'); if (!value) return;
+      show(await post('/api/admin/users/' + id + '/wallet', { wallet: value }));
+    } else if (event.target.dataset.delete) {
+      if (!confirm('Delete this user?')) return;
+      show(await post('/api/admin/users/' + id, null, 'DELETE'));
+    }
+    setTimeout(() => location.reload(), 900);
+  } catch (error) { show({ error: error.message }); }
+});
+</script>
 {% endblock %}
