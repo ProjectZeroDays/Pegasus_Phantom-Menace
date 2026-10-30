@@ -135,11 +135,25 @@ pegasus plugin-info device
 pegasus menu
 ```
 
-### Web GUI (Phase 3)
+### Web GUI (Phase 3 — shipped)
 
 ```bash
-pegasus serve
+# build the front end once
+cd pegasus/ui/web && npm install && npm run build && cd ../../..
+
+# start the console
+python -m pegasus.ui.web.server --port 5000 --open
+#   or:  pegasus serve
 ```
+
+The web GUI is a full operator console: 30 pages covering devices, access
+workflows, zero-click/CVE, post-exploitation, telemetry (contacts, SMS, calls,
+browser, apps, media, Wi-Fi, GPS, keystrokes), payloads, wordlists, sessions,
+campaigns, reports, network scanning, the plugin registry and a live command
+palette. Every action runs as a background job with streamed output.
+
+See [`ui/web/README.md`](ui/web/README.md) for the full page map, API reference
+and architecture notes.
 
 ## Architecture
 
@@ -148,6 +162,7 @@ pegasus/
 ├── core/              # Core framework (config, plugin, db, auth)
 ├── modules/           # Feature modules (device, payload, session, etc.)
 ├── ui/                # User interfaces (web, tui, cli)
+│   └── web/           # v2.0 Web GUI — React SPA + Flask API
 ├── plugins/           # External plugin system
 ├── data/              # CVE database, signatures, wordlists, templates
 ├── tests/             # Unit, integration, and e2e tests

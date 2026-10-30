@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Awaiting approval · Pegasus{% endblock %}
+{% block content %}
+<div style="max-width:520px; margin:50px auto" class="card">
+  <h1>Request received</h1>
+  <p class="lede">Thanks, <strong>{{ username }}</strong>. The operator has a notification in the admin console and will approve or reject the account. After approval, sign in and choose a service to activate access.</p>
+  <div class="row"><a class="btn" href="{{ url_for('login') }}">Go to sign in</a><a class="btn ghost" href="{{ url_for('index') }}">Guest dashboard</a></div>
+</div>
+{% endblock %}

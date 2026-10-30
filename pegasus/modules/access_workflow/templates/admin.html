@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Admin · Pegasus{% endblock %}
+{% block content %}
+<meta name="csrf" content="{{ csrf }}">
+<div class="row" style="justify-content:space-between">
+  <div><h1>Operator console</h1><p class="lede">Approvals, payments, notifications and capability parity.</p></div>
+  <div class="row"><a class="btn ghost small" href="{{ url_for('admin_settings') }}">Settings</a><a class="btn ghost small" href="{{ url_for('admin_users') }}">Users</a></div>
+</div>
+
+<div class="grid" style="margin-bottom:18px">
+  <div class="card"><h3>Pending approvals</h3><div class="stat">{{ pending|length }}</div></div>
+  <div class="card"><h3>Total users</h3><div class="stat">{{ users|length }}</div></div>
+  <div class="card"><h3>Payments</h3><div class="stat">{{ payments|length }}</div></div>
+  <div class="card"><h3>NSO parity</h3><div class="stat">{{ parity.coverage_percent }}<small>%</small></div></div>
+</div>
+
+<div class="card" style="margin-bottom:18px">
+  <div class="row" style="justify-content:space-between"><h2 style="margin:0">Approval queue</h2><span class="muted mono">{{ pending|length }}</span></div>
+  {% if pending %}
+  <table><thead><tr><th>User</th><th>Email</th><th>Wallet</th><th>Created</th><th></th></tr></thead><tbody>
+    {% for applicant in pending %}
+    <tr><td>{{ applicant.username }}</td><td class="mono">{{ applicant.email }}</td><td class="mono">{{ applicant.wallet_address or "—" }}</td><td class="muted">{{ applicant.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+      <td class="row"><button class="small" onclick="act('/api/admin/approve/{{ applicant.id }}')">Approve</button><button class="small ghost" onclick="act('/api/admin/reject/{{ applicant.id }}')">Reject</button></td></tr>
+    {% endfor %}
+  </tbody></table>
+  {% else %}<p class="muted">Queue is empty.</p>{% endif %}
+</div>
+
+<div class="card" style="margin-bottom:18px">
+  <div class="row" style="justify-content:space-between"><h2 style="margin:0">Payment claims</h2><span class="muted mono">{{ payments|length }}</span></div>
+  {% if payments %}
+  <table><thead><tr><th>User</th><th>Service</th><th>Amount</th><th>From</th><th>Status</th><th></th></tr></thead><tbody>
+    {% for payment in payments %}
+    <tr><td class="mono">{{ payment.user_id|string|truncate(8, True, "") }}</td><td>{{ payment.service_type }}</td><td>${{ payment.amount_usdc|int }}</td><td class="mono">{{ payment.wallet_from|truncate(14, True, "…") }}</td><td>{{ payment.status }}</td>
+      <td><button class="small" onclick="act('/api/admin/payments/{{ payment.id }}/confirm')">Confirm</button></td></tr>
+    {% endfor %}
+  </tbody></table>
+  {% else %}<p class="muted">No claims.</p>{% endif %}
+</div>
+
+<div class="card">
+  <div class="row" style="justify-content:space-between"><h2 style="margin:0">Activity inbox</h2><button class="small ghost" onclick="act('/api/admin/notifications/read')">Mark read</button></div>
+  <table><thead><tr><th>Kind</th><th>Title</th><th>When</th></tr></thead><tbody>
+    {% for item in notifications %}<tr><td>{{ item.kind }}</td><td>{{ item.title }}<div class="muted">{{ item.body or "" }}</div></td><td class="muted">{{ item.created_at.strftime("%m-%d %H:%M") }}</td></tr>{% else %}<tr><td colspan="3" class="muted">Nothing yet.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const csrf = document.querySelector('meta[name="csrf"]').content;
+async function act(url) {
+  const response = await fetch(url, { method: "POST", headers: { "X-CSRF-Token": csrf } });
+  if (response.ok) location.reload(); else alert("Action failed: " + response.statusText);
+}
+</script>
+{% endblock %}

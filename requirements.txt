@@ -12,3 +12,4 @@ colorama>=0.4.6        # Color-coded terminal output (Windows/Linux/macOS/Termux
 # adb          → Android Debug Bridge  (required for all features)
 # scrcpy       → Screen Mirror         (optional, NOT available in Termux)
 # nmap         → Network Security Scan (optional)
+psutil>=5.9.0

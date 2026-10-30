@@ -144,7 +144,7 @@ class C2Server:
         self.app.router.add_get("/api/v1/devices", self._handle_list_devices)
         self.app.router.add_get("/api/v1/device/{device_id}", self._handle_get_device)
         self.app.router.add_post("/api/v1/command", self._handle_command)
-        self.app.router.add_static("/static/", "static/")
+        self.app.router.add_static("/static/", str(Path(__file__).parent / "static"))
 
     async def _handle_index(self, request):
         """Serve the dashboard HTML."""

@@ -264,8 +264,10 @@ def serve() -> None:
 
 @cli.command()
 def web() -> None:
-    """Alias for `serve` — launch the web GUI."""
-    serve.callback()  # type: ignore[misc]
+    """Alias for `serve` - launch the web GUI."""
+    from pegasus.ui.web.server import main as serve_main
+
+    serve_main(["--host", "127.0.0.1", "--port", "5000", "--open"])
 
 
 @cli.command()
@@ -435,6 +437,101 @@ def slash_post_exploit(action: str, step: Optional[str]) -> None:
 
     argv = [step] if step else []
     asyncio.run(scm.execute(f"postexploit-{action}", argv))
+
+
+@slash.command("mutate")
+@click.argument("sample", required=False)
+@click.option("--xor", is_flag=True, help="Write XOR-obfuscated copies instead of only analysing.")
+def slash_mutate(sample: Optional[str], xor: bool) -> None:
+    """AI mutation analysis or XOR obfuscation."""
+    scm = _get_scm()
+    import asyncio
+
+    if sample:
+        asyncio.run(scm.execute("mutate-xor" if xor else "mutate-analyse", [sample]))
+    else:
+        asyncio.run(scm.execute("mutate-analyse", []))
+
+
+@slash.command("payload")
+@click.argument("action", default="mass")
+@click.argument("params", nargs=-1)
+def slash_payload(action: str, params: tuple) -> None:
+    """Payload batch or DNA registry commands."""
+    scm = _get_scm()
+    import asyncio
+
+    asyncio.run(scm.execute("payload-" + action, list(params)))
+
+
+@slash.command("stego")
+@click.argument("action", default="embed")
+@click.argument("params", nargs=-1)
+def slash_stego(action: str, params: tuple) -> None:
+    """Steganography embed or extract."""
+    scm = _get_scm()
+    import asyncio
+
+    asyncio.run(scm.execute("stego-" + action, list(params)))
+
+
+@slash.command("telegram")
+@click.argument("params", nargs=-1)
+def slash_telegram(params: tuple) -> None:
+    """Telegram remote control."""
+    scm = _get_scm()
+    import asyncio
+
+    asyncio.run(scm.execute("telegram", list(params)))
+
+
+@slash.command("frp")
+@click.argument("params", nargs=-1)
+def slash_frp(params: tuple) -> None:
+    """FRP unlock plan or run."""
+    scm = _get_scm()
+    import asyncio
+
+    asyncio.run(scm.execute("frp", list(params)))
+
+
+@slash.command("agents")
+@click.argument("params", nargs=-1)
+def slash_agents(params: tuple) -> None:
+    """List or run agents."""
+    scm = _get_scm()
+    import asyncio
+
+    asyncio.run(scm.execute("agent", list(params)))
+
+
+@slash.command("daemon")
+@click.argument("action", default="status")
+def slash_daemon(action: str) -> None:
+    """Dashboard daemon control."""
+    scm = _get_scm()
+    import asyncio
+
+    asyncio.run(scm.execute("daemon", [action]))
+
+
+@slash.command("factory")
+@click.argument("params", nargs=-1)
+def slash_factory(params: tuple) -> None:
+    """Global command factory."""
+    scm = _get_scm()
+    import asyncio
+
+    asyncio.run(scm.execute("factory", list(params)))
+
+
+@slash.command("capabilities")
+@click.option("--assert-parity", "check", is_flag=True)
+def slash_capabilities(check: bool) -> None:
+    """Unified capability manifest."""
+    from pegasus.modules.access_workflow.capabilities import assert_parity, manifest
+
+    console.print_json(data=assert_parity() if check else manifest())
 
 
 @slash.command("slash-help")

@@ -165,8 +165,12 @@ test_input.txt
 
 # Build artifacts
 build/
-dist/
+/dist/
 *.egg-info/
+
+# The web GUI ships its built bundle (served by `pegasus serve`).
+!/ui/web/dist/
+!/ui/web/dist/**
 
 # Lock files for specific tools (keep uv.lock, poetry.lock if using)
 .Python

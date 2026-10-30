@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Activate access · Pegasus{% endblock %}
+{% block content %}
+<meta name="csrf" content="{{ csrf }}">
+<h1>Activate access</h1>
+<p class="lede">Pick a service, send the exact USDC amount to the operator wallet from the address you registered, then submit the claim. Confirmation is automatic once the transfer is seen on-chain.</p>
+
+<div class="card" style="margin-bottom:16px">
+  <div class="row" style="justify-content:space-between">
+    <div>
+      <div class="muted" style="font-size:12px; text-transform:uppercase; letter-spacing:.07em">Operator wallet (USDC · Ethereum)</div>
+      <div class="mono" id="wallet" style="font-size:14px; margin-top:6px; word-break:break-all">{{ wallet or "not configured" }}</div>
+    </div>
+    <button class="ghost small" id="copyBtn" type="button">Copy</button>
+  </div>
+  <p class="muted" style="font-size:12px; margin:10px 0 0">{{ note }}</p>
+</div>
+
+<div class="grid">
+  {% for tier in tiers %}
+  <div class="card">
+    <h3>{{ tier.label }}</h3>
+    <div class="stat">${{ tier.price|int }} <small>USDC</small></div>
+    <p class="muted" style="font-size:13px">{{ tier.description }}</p>
+    <button class="tierBtn" data-service="{{ tier.key }}" data-price="{{ tier.price }}">Select</button>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2>Submit payment claim</h2>
+  <div class="row" style="align-items:flex-end">
+    <div style="flex:1; min-width:220px"><label>Service</label><select id="service">{% for tier in tiers %}<option value="{{ tier.key }}">{{ tier.label }} — ${{ tier.price|int }}</option>{% endfor %}</select></div>
+    <div style="flex:2; min-width:260px"><label>Your sending wallet</label><input id="walletFrom" value="{{ user.wallet_address or '' }}" placeholder="0x…"></div>
+    <button id="claimBtn">Submit claim</button>
+  </div>
+  <div id="claimStatus" class="muted mono" style="margin-top:12px">No claim yet.</div>
+</div>
+
+{% if payments %}
+<div class="card" style="margin-top:16px">
+  <h2>Claim history</h2>
+  <table><thead><tr><th>Service</th><th>Amount</th><th>Status</th><th>Tx</th><th>When</th></tr></thead><tbody>
+  {% for payment in payments %}<tr><td>{{ payment.service_type }}</td><td>${{ payment.amount_usdc|int }}</td><td>{{ payment.status }}</td><td class="mono">{{ payment.tx_ref or "—" }}</td><td class="muted">{{ payment.created_at.strftime("%Y-%m-%d %H:%M") }}</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const csrf = document.querySelector('meta[name="csrf"]').content;
+const statusEl = document.getElementById("claimStatus");
+const post = async (url, body) => {
+  const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf }, body: JSON.stringify(body || {}) });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || response.statusText);
+  return data;
+};
+document.getElementById("copyBtn").onclick = async () => {
+  const value = document.getElementById("wallet").textContent.trim();
+  if (!value || value === "not configured") return;
+  await navigator.clipboard.writeText(value);
+  document.getElementById("copyBtn").textContent = "Copied";
+  setTimeout(() => document.getElementById("copyBtn").textContent = "Copy", 1500);
+};
+document.querySelectorAll(".tierBtn").forEach(button => button.onclick = () => {
+  document.getElementById("service").value = button.dataset.service;
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+});
+let pollTimer = null;
+async function poll(id) {
+  try {
+    const result = await post(`/api/payments/${id}/verify`);
+    statusEl.textContent = result.status === "confirmed" ? "Payment confirmed — activating…" : (result.error || result.status);
+    if (result.status === "confirmed") { clearInterval(pollTimer); setTimeout(() => location.reload(), 800); }
+  } catch (error) { statusEl.textContent = "poll error: " + error.message; }
+}
+document.getElementById("claimBtn").onclick = async () => {
+  statusEl.textContent = "submitting…";
+  try {
+    const result = await post("/api/payments/claim", {
+      service_type: document.getElementById("service").value,
+      wallet_from: document.getElementById("walletFrom").value,
+    });
+    statusEl.textContent = result.status === "confirmed" ? "Payment confirmed — activating…" : "Claim stored. Waiting for the transfer to appear on-chain (checking every 15s).";
+    if (result.status === "confirmed") { setTimeout(() => location.reload(), 800); return; }
+    clearInterval(pollTimer);
+    pollTimer = setInterval(() => poll(result.payment_id), 15000);
+  } catch (error) { statusEl.textContent = "error: " + error.message; }
+};
+</script>
+{% endblock %}

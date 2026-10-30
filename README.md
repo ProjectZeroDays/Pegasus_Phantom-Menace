@@ -97,10 +97,70 @@ Integrated from DeadDroid v2.0 — 17 sub-features:
 
 ---
 
+## 🖥️ Web GUI (v2.0) — Mission Control
+
+The `pegasus/` Python package ships a complete operator console: a React +
+TypeScript front end (`pegasus/ui/web`) served by a Flask API, started with a
+single command.
+
+```bash
+# build the front end once
+cd pegasus/ui/web && npm install && npm run build && cd ../../..
+
+# run it
+python -m pegasus.ui.web.server --port 5000 --open
+#   or:  pegasus serve
+```
+
+Download the prebuilt standalone launcher from the Releases page:
+**`Pegasus-Web.exe`** (no Python required — bundles the API and the SPA).
+
+### What the GUI covers
+
+**32 pages**, every one wired to the live plugin system rather than mock data.
+
+| Area | Pages |
+|---|---|
+| Command | Mission Control, Devices, Monitoring |
+| Access & exploitation | Access Workflow, Workflow Engine, Zero-Click & CVE, Post-Exploitation, Capability Parity |
+| Device data | Locations, Geofences, Call Logs, Contacts, Messages, Browser, Applications, Photos & Video, Wi-Fi, Keystrokes, Activity Timeline, Keywords |
+| Operations | Payloads, Wordlists, Sessions, Campaigns, Reports |
+| Network & tools | Network Scanner (nmap), Toolbox (binary console + slash commands), Skills Catalog |
+| System | Plugins, Command Center, Settings |
+
+### Highlights
+
+- **Live job pipeline** — every action (ADB shell, nmap, msfvenom, lifecycle
+  runs) is dispatched as a background job; output streams into a terminal view
+  with progress and cancellation.
+- **Real device telemetry** — contacts, SMS, call logs, Chrome history, installed
+  apps, media, Wi-Fi and GPS are pulled over ADB and cached in a local SQLite
+  store with geofences, keyword tracking and per-device notes.
+- **Full command surface** — all 40 plugin commands and 46 slash commands are
+  browsable and executable from the UI, with the same output you would see in
+  the CLI.
+- **Toolchain awareness** — ADB, fastboot, scrcpy, nmap, msfvenom, Frida,
+  apktool, jadx, TShark, Wireshark, ngrok and OpenSSL are probed and shown with
+  version and availability.
+- **PWA-ready** — installable manifest, offline shell, responsive layout down to
+  phone width.
+
+Full details: [`pegasus/ui/web/README.md`](pegasus/ui/web/README.md).
+
+### Test the GUI backend
+
+```bash
+python -m pytest pegasus/ui/web/tests -q      # 24 tests, no device required
+cd pegasus/ui/web && npm run typecheck
+```
+
+---
+
 ## 🛠️ Build / Install
 
 **CL:** `python3 pegasus_v_1.4.py`
-**EXE:** `pyinstaller --onefile --name Pegasus-v1.4 --icon=pegasus_icon.ico pegasus_v_1.4.py`
+**EXE (CLI):** `pyinstaller --onefile --name Pegasus-v1.4 --icon=pegasus_icon.ico pegasus_v_1.4.py`
+**EXE (Web GUI):** `python -m PyInstaller Pegasus-Web.spec --noconfirm` → `dist/Pegasus-Web.exe`
 **APK:** See `pegasus-mobile/README.md` and `build_apk.bat`
 
 ---

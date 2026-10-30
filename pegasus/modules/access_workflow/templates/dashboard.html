@@ -1,692 +1,324 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pegasus Phantom Menace v2 - Command & Control Dashboard</title>
-    <meta name="theme-color" content="#0A0B0E">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="apple-mobile-web-app-title" content="Pegasus v2">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-32.png') }}" sizes="32x32">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-192.png') }}" sizes="192x192">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='android_192x192.png') }}" sizes="192x192">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='ios_1024x1024.png') }}">
-    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends "base.html" %}
+{% block title %}Console · Pegasus{% endblock %}
+{% block content %}
+<meta name="csrf" content="{{ csrf }}">
+<div class="row" style="justify-content:space-between; align-items:flex-start">
+  <div>
+    <h1>Operations console</h1>
+    <p class="lede">Live ADB inventory, exploit registry, collection actions and delivery tooling. Every number below is polled from the host or the attached device.</p>
+  </div>
+  <div class="row">
+    <span class="pill" id="statusPill">connecting…</span>
+    <button class="ghost small" id="refreshBtn">Refresh</button>
+  </div>
+</div>
 
-        :root {
-            --primary: #FF3D00;
-            --primary-dark: #BF3600;
-            --primary-glow: rgba(255, 61, 0, 0.4);
-            --secondary: #58A6FF;
-            --secondary-dark: #2F81F7;
-            --success: #3FB950;
-            --success-dark: #2F9E44;
-            --warning: #D29922;
-            --error: #D73A49;
-            --error-dark: #CB243E;
-            --bg: #0A0B0E;
-            --surface: #161B22;
-            --surface-elev: #1F2430;
-            --surface-hover: #21262D;
-            --text-primary: #C9D1D9;
-            --text-secondary: #8B949E;
-            --text-muted: #6E7681;
-            --border: #30363D;
-            --font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-        }
+{% if not user %}
+<div class="lock">Guest view. Pages are unlocked for evaluation, but exploit command internals stay redacted. <a href="{{ url_for('login') }}">Sign in</a> or use the demo account <span class="mono">demo / demo</span>.</div>
+{% elif not (user.role == 'admin' or user.is_demo or user.access_tier != 'none') %}
+<div class="lock">Your account is not activated. Open <a href="{{ url_for('payment') }}">billing</a> to choose a service; internals unlock automatically once the payment is confirmed.</div>
+{% endif %}
 
-        html, body {
-            height: 100%;
-            font-family: var(--font-family);
-            background: var(--bg);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
+<div class="grid" style="margin:18px 0">
+  <div class="card"><h3>Devices online</h3><div class="stat" id="statDevices">0 <small>of 0</small></div></div>
+  <div class="card"><h3>Host CPU</h3><div class="stat" id="statCpu">0<small>%</small></div></div>
+  <div class="card"><h3>Memory</h3><div class="stat" id="statMem">0<small>%</small></div></div>
+  <div class="card"><h3>Uptime</h3><div class="stat" id="statUptime">0s</div></div>
+</div>
 
-        /* App Header */
-        .app-header {
-            background: linear-gradient(135deg, #161B22, #0D1117);
-            border-bottom: 2px solid var(--primary);
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
+<div class="card" style="margin-bottom:18px">
+  <div class="row" style="justify-content:space-between">
+    <h2 style="margin:0">Live telemetry</h2>
+    <div class="legend"><span><span class="dot" style="background:#ff5c39"></span>devices</span><span><span class="dot" style="background:#3ddc97"></span>cpu %</span><span><span class="dot" style="background:#ffb03a"></span>memory %</span></div>
+  </div>
+  <canvas class="chart" id="chart" width="1100" height="150"></canvas>
+  <div class="muted mono" id="chartMeta">waiting for samples…</div>
+</div>
 
-        .app-logo {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
+<div class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="devices">Devices</button>
+  <button role="tab" aria-selected="false" data-tab="exploits">Zero-click</button>
+  <button role="tab" aria-selected="false" data-tab="collection">Collection</button>
+  <button role="tab" aria-selected="false" data-tab="delivery">Payloads</button>
+  <button role="tab" aria-selected="false" data-tab="parity">NSO parity</button>
+</div>
 
-        .app-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #FF3D00, #BF3600);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 15px var(--primary-glow);
-            animation: pulse 2s infinite;
-        }
+<section class="tabpanel" id="panel-devices">
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Attached devices</h2><span class="muted mono" id="deviceCount">0</span></div>
+    <table><thead><tr><th>Serial</th><th>Model</th><th>State</th><th>Actions</th></tr></thead><tbody id="deviceRows"><tr><td colspan="4" class="muted">No devices. Enable USB debugging and authorise this host.</td></tr></tbody></table>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>Screen capture</h2>
+    <div class="row"><select id="shotSerial"></select><button id="shotBtn">Capture</button></div>
+    <div id="shotResult" class="muted mono" style="margin-top:10px">—</div>
+    <img id="shotImg" alt="" style="max-width:100%; border-radius:10px; margin-top:10px; display:none">
+  </div>
+</section>
 
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 4px 15px rgba(255, 61, 0, 0.4); }
-            50% { box-shadow: 0 4px 25px rgba(255, 61, 0, 0.7); }
-        }
+<section class="tabpanel" id="panel-exploits" hidden>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">Zero-click registry</h2>
+      <select id="familyFilter" style="width:auto"><option value="">all families</option></select></div>
+    <table><thead><tr><th>Vector</th><th>Family</th><th>Transport</th><th>Surface</th><th></th></tr></thead><tbody id="exploitRows"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody></table>
+    <pre id="exploitOutput" hidden></pre>
+  </div>
+</section>
 
-        .app-brand {
-            display: flex;
-            flex-direction: column;
-        }
+<section class="tabpanel" id="panel-collection" hidden>
+  <div class="card">
+    <h2>Post-exploitation steps</h2>
+    <div class="row" id="collectionButtons"></div>
+    <pre id="collectionOutput" hidden></pre>
+  </div>
+</section>
 
-        .app-title {
-            font-size: 1.75rem;
-            font-weight: 900;
-            letter-spacing: -1px;
-            background: linear-gradient(90deg, #FF3D00, #58A6FF);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .app-subtitle {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-top: 0.25rem;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .nav-tab {
-            padding: 0.5rem 1rem;
-            background: var(--surface-elev);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .nav-tab:hover, .nav-tab.active {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: rgba(255, 61, 0, 0.1);
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 1600px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-            min-height: calc(100vh - 200px);
-        }
-
-        /* Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--surface-elev);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1.5rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--primary);
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: var(--text-primary);
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 0.5rem;
-        }
-
-        .stat-trend {
-            font-size: 0.8rem;
-            margin-top: 0.25rem;
-        }
-
-        .trend-up { color: var(--success); }
-        .trend-down { color: var(--error); }
-
-        /* Device Dashboard Panel */
-        .devices-panel {
-            background: var(--surface-elev);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background: #0A0B0E;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .panel-title {
-            font-size: 1.1rem;
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        .panel-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text-primary);
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: #0D1117;
-            border-color: var(--primary);
-        }
-
-        .btn-primary:hover {
-            background: #FF5A3D;
-        }
-
-        .btn-danger {
-            background: var(--error);
-            color: #FFFFFF;
-            border-color: var(--error);
-        }
-
-        .btn-sm {
-            padding: 0.4rem 0.7rem;
-            font-size: 0.8rem;
-        }
-
-        .status-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .status-online { background: rgba(63, 185, 80, 0.15); color: var(--success); }
-        .status-warning { background: rgba(210, 153, 34, 0.15); color: var(--warning); }
-        .status-exploited { background: rgba(215, 58, 73, 0.2); color: var(--error); font-weight: bold; }
-
-        .indicator-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-
-        .indicator-dot.status-offline { background: var(--error); animation: none; }
-        .indicator-dot.status-warning { background: var(--warning); animation: none; }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Commands Panel */
-        .commands-panel {
-            background: var(--surface-elev);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-
-        .commands-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            padding: 1.5rem;
-        }
-
-        .cmd-card {
-            background: #0A0B0E;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .cmd-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 61, 0, 0.1);
-        }
-
-        .cmd-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .cmd-name {
-            font-weight: bold;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            font-family: monospace;
-        }
-
-        .cmd-category {
-            font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-            background: rgba(255, 61, 0, 0.1);
-            color: var(--primary);
-            border-radius: 4px;
-        }
-
-        .cmd-desc {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .cmd-tags {
-            display: flex;
-            gap: 0.4rem;
-        }
-
-        .cmd-tag {
-            font-size: 0.65rem;
-            padding: 0.15rem 0.4rem;
-            background: rgba(88, 166, 255, 0.1);
-            color: var(--secondary);
-            border-radius: 4px;
-        }
-
-        /* Bottom Status Bar */
-        .bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #0A0B0E;
-            border-top: 1px solid var(--border);
-            padding: 0.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .bar-left, .bar-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .bar-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--success);
-        }
-        .dot.status-error { background: var(--error); }
-        .dot.status-warning { background: var(--warning); }
-
-        /* Terminal Overlay */
-        .terminal-overlay {
-            position: fixed;
-            bottom: 60px;
-            left: 0;
-            right: 0;
-            background: #0A0B0E;
-            border-top: 1px solid var(--border);
-            height: 0;
-            overflow: hidden;
-            transition: height 0.3s ease;
-            z-index: 999;
-        }
-
-        .terminal-overlay.open {
-            height: 300px;
-        }
-
-        .terminal-header {
-            background: #161B22;
-            padding: 0.5rem 1rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .terminal-content {
-            padding: 1rem;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 0.85rem;
-            color: var(--text-primary);
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .terminal-line {
-            margin-bottom: 0.5rem;
-            white-space: pre-wrap;
-        }
-
-        .terminal-prompt {
-            color: var(--primary);
-            margin-right: 0.5rem;
-        }
-
-        .close-terminal {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0D1117;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #30363D;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #484f58;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            .commands-grid {
-                grid-template-columns: 1fr;
-            }
-            .bottom-bar {
-                flex-direction: column;
-                gap: 1rem;
-                padding: 0.5rem 1rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="app-header">
-        <div class="app-logo">
-            <div class="app-icon">🛡️</div>
-            <div>
-                <div class="app-title">PEGASUS PHANTOM MENACE v2</div>
-                <div class="app-subtitle">Autonomous Android Security Audit & Exploitation Platform</div>
-            </div>
-        </div>
-        <div class="nav-tabs">
-            <div class="nav-tab active">Dashboard</div>
-            <div class="nav-tab">Access Workflow</div>
-            <div class="nav-tab">Zero-Click Exploits</div>
-            <div class="nav-tab">Post-Exploitation</div>
-            <div class="nav-tab">Monitoring</div>
-            <div class="nav-tab">Skills</div>
-        </div>
+<section class="tabpanel" id="panel-delivery" hidden>
+  <div class="grid">
+    <div class="card">
+      <h2>Mass payload batch</h2>
+      <label>LHOST</label><input id="plLhost" value="127.0.0.1">
+      <label>Start port</label><input id="plPort" type="number" value="4444">
+      <label>Count</label><input id="plCount" type="number" value="4" min="1" max="64">
+      <label>Campaign</label><input id="plCampaign" value="dashboard">
+      <div style="margin-top:14px"><button id="plBtn">Generate</button></div>
+      <pre id="plOut" hidden></pre>
     </div>
-
-    <div class="container">
-        <div class="dashboard-grid">
-            <div class="stat-card">
-                <div class="stat-value">4</div>
-                <div class="stat-label">Plugins Loaded</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">3</div>
-                <div class="stat-label">Devices Connected</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">12</div>
-                <div class="stat-label">Active Sessions</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">84%</div>
-                <div class="stat-label">Exploit Success Rate</div>
-            </div>
-        </div>
-
-        <div class="devices-panel">
-            <div class="panel-header">
-                <div class="panel-title">● Connected Devices</div>
-                <div class="panel-actions">
-                    <button class="btn btn-primary" onclick="refreshDevices()">Refresh</button>
-                    <button class="btn">Scan Network</button>
-                    <button class="btn">Pair Device</button>
-                </div>
-            </div>
-            <table class="devices-table">
-                <thead>
-                    <tr><th>Device</th><th>Model</th><th>Vector</th><th>Status</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="device-table-body">
-                    <!-- Devices will be populated here by JavaScript -->
-                </tbody>
-            </table>
-        </div>
-
-        <div class="commands-panel">
-            <div class="panel-header"><div class="panel-title">● Quick Command Center</div></div>
-            <div class="commands-grid">
-                <div class="cmd-card">
-                    <div class="cmd-header"><div class="cmd-name">access-autonomous</div><div class="cmd-category">access</div></div>
-                    <div class="cmd-desc">Autonomous exploitation workflow</div>
-                    <div class="cmd-tags">
-                        <span class="cmd-tag">auto</span>
-                        <span class="cmd-tag">adaptive</span>
-                        <span class="cmd-tag">self-healing</span>
-                    </div>
-                </div>
-                <div class="cmd-card">
-                    <div class="cmd-header"><div class="cmd-name">access-zero-click</div><div class="cmd-category">exploit</div></div>
-                    <div class="cmd-desc">Pixel 8, Samsung S24, Xiaomi, OnePlus</div>
-                    <div class="cmd-tags">
-                        <span class="cmd-tag">zero-click</span>
-                        <span class="cmd-tag">no-user</span>
-                        <span class="cmd-tag">remote</span>
-                    </div>
-                </div>
-                <div class="cmd-card">
-                    <div class="cmd-header"><div class="cmd-name">post-exploit-chain</div><div class="cmd-category">post-exploitation</div></div>
-                    <div class="cmd-desc">Full post-exploitation chain</div>
-                    <div class="cmd-tags">
-                        <span class="cmd-tag">sequential</span>
-                        <span class="cmd-tag">persistence</span>
-                        <span class="cmd-tag">exfiltration</span>
-                    </div>
-                </div>
-                <div class="cmd-card">
-                    <div class="cmd-header"><div class="cmd-name">brutdroid-root</div><div class="cmd-category">device</div></div>
-                    <div class="cmd-desc">Root emulator with Magisk + rootAVD</div>
-                    <div class="cmd-tags">
-                        <span class="cmd-tag">root</span>
-                        <span class="cmd-tag">magisk</span>
-                        <span class="cmd-tag">frida</span>
-                    </div>
-                </div>
-                <div class="cmd-card">
-                    <div class="cmd-header"><div class="cmd-name">passgen</div><div class="cmd-category">credentials</div></div>
-                    <div class="cmd-desc">Wordlist generator with variations</div>
-                    <div class="cmd-tags">
-                        <span class="cmd-tag">wordlist</span>
-                        <span class="cmd-tag">bruteforce</span>
-                        <span class="cmd-tag">credentials</span>
-                    </div>
-                </div>
-                <div class="cmd-card">
-                    <div class="cmd-header"><div class="cmd-name">access-workflow-rates</div><div class="cmd-category">monitoring</div></div>
-                    <div class="cmd-desc">Exploit success rates by vector</div>
-                    <div class="cmd-tags">
-                        <span class="cmd-tag">analytics</span>
-                        <span class="cmd-tag">metrics</span>
-                        <span class="cmd-tag">optimization</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="card">
+      <h2>Mutation analysis</h2>
+      <label>APK or smali directory</label><input id="muPath" placeholder="C:\samples\target.apk">
+      <div style="margin-top:14px"><button id="muBtn">Analyse</button></div>
+      <pre id="muOut" hidden></pre>
     </div>
-
-    <div class="bottom-bar">
-        <div class="bar-left">
-            <div class="bar-item">
-                <div class="dot"></div><span>System: Operational</span>
-            </div>
-            <div class="bar-item">
-                <div class="dot status-success"></div><span>Database: Connected</span>
-            </div>
-            <div class="bar-item">
-                <div class="dot status-warning"></div><span>AI: Not Configured</span>
-            </div>
-        </div>
-        <div class="bar-right">
-            <div class="bar-item"><span>Pegasus Phantom Menace v2.0</span></div>
-            <div class="bar-item"><span>Authorized Security Testing Only</span></div>
-        </div>
+    <div class="card">
+      <h2>Steganography</h2>
+      <label>Cover image</label><input id="stCover" placeholder="cover.png">
+      <label>URL to hide</label><input id="stUrl" placeholder="https://host/payload.apk">
+      <label>Output</label><input id="stOut" value="stego.png">
+      <div style="margin-top:14px"><button id="stBtn">Embed</button></div>
+      <pre id="stOutLog" hidden></pre>
     </div>
-
-    <div class="terminal-overlay" id="terminalOverlay">
-        <div class="terminal-header">
-            <span style="color: #FF3D00; font-weight: bold;">● PEGASUS TERMINAL</span>
-            <button class="close-terminal" onclick="toggleTerminal()">✕</button>
-        </div>
-        <div class="terminal-content" id="terminalContent">
-            <div class="terminal-line"><span class="terminal-prompt">$</span> Pegasus Phantom Menace v2.0 initialized</div>
-            <div class="terminal-line"><span class="terminal-prompt">$</span> Loading plugins...</div>
-            <div class="terminal-line"><span class="terminal-prompt">$</span> [+] Plugin loaded: access_workflow v2.0.0</div>
-            <div class="terminal-line"><span class="terminal-prompt">$</span> [+] Plugin loaded: brutdroid v2.0.0</div>
-            <div class="terminal-line"><span class="terminal-prompt">$</span> [+] Plugin loaded: passgen v2.0.0</div>
-            <div class="terminal-line"><span class="terminal-prompt">$</span> [+] Plugin loaded: post_exploitation v2.0.0</div>
-            <div class="terminal-line"><span class="terminal-prompt">$</span> Ready. Type a command.</div>
-        </div>
+    <div class="card">
+      <h2>FRP unlock</h2>
+      <p class="muted">Adaptive five-method chain. Plan preview is always available.</p>
+      <button id="frpBtn" class="ghost">Load plan</button>
+      <pre id="frpOut" hidden></pre>
     </div>
+  </div>
+</section>
 
-    <script>
-        // Terminal functionality
-        function toggleTerminal() {
-            const terminal = document.getElementById('terminalOverlay');
-            terminal.classList.toggle('open');
-        }
+<section class="tabpanel" id="panel-parity" hidden>
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">NSO-class capability parity</h2><span class="pill" id="parityPill">—</span></div>
+    <p class="muted">Each row resolves to an importable callable. “shell” and “partial” rows state their real device constraints.</p>
+    <table><thead><tr><th>Capability</th><th>Category</th><th>Parity</th><th>Target</th><th>State</th></tr></thead><tbody id="parityRows"></tbody></table>
+  </div>
+</section>
+{% endblock %}
 
-        // Fetch and populate devices
-        async function loadDevices() {
-            try {
-                const response = await fetch('/api/devices');
-                const data = await response.json();
-                const tbody = document.getElementById('device-table-body');
-                tbody.innerHTML = '';
-                
-                data.devices.forEach(device => {
-                    const row = document.createElement('tr');
-                    row.className = 'device-row';
-                    row.innerHTML = `
-                        <td class="device-info">
-                            <div class="device-avatar">${device.name.charAt(0).toUpperCase()}</div>
-                            <div class="device-details">
-                                <div class="device-name">${device.name}</div>
-                                <div class="device-model">${device.model || 'Unknown Model'}</div>
-                                <div class="device-meta">${device.ip_address || ''} • ${device.android_version || ''}</div>
-                            </div>
-                        </td>
-                        <td><span class="status-pill status-online"><div class="indicator-dot"></div>${device.status || 'online'}</span></td>
-                        <td>${device.access_vector || 'Unknown'}</td>
-                        <td><span class="status-pill status-success">● Active</span></td>
-                        <td class="device-actions">
-                            <button class="btn btn-sm">Shell</button>
-                            <button class="btn btn-sm">Pull</button>
-                            <button class="btn btn-sm">Exec</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-            } catch (e) {
-                console.error('Failed to load devices:', e);
-            }
-        }
+{% block scripts %}
+<script>
+const csrf = document.querySelector('meta[name="csrf"]').content;
+const $ = (id) => document.getElementById(id);
+const api = async (url, options = {}) => {
+  const response = await fetch(url, { headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf }, ...options });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error || response.statusText);
+  return body;
+};
+const show = (el, data) => { el.hidden = false; el.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2); };
 
-        // Load data on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDevices();
-            setInterval(loadDevices, 30000); // Refresh every 30 seconds
-        });
-    </script>
-</body>
-</html>
+let deviceCache = [];
+let exploitCache = [];
+
+function drawChart(points) {
+  const canvas = $("chart");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "#232b36";
+  for (let y = 0; y < 4; y++) { ctx.beginPath(); ctx.moveTo(0, y * 37 + 8); ctx.lineTo(canvas.width, y * 37 + 8); ctx.stroke(); }
+  if (!points.length) return;
+  const maxDevice = Math.max(1, ...points.map(p => p.devices));
+  const series = [
+    { key: "devices", colour: "#ff5c39", max: maxDevice },
+    { key: "cpu_percent", colour: "#3ddc97", max: 100 },
+    { key: "memory_percent", colour: "#ffb03a", max: 100 },
+  ];
+  for (const line of series) {
+    ctx.beginPath();
+    ctx.strokeStyle = line.colour;
+    ctx.lineWidth = 2;
+    points.forEach((point, index) => {
+      const x = (index / Math.max(1, points.length - 1)) * canvas.width;
+      const y = canvas.height - 8 - (point[line.key] / line.max) * (canvas.height - 20);
+      index ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    });
+    ctx.stroke();
+  }
+}
+
+async function refresh() {
+  try {
+    const status = await api("/api/status");
+    $("statusPill").textContent = status.status + " · " + (status.user || "guest");
+    $("statusPill").className = "pill " + (status.devices_online ? "ok" : "");
+    $("statDevices").innerHTML = `${status.devices_online} <small>of ${status.devices_total}</small>`;
+    $("statUptime").textContent = status.uptime_seconds + "s";
+    const activity = await api("/api/activity");
+    $("statCpu").innerHTML = Math.round(activity.host.cpu_percent) + "<small>%</small>";
+    $("statMem").innerHTML = Math.round(activity.host.memory_percent) + "<small>%</small>";
+    drawChart(activity.points.slice(-120));
+    $("chartMeta").textContent = `${activity.points.length} samples · ${activity.interval}s interval`;
+    renderDevices(activity.devices);
+  } catch (error) {
+    $("statusPill").textContent = "offline";
+    $("statusPill").className = "pill bad";
+  }
+}
+
+function renderDevices(devices) {
+  deviceCache = devices;
+  const rows = $("deviceRows");
+  const selector = $("shotSerial");
+  rows.innerHTML = devices.length ? "" : '<tr><td colspan="4" class="muted">No devices attached.</td></tr>';
+  selector.innerHTML = "";
+  devices.forEach(device => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="mono"></td><td></td><td></td><td></td>`;
+    tr.children[0].textContent = device.serial;
+    tr.children[1].textContent = device.model;
+    tr.children[2].textContent = device.state;
+    const button = document.createElement("button");
+    button.className = "small ghost";
+    button.textContent = "Screenshot";
+    button.onclick = () => capture(device.serial);
+    tr.children[3].appendChild(button);
+    rows.appendChild(tr);
+    const option = document.createElement("option");
+    option.value = device.serial;
+    option.textContent = device.serial;
+    selector.appendChild(option);
+  });
+  $("deviceCount").textContent = devices.length + " device(s)";
+}
+
+async function capture(serial) {
+  show($("shotResult"), "capturing…");
+  try {
+    const result = await api(`/api/screenshot/${encodeURIComponent(serial)}`, { method: "POST" });
+    const image = $("shotImg");
+    image.src = result.image_url + "?t=" + Date.now();
+    image.style.display = "block";
+    show($("shotResult"), result);
+  } catch (error) { show($("shotResult"), "error: " + error.message); }
+}
+
+async function loadExploits() {
+  const family = $("familyFilter").value;
+  const data = await api("/api/exploits" + (family ? "?family=" + family : ""));
+  exploitCache = data.exploits;
+  const rows = $("exploitRows");
+  rows.innerHTML = "";
+  const families = [...new Set(data.exploits.map(item => item.device_family))];
+  if (!$("familyFilter").dataset.filled) {
+    families.forEach(value => { const option = document.createElement("option"); option.value = value; option.textContent = value; $("familyFilter").appendChild(option); });
+    $("familyFilter").dataset.filled = "1";
+  }
+  data.exploits.forEach(exploit => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td class="mono"></td><td></td><td></td><td></td><td></td>`;
+    tr.children[0].textContent = exploit.key;
+    tr.children[1].textContent = exploit.device_family;
+    tr.children[2].textContent = exploit.transport;
+    tr.children[3].textContent = exploit.cve;
+    const run = document.createElement("button");
+    run.className = "small";
+    run.textContent = "Run";
+    run.onclick = () => runExploit(exploit.key);
+    tr.children[4].appendChild(run);
+    rows.appendChild(tr);
+  });
+}
+
+async function runExploit(key) {
+  const serial = deviceCache[0]?.serial || "";
+  const params = serial ? { serial } : {};
+  show($("exploitOutput"), "running " + key + "…");
+  try { show($("exploitOutput"), await api("/api/exploits/run", { method: "POST", body: JSON.stringify({ key, params }) })); }
+  catch (error) { show($("exploitOutput"), "error: " + error.message); }
+}
+
+async function loadCollection() {
+  const data = await api("/api/post-exploitation");
+  const wrap = $("collectionButtons");
+  wrap.innerHTML = "";
+  data.steps.filter(step => step.key !== "menu").forEach(step => {
+    const button = document.createElement("button");
+    button.className = "ghost small";
+    button.textContent = step.key;
+    button.title = step.description;
+    button.onclick = async () => {
+      show($("collectionOutput"), "running " + step.key + "…");
+      try { show($("collectionOutput"), await api("/api/post-exploitation/" + step.key, { method: "POST" })); }
+      catch (error) { show($("collectionOutput"), "error: " + error.message); }
+    };
+    wrap.appendChild(button);
+  });
+}
+
+async function loadParity() {
+  const data = await api("/api/nso/capabilities");
+  $("parityPill").textContent = data.parity.coverage_percent + "% coverage";
+  $("parityPill").className = "pill " + (data.parity.coverage_percent === 100 ? "ok" : "bad");
+  const rows = $("parityRows");
+  rows.innerHTML = "";
+  data.capabilities.forEach(cap => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td></td><td></td><td></td><td class="mono"></td><td></td>`;
+    tr.children[0].textContent = cap.name;
+    tr.children[0].title = cap.description;
+    tr.children[1].textContent = cap.category;
+    tr.children[2].textContent = cap.parity;
+    tr.children[3].textContent = cap.target;
+    tr.children[4].textContent = cap.resolve.available ? "available" : "missing";
+    tr.children[4].className = cap.resolve.available ? "mono" : "mono";
+    tr.children[4].style.color = cap.resolve.available ? "var(--ok)" : "var(--bad)";
+    rows.appendChild(tr);
+  });
+}
+
+document.querySelectorAll(".tabs button").forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll(".tabs button").forEach(other => other.setAttribute("aria-selected", other === tab));
+    document.querySelectorAll(".tabpanel").forEach(panel => panel.hidden = panel.id !== "panel-" + tab.dataset.tab);
+    if (tab.dataset.tab === "exploits") loadExploits();
+    if (tab.dataset.tab === "collection") loadCollection();
+    if (tab.dataset.tab === "parity") loadParity();
+  };
+});
+
+$("refreshBtn").onclick = refresh;
+$("shotBtn").onclick = () => $("shotSerial").value && capture($("shotSerial").value);
+$("familyFilter").onchange = loadExploits;
+$("plBtn").onclick = async () => {
+  show($("plOut"), "generating…");
+  try { show($("plOut"), await api("/api/features/payload", { method: "POST", body: JSON.stringify({
+    lhost: $("plLhost").value, port: Number($("plPort").value), count: Number($("plCount").value), campaign: $("plCampaign").value }) })); }
+  catch (error) { show($("plOut"), "error: " + error.message); }
+};
+$("muBtn").onclick = async () => {
+  show($("muOut"), "analysing…");
+  try { show($("muOut"), await api("/api/features/mutation", { method: "POST", body: JSON.stringify({ sample: $("muPath").value }) })); }
+  catch (error) { show($("muOut"), "error: " + error.message); }
+};
+$("stBtn").onclick = async () => {
+  show($("stOutLog"), "embedding…");
+  try { show($("stOutLog"), await api("/api/features/stego", { method: "POST", body: JSON.stringify({ cover: $("stCover").value, url: $("stUrl").value, output: $("stOut").value }) })); }
+  catch (error) { show($("stOutLog"), "error: " + error.message); }
+};
+$("frpBtn").onclick = async () => { try { show($("frpOut"), await api("/api/features/frp")); } catch (error) { show($("frpOut"), "error: " + error.message); } };
+
+refresh();
+setInterval(refresh, 15000);
+</script>
+{% endblock %}

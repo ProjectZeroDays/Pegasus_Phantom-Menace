@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Settings · Pegasus{% endblock %}
+{% block content %}
+<h1>Instance settings</h1>
+<p class="lede">Wallet and pricing are stored in the database and applied immediately.</p>
+<form method="post" class="card" style="max-width:620px">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Operator USDC wallet</label><input name="admin_wallet" value="{{ settings.admin_wallet }}" placeholder="0x…">
+  <label>Payment note shown to users</label><textarea name="payment_note" rows="2">{{ settings.payment_note }}</textarea>
+  <div class="grid" style="margin-top:8px">
+    <div><label>One-time price (USDC)</label><input name="price_one_time" type="number" step="1" value="{{ settings.price_one_time }}"></div>
+    <div><label>Weekly price (USDC)</label><input name="price_weekly" type="number" step="1" value="{{ settings.price_weekly }}"></div>
+    <div><label>Monthly price (USDC)</label><input name="price_monthly" type="number" step="1" value="{{ settings.price_monthly }}"></div>
+  </div>
+  <label>Registration open</label>
+  <select name="registration_open"><option value="1" {{ "selected" if settings.registration_open == "1" }}>yes</option><option value="0" {{ "selected" if settings.registration_open != "1" }}>no</option></select>
+  <div style="margin-top:16px"><button type="submit">Save</button></div>
+</form>
+{% endblock %}

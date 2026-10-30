@@ -11,10 +11,18 @@ __pycache__/
 *.pyc
 __pycache__/
 *.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.db
 .DS_Store
 .vscode/
 .idea/
 cmdline-tools.zip
+
+# Web GUI
+pegasus/ui/web/node_modules/
+pegasus/ui/web/*.tsbuildinfo
 
 # Android / Gradle
 local.properties
@@ -26,3 +34,4 @@ pegasus-mobile/gradle-8.2-bin.zip
 
 # License secret (plaintext — never commit)
 _license_secret.py
+build_web.log

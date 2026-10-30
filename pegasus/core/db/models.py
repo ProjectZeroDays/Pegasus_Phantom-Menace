@@ -440,9 +440,69 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    # --- access control -------------------------------------------------
+    passkey_hash: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    fido2_credential_id: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    fido2_public_key: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    wallet_address: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    approval_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    access_tier: Mapped[str] = mapped_column(String(20), default="none", nullable=False)
+    access_expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_demo: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
     __table_args__ = (
         Index("idx_users_role", "role"),
         Index("idx_users_active", "is_active"),
+        Index("idx_users_approval", "approval_status"),
+    )
+
+
+class AppSetting(Base):
+    """Key/value store for runtime configuration (admin wallet, pricing)."""
+
+    __tablename__ = "app_settings"
+
+    key: Mapped[str] = mapped_column(String(100), primary_key=True)
+    value: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+class Payment(Base):
+    """A USDC subscription payment claim and its verification state."""
+
+    __tablename__ = "payments"
+
+    id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    service_type: Mapped[str] = mapped_column(String(30), nullable=False)
+    amount_usdc: Mapped[float] = mapped_column(Float, nullable=False)
+    wallet_from: Mapped[str] = mapped_column(String(128), nullable=False)
+    wallet_to: Mapped[str] = mapped_column(String(128), nullable=False)
+    tx_ref: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        Index("idx_payments_user_status", "user_id", "status"),
+    )
+
+
+class Notification(Base):
+    """Admin inbox entries (registration requests, payments, system events)."""
+
+    __tablename__ = "notifications"
+
+    id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
+    kind: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    user_id: Mapped[Optional[UUID]] = mapped_column(PG_UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    read_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (
+        Index("idx_notifications_kind_created", "kind", "created_at"),
     )
 
 

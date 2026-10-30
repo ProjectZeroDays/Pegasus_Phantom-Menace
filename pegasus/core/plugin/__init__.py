@@ -301,17 +301,119 @@ class PluginManager:
     
     def discover_plugins(self, plugin_dirs: List[Path]) -> List[str]:
         """Discover available plugins in the given directories (recursive)."""
-        plugins = []
+        plugins: List[str] = []
+        seen = set()
         for plugin_dir in self.context.settings.plugins.plugin_dirs:
             if not plugin_dir.exists():
                 continue
             for item in plugin_dir.rglob("*"):
+                candidate = None
                 if item.is_dir() and (item / "plugin.py").exists():
-                    plugins.append(str(item / "plugin.py"))
-                elif item.suffix == ".py" and item.name != "__init__.py" and item.name == "plugin.py":
-                    plugins.append(str(item))
+                    candidate = item / "plugin.py"
+                elif item.suffix == ".py" and item.name == "plugin.py":
+                    candidate = item
+                if candidate is None:
+                    continue
+                resolved = str(candidate.resolve())
+                if resolved in seen:
+                    continue
+                seen.add(resolved)
+                plugins.append(resolved)
         return plugins
     
+    def _apply_metadata(self, plugin: Plugin, metadata: PluginMetadata) -> None:
+        """Attach module-level metadata to a plugin instance and its class."""
+        try:
+            plugin.metadata = metadata
+        except Exception:
+            pass
+        plugin_class = plugin.__class__
+        if getattr(plugin_class, "metadata", None) is None:
+            try:
+                plugin_class.metadata = metadata
+            except Exception:
+                pass
+
+    def _bind_metadata(self, module, factory, metadata: PluginMetadata) -> None:
+        """Bind module-level metadata onto the plugin class the factory returns.
+
+        Module layout is `plugin.py` (metadata + factory) importing the real
+        class from `module.py`, so the class object lives in another module and
+        has no `metadata` of its own. Resolve the factory's return annotation /
+        closure cell to find it, then set `Class.metadata`.
+        """
+        candidates = []
+
+        # 1. Factory return annotation: `def create_plugin(context) -> Foo:`
+        try:
+            hints = getattr(factory, "__annotations__", {}) or {}
+            hint = hints.get("return")
+            if isinstance(hint, type) and issubclass(hint, Plugin):
+                candidates.append(hint)
+            elif isinstance(hint, str):
+                resolved = getattr(module, hint, None)
+                if isinstance(resolved, type) and issubclass(resolved, Plugin):
+                    candidates.append(resolved)
+        except Exception:
+            pass
+
+        # 2. Factory globals (module namespace of the defining module)
+        for value in (getattr(factory, "__globals__", {}) or {}).values():
+            if (
+                isinstance(value, type)
+                and issubclass(value, Plugin)
+                and value is not Plugin
+                and value not in candidates
+            ):
+                candidates.append(value)
+
+        # 3. Closure cells
+        try:
+            for cell in getattr(factory, "__closure__", None) or ():
+                value = cell.cell_contents
+                if (
+                    isinstance(value, type)
+                    and issubclass(value, Plugin)
+                    and value is not Plugin
+                    and value not in candidates
+                ):
+                    candidates.append(value)
+        except Exception:
+            pass
+
+        for cls in candidates:
+            if getattr(cls, "metadata", None) is None:
+                try:
+                    cls.metadata = metadata
+                except Exception:
+                    pass
+
+    @staticmethod
+    def _run_async(coro) -> Any:
+        """Run a coroutine from synchronous (possibly already-running) context."""
+        import asyncio
+
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            if loop.is_closed():
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            return loop.run_until_complete(coro)
+
+        # Called from inside a running loop (e.g. the web server thread):
+        # execute in a private loop on this thread.
+        loop = asyncio.new_event_loop()
+        try:
+            return loop.run_until_complete(coro)
+        finally:
+            loop.close()
+
     def load_plugin(self, plugin_path: str) -> Optional[Plugin]:
         """Load a plugin from a Python file."""
         try:
@@ -319,17 +421,93 @@ class PluginManager:
             spec = importlib.util.spec_from_file_location("plugin_module", plugin_path)
             if spec is None or spec.loader is None:
                 return None
-            
+
             module = importlib.util.module_from_spec(spec)
             sys.modules["plugin_module"] = module
             spec.loader.exec_module(module)
-            
-            # Find plugin class
+
+            # Resolve metadata + factory declared at module level (the documented
+            # plugin contract). Fall back to class discovery for legacy plugins.
+            module_metadata = getattr(module, "metadata", None)
+            if isinstance(module_metadata, PluginMetadata):
+                if module_metadata.name in self.context.plugins:
+                    self.context.logger.warning(
+                        f"Plugin {module_metadata.name} already loaded"
+                    )
+                    return self.context.plugins[module_metadata.name]
+
+                factory = getattr(module, "create_plugin", None) or getattr(
+                    module, "main", None
+                )
+                if callable(factory):
+                    # Bind metadata to plugin classes declared in this module or in
+                    # the module that defines the factory's target class: module
+                    # classes read self.metadata during __init__ (logger naming).
+                    self._bind_metadata(module, factory, module_metadata)
+
+                    plugin = factory(self.context)
+                    if not isinstance(plugin, Plugin):
+                        self.context.logger.error(
+                            f"Factory in {plugin_path} did not return a Plugin"
+                        )
+                        return None
+                    if getattr(plugin.__class__, "metadata", None) is None:
+                        plugin.__class__.metadata = module_metadata
+                    if getattr(plugin, "metadata", None) is None:
+                        plugin.metadata = module_metadata
+                    self._apply_metadata(plugin, module_metadata)
+
+                    for dep in module_metadata.requires:
+                        try:
+                            importlib.import_module(dep)
+                        except ImportError:
+                            self.context.logger.error(
+                                f"Plugin {module_metadata.name} missing dependency: {dep}"
+                            )
+                            return None
+
+                    for conflict in module_metadata.conflicts:
+                        if conflict in self.context.plugins:
+                            self.context.logger.error(
+                                f"Plugin {module_metadata.name} conflicts with {conflict}"
+                            )
+                            return None
+
+                    success = self._run_async(plugin.initialize())
+                    if not success:
+                        self.context.logger.error(
+                            f"Plugin {module_metadata.name} initialization failed"
+                        )
+                        return None
+
+                    self.context.register_plugin(plugin)
+                    self._loaded_modules[module_metadata.name] = module
+                    self._plugin_classes[module_metadata.name] = plugin.__class__
+                    self.context.logger.info(
+                        f"Loaded plugin: {module_metadata.name} v{module_metadata.version}"
+                    )
+                    return plugin
+
+            # Find plugin class, preferring classes defined in this module.
             plugin_class = None
-            for name, obj in inspect.getmembers(module):
-                if inspect.isclass(obj) and issubclass(obj, Plugin) and obj is not Plugin:
+            for _, obj in inspect.getmembers(module):
+                if (
+                    inspect.isclass(obj)
+                    and issubclass(obj, Plugin)
+                    and obj is not Plugin
+                    and obj.__module__ == module.__name__
+                ):
                     plugin_class = obj
                     break
+            if plugin_class is None:
+                for name, obj in inspect.getmembers(module):
+                    if inspect.isclass(obj) and issubclass(obj, Plugin) and obj is not Plugin:
+                        plugin_class = obj
+                        break
+
+            if plugin_class is not None and isinstance(module_metadata, PluginMetadata):
+                if getattr(plugin_class, "metadata", None) is None:
+                    plugin_class.metadata = module_metadata
             
             if plugin_class is None:
                 self.context.logger.warning(f"No Plugin class found in {plugin_path}")
@@ -359,14 +537,7 @@ class PluginManager:
             plugin = plugin_class(self.context)
             
             # Initialize
-            import asyncio
-            try:
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-            
-            success = loop.run_until_complete(plugin.initialize())
+            success = self._run_async(plugin.initialize())
             if not success:
                 self.context.logger.error(f"Plugin {metadata.name} initialization failed")
                 return None
@@ -384,16 +555,99 @@ class PluginManager:
             return None
     
     def load_all_plugins(self, plugin_dirs: Optional[List[Path]] = None) -> List[Plugin]:
-        """Load all plugins from the given directories."""
+        """Load all plugins from the given directories.
+
+        Falls back to importing built-in modules directly when file discovery
+        yields nothing — the case in a PyInstaller bundle, where ``plugin.py``
+        sources exist only inside the archive.
+        """
         dirs = plugin_dirs or self.context.settings.plugins.plugin_dirs
         plugins = []
-        
+
         for plugin_path in self.discover_plugins(dirs):
             plugin = self.load_plugin(plugin_path)
             if plugin:
                 plugins.append(plugin)
-        
+
+        if not plugins:
+            plugins = self.load_builtin_plugins()
+
         return plugins
+
+    #: Built-in module plugins, in load order.
+    BUILTIN_MODULES: tuple[str, ...] = (
+        "device",
+        "payload",
+        "session",
+        "reporting",
+        "analysis",
+        "exploit",
+        "forensics",
+        "intelligence",
+        "network",
+        "ai",
+        "passgen",
+        "brutdroid",
+        "access_workflow",
+        "access_workflow.post_exploitation",
+    )
+
+    def load_builtin_plugins(self) -> List[Plugin]:
+        """Import built-in module plugins without touching the filesystem."""
+        loaded: List[Plugin] = []
+        for dotted in self.BUILTIN_MODULES:
+            module_name = f"pegasus.modules.{dotted}.plugin"
+            try:
+                module = importlib.import_module(module_name)
+            except Exception as exc:  # noqa: BLE001
+                self.context.logger.error(f"Cannot import {module_name}: {exc}")
+                continue
+
+            metadata = getattr(module, "metadata", None)
+            if not isinstance(metadata, PluginMetadata):
+                self.context.logger.error(f"{module_name} has no module metadata")
+                continue
+            if metadata.name in self.context.plugins:
+                continue
+
+            factory = getattr(module, "create_plugin", None) or getattr(module, "main", None)
+            if not callable(factory):
+                self.context.logger.error(f"{module_name} has no factory")
+                continue
+
+            self._bind_metadata(module, factory, metadata)
+            try:
+                plugin = factory(self.context)
+            except Exception as exc:  # noqa: BLE001
+                self.context.logger.error(f"{metadata.name} instantiation failed: {exc}")
+                continue
+            if not isinstance(plugin, Plugin):
+                continue
+            self._apply_metadata(plugin, metadata)
+
+            missing = []
+            for dep in metadata.requires:
+                try:
+                    importlib.import_module(dep)
+                except ImportError:
+                    missing.append(dep)
+            if missing:
+                self.context.logger.error(
+                    f"Plugin {metadata.name} missing dependencies: {', '.join(missing)}"
+                )
+                continue
+
+            if not self._run_async(plugin.initialize()):
+                self.context.logger.error(f"Plugin {metadata.name} initialization failed")
+                continue
+
+            self.context.register_plugin(plugin)
+            self._plugin_classes[metadata.name] = plugin.__class__
+            self.context.logger.info(
+                f"Loaded builtin plugin: {metadata.name} v{metadata.version}"
+            )
+            loaded.append(plugin)
+        return loaded
     
     def unload_plugin(self, name: str) -> bool:
         """Unload a plugin by name."""
@@ -403,14 +657,7 @@ class PluginManager:
         plugin = self.context.plugins[name]
         
         # Shutdown
-        import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-        
-        success = loop.run_until_complete(plugin.shutdown())
+        success = self._run_async(plugin.shutdown())
         
         # Remove from context
         for cmd_name in list(self.context.commands.keys()):
@@ -479,15 +726,8 @@ class PluginManager:
         
         # Instantiate and initialize
         plugin = plugin_class(self.context)
-        
-        import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-        
-        success = loop.run_until_complete(plugin.initialize())
+
+        success = self._run_async(plugin.initialize())
         if not success:
             self.context.logger.error(f"Plugin {metadata.name} initialization failed")
             return None

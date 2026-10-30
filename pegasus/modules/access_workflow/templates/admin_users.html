@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Users · Pegasus{% endblock %}
+{% block content %}
+<h1>Users</h1>
+<p class="lede">Every account, approval state, tier and expiry.</p>
+<div class="card">
+  <table><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Approval</th><th>Tier</th><th>Expires</th><th>Active</th></tr></thead><tbody>
+  {% for item in users %}
+  <tr><td>{{ item.username }}{% if item.is_demo %} <span class="pill">demo</span>{% endif %}</td><td class="mono">{{ item.email }}</td><td>{{ item.role }}</td><td>{{ item.approval_status }}</td><td>{{ item.access_tier }}</td><td class="muted">{{ item.access_expires_at.strftime("%Y-%m-%d") if item.access_expires_at else "—" }}</td><td>{{ "yes" if item.is_active else "no" }}</td></tr>
+  {% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}
