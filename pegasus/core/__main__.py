@@ -425,6 +425,18 @@ def slash_zeroclick_sweep(family: Optional[str]) -> None:
     asyncio.run(scm.execute("zeroclick-sweep", [family] if family else []))
 
 
+@slash.command("post-exploit")
+@click.argument("action", default="list")
+@click.argument("step", required=False)
+def slash_post_exploit(action: str, step: Optional[str]) -> None:
+    """Post-exploitation workflows: list, run <step>, chain."""
+    scm = _get_scm()
+    import asyncio
+
+    argv = [step] if step else []
+    asyncio.run(scm.execute(f"postexploit-{action}", argv))
+
+
 @slash.command("slash-help")
 def slash_help() -> None:
     """Show all available slash commands."""

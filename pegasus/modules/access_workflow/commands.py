@@ -101,7 +101,12 @@ async def cmd_zeroclick_sweep(*args: str) -> List[Dict[str, Any]]:
 
 
 def register(scm: Any) -> None:
-    """Register zero-click commands on a slash-command manager."""
+    """Register workflow commands on a slash-command manager."""
+    _register_zero_click(scm)
+    _register_post_exploitation(scm)
+
+
+def _register_zero_click(scm: Any) -> None:
     if _free(scm, "/zeroclick-list"):
         scm.register(
             "/zeroclick-list",
@@ -125,4 +130,79 @@ def register(scm: Any) -> None:
             cmd_zeroclick_sweep,
             category="exploit",
             examples=["/zeroclick-sweep pixel8"],
+        )
+
+
+# ---------------------------------------------------------------------------
+# Post-exploitation
+# ---------------------------------------------------------------------------
+
+
+async def cmd_postexploit_list(*args: str) -> List[Dict[str, Any]]:
+    """List the post-exploitation chain in execution order."""
+    from pegasus.modules.access_workflow.post_exploitation import registry
+
+    steps = registry.list_commands()
+    table = Table(title="Post-Exploitation Steps")
+    table.add_column("#", style="cyan", no_wrap=True)
+    table.add_column("Step", style="bold")
+    table.add_column("Description", overflow="fold")
+    for step in steps:
+        table.add_row(str(step["position"] or "-"), step["key"], step["description"])
+    console.print(table)
+    return steps
+
+
+async def cmd_postexploit_run(*args: str) -> Dict[str, Any]:
+    """Run one post-exploitation step."""
+    from pegasus.modules.access_workflow.post_exploitation import registry
+
+    if not args:
+        console.print("[red]Usage: /postexploit-run <step>[/red]")
+        return {}
+    try:
+        result = await registry.run(args[0])
+    except Exception as exc:
+        console.print(f"[red]Step failed:[/] {exc}")
+        return {"step": args[0], "status": "error", "error": str(exc)}
+    console.print_json(data=result)
+    return result
+
+
+async def cmd_postexploit_chain(*args: str) -> List[Dict[str, Any]]:
+    """Run the whole post-exploitation chain."""
+    from pegasus.modules.access_workflow.post_exploitation import registry
+
+    console.print("[cyan]Running full post-exploitation chain...[/cyan]")
+    results = await registry.run_chain()
+    failed = [item for item in results if item.get("status") == "error"]
+    if failed:
+        console.print(f"[red]Chain stopped at:[/] {failed[0]['step']}")
+    else:
+        console.print(f"[green]Chain completed:[/] {len(results)} steps")
+    return results
+
+
+def _register_post_exploitation(scm: Any) -> None:
+    if _free(scm, "/postexploit-list"):
+        scm.register(
+            "/postexploit-list",
+            "List post-exploitation steps",
+            cmd_postexploit_list,
+            category="exploit",
+        )
+    if _free(scm, "/postexploit-run"):
+        scm.register(
+            "/postexploit-run",
+            "Run one post-exploitation step",
+            cmd_postexploit_run,
+            category="exploit",
+            examples=["/postexploit-run fingerprint"],
+        )
+    if _free(scm, "/postexploit-chain"):
+        scm.register(
+            "/postexploit-chain",
+            "Run the full post-exploitation chain",
+            cmd_postexploit_chain,
+            category="exploit",
         )
