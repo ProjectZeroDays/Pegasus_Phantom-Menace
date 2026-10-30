@@ -34,11 +34,11 @@ Unicode true
 BrandingText "${APP_PUBLISHER}"
 
 !define MUI_ABORTWARNING
-!define MUI_ICON "..\..\..\pegasus.ico"
-!define MUI_UNICON "..\..\..\pegasus.ico"
+!define MUI_ICON "..\..\..\..\pegasus.ico"
+!define MUI_UNICON "..\..\..\..\pegasus.ico"
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "..\..\..\LICENSE"
+!insertmacro MUI_PAGE_LICENSE "..\..\..\..\LICENSE"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -81,9 +81,9 @@ Function .onInit
 FunctionEnd
 
 Function .onSelChange
-  ${If} ${SectionIsSelected} ${SEC_SERVICE}
-  ${AndIf} ${SectionIsSelected} ${SEC_TASK}
-    SectionSetFlags ${SEC_TASK} 0
+  ${If} ${SectionIsSelected} 2
+  ${AndIf} ${SectionIsSelected} 3
+    SectionSetFlags 3 0
   ${EndIf}
 FunctionEnd
 
@@ -92,11 +92,11 @@ Section "Application files" SEC_CORE
   SetOutPath "$INSTDIR"
   SetOverwrite on
 
-  File /r "..\..\..\pegasus"
-  File "..\..\..\run_pegasus.bat"
-  File "..\..\..\requirements.txt"
-  File "..\..\..\version.txt"
-  File "..\..\..\LICENSE"
+  File /r /x node_modules /x __pycache__ /x .pytest_cache /x build /x dist "..\..\..\..\pegasus"
+  File "..\..\..\..\run_pegasus.bat"
+  File "..\..\..\..\requirements.txt"
+  File "..\..\..\..\version.txt"
+  File "..\..\..\..\LICENSE"
   File "..\daemon\install.ps1"
   File "..\daemon\uninstall.ps1"
 
@@ -138,7 +138,7 @@ Section "Application files" SEC_CORE
   WriteRegDWORD HKLM "${APP_REGKEY}" "NoModify" 1
   WriteRegDWORD HKLM "${APP_REGKEY}" "NoRepair" 1
 
-  ${If} ${SectionIsSelected} ${SEC_PATH}
+  ${If} ${SectionIsSelected} 4
     nsExec::ExecToLog 'powershell -NoProfile -Command "$$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\"); if ($$p -notlike \"*$INSTDIR\launchers*\") { [Environment]::SetEnvironmentVariable(\"Path\", $$p + \";$INSTDIR\launchers\", \"Machine\") }"'
     Pop $0
   ${EndIf}
@@ -179,10 +179,10 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\${APP_NAME}\Uninstall.lnk"
   RMDir "$SMPROGRAMS\${APP_NAME}"
 
-  EnVar::SetHKLM
-  EnVar::DeleteValue "Path" "$INSTDIR\launchers"
+  nsExec::ExecToLog 'powershell -NoProfile -Command "$$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\"); if ($$p -like \"*$INSTDIR\launchers*\") { [Environment]::SetEnvironmentVariable(\"Path\", ($$p -replace [regex]::Escape(\";$INSTDIR\launchers\"), \"\"), \"Machine\") }"'
 
-  RMDir /r "$INSTDIR\pegasus"  RMDir /r "$INSTDIR\.venv"
+  RMDir /r "$INSTDIR\pegasus"
+  RMDir /r "$INSTDIR\.venv"
   RMDir /r "$INSTDIR\launchers"
   Delete "$INSTDIR\requirements.txt"
   Delete "$INSTDIR\version.txt"

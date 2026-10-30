@@ -32,11 +32,17 @@ class StreamCapture:
         self._old_stderr = None
         self._active = False
         self._rich_restore: list[tuple[Any, bool]] = []
+        self._old_columns: Optional[str] = None
 
     # -- context manager -------------------------------------------------
     def __enter__(self) -> "StreamCapture":
         self._active = True
         self._disable_legacy_windows()
+        # Module consoles are created at import time with a default width; Rich
+        # honours COLUMNS for every console it renders, so tables are not
+        # truncated (e.g. CVE identifiers) in captured output.
+        self._old_columns = os.environ.get("COLUMNS")
+        os.environ["COLUMNS"] = "180"
         sys.stdout.flush()
         sys.stderr.flush()
         self._old_stdout, self._old_stderr = sys.stdout, sys.stderr
@@ -119,6 +125,10 @@ class StreamCapture:
             except Exception:
                 pass
         self._rich_restore.clear()
+        if self._old_columns is None:
+            os.environ.pop("COLUMNS", None)
+        else:
+            os.environ["COLUMNS"] = self._old_columns
         self._active = False
         return False
 
@@ -138,7 +148,7 @@ class StreamCapture:
             force_terminal=False,
             color_system=None,
             legacy_windows=False,
-            width=kwargs.pop("width", 110),
+            width=kwargs.pop("width", 180),
             highlight=False,
             markup=True,
             **kwargs,

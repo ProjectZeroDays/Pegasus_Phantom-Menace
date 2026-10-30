@@ -192,6 +192,21 @@ def test_console_markup_is_preserved_not_stripped_into_mojibake():
     assert "\ufffd" not in output
 
 
+def test_capture_width_prevents_table_truncation():
+    """Regression: default width truncated CVE ids (`CVE-2024-31.`)."""
+    from rich.table import Table
+
+    with StreamCapture() as capture:
+        table = Table()
+        table.add_column("CVE ID")
+        table.add_column("Description")
+        table.add_row("CVE-2024-31317", "ZygoteProcess command injection")
+        capture.console().print(table)
+    output = capture.getvalue()
+    assert "CVE-2024-31317" in output
+    assert "CVE-2024-31." not in output
+
+
 # ---------------------------------------------------------------------------
 # Telemetry store
 # ---------------------------------------------------------------------------
