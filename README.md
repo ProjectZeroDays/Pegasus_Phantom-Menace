@@ -11,6 +11,7 @@
 11| [![HTML](https://img.shields.io/badge/HTML-3.1%25-E34F26?logo=html5&logoColor=white)](https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace)
 12| [![CSS](https://img.shields.io/badge/CSS-1.4%25-1572B6?logo=css3&logoColor=white)](https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace)
 13| [![Repository](https://img.shields.io/badge/Repository-ProjectZeroDays%2FPegasus__Phantom--Menace-181717?logo=github)](https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace)
+![Windows](https://img.shields.io/badge/Windows-0078D6?logo=windows) ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple) ![Android](https://img.shields.io/badge/Android-3DDC84?logo=android) ![iOS](https://img.shields.io/badge/iOS-000000?logo=apple) ![Kali](https://img.shields.io/badge/Kali-557C94?logo=linux) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?logo=ubuntu)
 14| 
 15| **Android Device Management & Security Audit Tool — v1.4**
 16| 
