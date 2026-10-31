@@ -289,7 +289,32 @@ class SlashCommandHandlers:
 
     async def cmd_btscan(self, *args) -> None:
         """Bluetooth proximity scanning."""
+        import sys
+
         self.console.print("[cyan]> Bluetooth scanning...[/cyan]")
+        if sys.platform == "win32":
+            # Windows: enumerate BT radios/devices via PowerShell (no bluez here)
+            ps = (
+                "Get-PnpDevice -Class Bluetooth -ErrorAction SilentlyContinue "
+                "| Select-Object -ExpandProperty FriendlyName"
+            )
+            proc = await asyncio.create_subprocess_exec(
+                "powershell", "-NoProfile", "-Command", ps,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            try:
+                stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=20)
+            except asyncio.TimeoutError:
+                proc.kill()
+                self.print_warning("Bluetooth scan timed out")
+                return
+            if proc.returncode == 0 and stdout and stdout.strip():
+                self.console.print(stdout.decode(errors="replace"))
+                self._save_scan_result("btscan", "bluetooth", stdout.decode(errors="replace"))
+            else:
+                self.print_warning("No Bluetooth devices found (radio off or none paired)")
+            return
         if not shutil.which("hcitool") and not shutil.which("bluetoothctl"):
             self.print_error("Bluetooth tools not installed. Install bluez/bluez-utils.")
             return
@@ -312,7 +337,28 @@ class SlashCommandHandlers:
 
     async def cmd_wifiscan(self, *args) -> None:
         """WiFi beacon scanning."""
+        import sys
+
         self.console.print("[cyan]> WiFi beacon scanning...[/cyan]")
+        if sys.platform == "win32":
+            # Windows: netsh wlan show networks
+            proc = await asyncio.create_subprocess_exec(
+                "netsh", "wlan", "show", "networks", "mode=bssid",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            try:
+                stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=20)
+            except asyncio.TimeoutError:
+                proc.kill()
+                self.print_warning("WiFi scan timed out")
+                return
+            if proc.returncode == 0 and stdout:
+                self.console.print(stdout.decode(errors="replace")[:5000])
+                self._save_scan_result("wifiscan", "wifi", stdout.decode(errors="replace"))
+            else:
+                self.print_warning("WiFi scan failed (interface disabled?)")
+            return
         if not shutil.which("iwlist") and not shutil.which("nmcli"):
             self.print_error("WiFi scanning tools not installed.")
             return
@@ -626,6 +672,103 @@ class SlashCommandHandlers:
         frequency = self.prompt("How often should this run?", choices=["hourly", "daily", "weekly", "manual"], default="hourly")
         self.console.print(f"[green]Improvement cycle set to: {frequency}[/green]")
         await self._run_improvement_cycle()
+
+    async def cmd_persistent(self, *args) -> None:
+        """Toggle persistent execution - keep the workflow alive after disconnect."""
+        state = self.toggle("/persistent")
+        if state == SlashCommandStatus.ON:
+            self.console.print("[green]Persistent mode: ON — workflows continue after disconnect.[/green]")
+        else:
+            self.console.print("[yellow]Persistent mode: OFF.[/yellow]")
+
+    async def cmd_goal(self, *args) -> None:
+        """Set or show the current operating goal."""
+        goal_file = self.logs_dir.parent / "goal.txt"
+        if args and args[0]:
+            goal = " ".join(args)
+            goal_file.write_text(goal, encoding="utf-8")
+            self.console.print(f"[green]Goal set: {goal}[/green]")
+        elif goal_file.exists():
+            self.console.print(f"[cyan]Current goal: {goal_file.read_text(encoding='utf-8').strip()}[/cyan]")
+        else:
+            goal = self.prompt("What is the operating goal?")
+            goal_file.write_text(goal, encoding="utf-8")
+            self.console.print(f"[green]Goal set: {goal}[/green]")
+
+    async def cmd_auto(self, *args) -> None:
+        """Toggle full autonomous mode — every decision made without asking."""
+        state = self.toggle("/auto")
+        if state == SlashCommandStatus.ON:
+            self.toggle_states["/never-ask"] = SlashCommandStatus.ON
+            self.toggle_states["/persistent"] = SlashCommandStatus.ON
+            self.console.print("[green]Auto mode: ON — autonomous decisions, no confirmations, persistent.[/green]")
+        else:
+            self.toggle_states["/never-ask"] = SlashCommandStatus.OFF
+            self.console.print("[yellow]Auto mode: OFF — confirmations restored.[/yellow]")
+
+    async def cmd_finish(self, *args) -> None:
+        """Complete the current task and report."""
+        summary_path = self.logs_dir / "task_summary.txt"
+        if summary_path.exists():
+            self.console.print("[cyan]Last task summary:[/cyan]")
+            self.console.print(summary_path.read_text(encoding="utf-8"))
+        self.console.print("[green]Task marked finished.[/green]")
+
+    async def cmd_never_ask(self, *args) -> None:
+        """Answer yes to every confirmation automatically."""
+        state = self.toggle("/never-ask")
+        if state == SlashCommandStatus.ON:
+            self.console.print("[green]Never-ask: ON — all confirmations auto-yes.[/green]")
+        else:
+            self.console.print("[yellow]Never-ask: OFF.[/yellow]")
+
+    async def cmd_your_turn(self, *args) -> None:
+        """Yield control to the agent until it needs input."""
+        self.console.print("[cyan]Agent has the floor. Interrupt with any command.[/cyan]")
+        self.toggle_states["/auto"] = SlashCommandStatus.ON
+        self.console.print("[green]Autonomy engaged — run /auto to take back control.[/green]")
+
+    async def cmd_debug(self, *args) -> None:
+        """Attach diagnostics to the current task."""
+        self.console.print("[cyan]> Collecting diagnostics…[/cyan]")
+        sections = []
+        sections.append(f"platform: {platform.system()} {platform.release()}")
+        sections.append(f"python: {sys.version.split()[0]}")
+        sections.append(f"cwd: {os.getcwd()}")
+        sections.append("tools: " + ", ".join(
+            f"{t}={'yes' if shutil.which(t) else 'no'}" for t in ("adb", "fastboot", "nmap", "frida")
+        ))
+        try:
+            import subprocess as _sp
+            devices = _sp.run(["adb", "devices"], capture_output=True, text=True, timeout=10)
+            sections.append("adb devices:\n" + (devices.stdout or "").strip())
+        except Exception:
+            sections.append("adb devices: unavailable")
+        report = "\n".join(sections)
+        out = self.logs_dir / "diagnostics.txt"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(report, encoding="utf-8")
+        self.console.print(report)
+        self.print_success(f"Diagnostics written to {out}")
+
+    async def cmd_push(self, *args) -> None:
+        """Push commits to the remote and report status."""
+        import subprocess as _sp
+        self.console.print("[cyan]> git push…[/cyan]")
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                "git", "push",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await proc.communicate()
+            if proc.returncode == 0:
+                self.print_success("Pushed to remote")
+            else:
+                self.print_warning(f"push failed: {(stderr or b'').decode(errors='replace')[:300]}")
+        except FileNotFoundError:
+            self.print_error("git not installed")
+
 
     # ── Logging Commands ─────────────────────────────────────────────
 
@@ -1173,6 +1316,19 @@ class SlashCommandManager:
         # Documentation and improvement
         self.register("/docs", "Update all documentation including GitHub Wiki", self.handlers.cmd_docs, category="docs")
         self.register("/improve", "Continuous improvement and refactoring", self.handlers.cmd_improve, category="docs")
+
+        # Autonomy & workflow control
+        self.register("/god", "Alias for /god-mode", self.handlers.cmd_god_mode, category="system")
+        self.register("/persistent", "Toggle persistent execution - keep running after disconnect", self.handlers.cmd_persistent, category="system")
+        self.register("/goal", "Set or show the current operating goal", self.handlers.cmd_goal, category="system")
+        self.register("/auto", "Toggle full autonomous mode", self.handlers.cmd_auto, category="system")
+        self.register("/finish", "Complete the current task and report", self.handlers.cmd_finish, category="system")
+        self.register("/never-ask", "Stop asking for confirmation - answer yes automatically", self.handlers.cmd_never_ask, category="system")
+        self.register("/your-turn", "Yield control to the agent until it needs input", self.handlers.cmd_your_turn, category="system")
+
+        # Debugging & delivery
+        self.register("/debug", "Attach diagnostics to the current task", self.handlers.cmd_debug, category="debug")
+        self.register("/push", "Push commits to the remote and report status", self.handlers.cmd_push, category="system")
 
     def register(self, name: str, description: str, handler: Callable, **kwargs) -> None:
         """Register a slash command."""

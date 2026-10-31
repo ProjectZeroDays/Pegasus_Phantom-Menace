@@ -85,7 +85,7 @@ export default function Locations() {
         ) : loading && !data ? (
           <div style={{ padding: 16 }}><Loading label="Reading location provider…" /></div>
         ) : error ? (
-          <Empty title="Location unavailable" detail={error} />
+          <Empty title="Location unavailable" detail={error instanceof Error ? error.message : String(error)} />
         ) : rows.length === 0 ? (
           <Empty icon={<MapPin size={16} />} title="No location samples" detail="Pull from device to populate the buffer." action={<Button size="sm" variant="primary" onClick={() => void doCollect()}>Collect now</Button>} />
         ) : (

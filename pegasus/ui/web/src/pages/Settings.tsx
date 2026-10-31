@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Copy, Cpu, FolderTree, KeyRound, RefreshCw, Server, Settings as SettingsIcon } from "lucide-react";
 import { useApp } from "@/state/AppContext";
 import { api, useApi } from "@/lib/api";
@@ -22,6 +22,77 @@ export default function Settings() {
   const [copied, setCopied] = useState<string | null>(null);
   const health = useApi<HealthInfo>("/health", { interval: 15000 });
   const tools = useApi<{ tools: ToolStatus[] }>("/system/tools", { interval: 45000 });
+
+  const [provider, setProvider] = useState("openrouter");
+  const [model, setModel] = useState("claude-sonnet-4-6");
+  const [downloading, setDownloading] = useState(false);
+  const [mimicodeEnabled, setMimicodeEnabled] = useState(false);
+
+  const agentAvail = useApi<{ opencode: boolean; mimicode: boolean }>("/agents/available").data;
+  const [agentCfg, setAgentCfg] = useState<{ agent: string | null; provider: string | null; model: string | null; skills: string }>({ agent: null, provider: null, model: null, skills: ".openfable-skills" });
+  useEffect(() => {
+    api.get<{ agent: string | null; provider: string | null; model: string | null; skills: string }>("/agents/config")
+      .then((d) => setAgentCfg({ agent: d.agent, provider: d.provider, model: d.model, skills: d.skills ?? ".openfable-skills" }))
+      .catch(() => undefined);
+  }, []);
+  const saveAgentCfg = () => api.post("/agents/config", agentCfg);
+
+  // Telegram remote control
+  const tg = useApi<{ configured: boolean; running: boolean; bot: string | null; chatId: string | null }>("/telegram/status", { interval: 20000 });
+  const [tgToken, setTgToken] = useState("");
+  const [tgChat, setTgChat] = useState("");
+  const [tgBusy, setTgBusy] = useState(false);
+  const [tgResult, setTgResult] = useState<string | null>(null);
+  const saveTelegram = async () => {
+    setTgBusy(true);
+    setTgResult(null);
+    try {
+      const r = await api.post<{ bot: string; chat_id: string }>("/telegram/setup", { token: tgToken, chatId: tgChat });
+      setTgResult(`connected as @${r.bot} · chat ${r.chat_id}`);
+      setTgToken("");
+      void tg.refresh();
+    } catch (e: any) {
+      setTgResult(`error: ${e?.message ?? "failed"}`);
+    } finally {
+      setTgBusy(false);
+    }
+  };
+  const toggleTelegram = async (action: "start" | "stop") => {
+    setTgBusy(true);
+    try {
+      await api.post(`/telegram/${action}`, {});
+      void tg.refresh();
+    } catch (e: any) {
+      setTgResult(`error: ${e?.message ?? "failed"}`);
+    } finally {
+      setTgBusy(false);
+    }
+  };
+  const sendTelegramPing = async () => {
+    try {
+      await api.post("/telegram/message", { text: "Pegasus test ping — remote control is live." });
+      setTgResult("test message sent");
+    } catch (e: any) {
+      setTgResult(`error: ${e?.message ?? "failed"}`);
+    }
+  };
+
+  const recs = useApi<{ models: { id: string; est_gb: number; fits: boolean; tier: string; files?: string[] }[]; platform: string }>("/models/recommended");
+  const modelsByHW = (recs.data?.models ?? []).map(m => ({
+    label: `${m.id} (${m.est_gb} GB${m.fits ? "" : " — tight"})`,
+    id: m.id, fmt: (m.tier ?? "gguf").toUpperCase(), size: `~${m.est_gb} GB`,
+  }));
+  const installLocal = async () => {
+    setDownloading(true);
+    try {
+      const best = recs.data?.models?.find(m => m.fits) ?? recs.data?.models?.[0];
+      if (!best) return;
+      await api.post("/models/download", { model: best.id, filename: best.files?.[0] ?? "" });
+      await api.post("/models/select", { model: best.id, filename: best.files?.[0] ?? "" });
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const copy = async (value: string) => {
     try {
@@ -47,6 +118,125 @@ export default function Settings() {
         <Stat value={system?.workspace.aiConfigured ? "SET" : "UNSET"} label="AI key" tone={system?.workspace.aiConfigured ? "ok" : "warn"} />
         <Stat value={activeSerial ? "BOUND" : "IDLE"} label="Active device" hint={activeSerial ?? "none"} />
       </div>
+
+      <Panel title="AI Provider & Local Model" actions={<Badge tone="ok">v2.1</Badge>}>
+        <div className="grid-2" style={{ gap: 10 }}>
+          <div className="col">
+            <label className="mono tiny">Provider</label>
+            <select className="mono tiny" value={provider} onChange={e => setProvider(e.target.value)} style={{ padding: 6, width: "100%" }}>
+              <option value="openrouter">OpenRouter (fallback)</option>
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic</option>
+              <option value="local">Local (GGUF / MLX)</option>
+            </select>
+            <label className="mono tiny">Model — best for this device</label>
+            <select className="mono tiny" value={model} onChange={e => setModel(e.target.value)} style={{ padding: 6, width: "100%" }}>
+              {modelsByHW.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+            </select>
+            <label className="mono tiny">Format</label>
+            <div className="mono tiny">GGUF (Windows/Linux/Android) · MLX (mac/iOS)</div>
+          </div>
+          <div className="col">
+            <label className="mono tiny">Download local model</label>
+            <Button size="sm" onClick={() => void installLocal()} disabled={downloading}>
+              {downloading ? "Downloading…" : "Download to workspace"}
+            </Button>
+            <div className="mono tiny" style={{ marginTop: 6, opacity: 0.8 }}>
+              {modelsByHW.find(m => m.id === model)?.fmt} · {modelsByHW.find(m => m.id === model)?.size}
+            </div>
+            <div className="mono tiny" style={{ marginTop: 6, color: "#ff9e00" }}>
+              Set PEGASUS__AI__API_KEY for provider; local runs without network.
+            </div>
+            <div className="mono tiny" style={{ marginTop: 6 }}>
+              <label className="row" style={{ gap: 6, alignItems: "center" }}>
+                <input type="checkbox" checked={mimicodeEnabled} onChange={e => setMimicodeEnabled(e.target.checked)} />
+                Mimicode / OpenFable / OpenCode integration (settings icon → provider config)
+              </label>
+            </div>
+          </div>
+        </div>
+      </Panel>
+
+      <Panel title="Coding agent" id="agents" actions={<Badge tone={(agentAvail as any)?.opencode || (agentAvail as any)?.mimicode ? "ok" : "warn"}>{(agentAvail as any)?.opencode ? "opencode" : (agentAvail as any)?.mimocode ? "mimocode" : "none installed"}</Badge>}>
+        <div className="grid-2" style={{ gap: 10 }}>
+          <div className="col">
+            <label className="mono tiny">Agent receiver</label>
+            <select className="mono tiny" value={agentCfg.agent ?? ""} onChange={e => setAgentCfg({ ...agentCfg, agent: e.target.value })} style={{ padding: 6, width: "100%" }}>
+              <option value="">—</option>
+              <option value="opencode">OpenCode</option>
+              <option value="mimocode">Mimicode (OpenFable jailbreak)</option>
+            </select>
+            <label className="mono tiny">Provider override</label>
+            <select className="mono tiny" value={agentCfg.provider ?? ""} onChange={e => setAgentCfg({ ...agentCfg, provider: e.target.value })} style={{ padding: 6, width: "100%" }}>
+              <option value="">—</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic</option>
+              <option value="venice">Venice</option>
+              <option value="local">Local model</option>
+            </select>
+            <label className="mono tiny">Model override</label>
+            <input className="mono tiny" value={agentCfg.model ?? ""} onChange={e => setAgentCfg({ ...agentCfg, model: e.target.value })} placeholder="claude-sonnet-4-6" style={{ padding: 6, width: "100%" }} />
+          </div>
+          <div className="col">
+            <label className="mono tiny">Skills directory (.openfable-skills)</label>
+            <input className="mono tiny" value={agentCfg.skills ?? ""} onChange={e => setAgentCfg({ ...agentCfg, skills: e.target.value })} placeholder=".openfable-skills" style={{ padding: 6, width: "100%" }} />
+            <Button size="sm" onClick={() => void saveAgentCfg()} style={{ marginTop: 8 }}>Save agent config</Button>
+            <div className="mono tiny" style={{ marginTop: 6, opacity: 0.8 }}>
+              Chat routes through the agent when configured; the NL translator handles everything else.
+            </div>
+          </div>
+        </div>
+      </Panel>
+
+      <Panel
+        title="Telegram remote control"
+        id="telegram"
+        actions={<Badge tone={tg.data?.running ? "ok" : tg.data?.configured ? "warn" : "dim"}>{tg.data?.running ? "running" : tg.data?.configured ? "stopped" : "not set"}</Badge>}
+      >
+        <div className="grid-2" style={{ gap: 10 }}>
+          <div className="col">
+            <label className="mono tiny">Bot token</label>
+            <input
+              type="password"
+              className="mono tiny"
+              style={{ padding: 6, width: "100%", background: "#0d1117", color: "#e6edf3", borderRadius: 6, border: "1px solid rgba(255,255,255,.08)" }}
+              placeholder={tg.data?.configured ? "configured ✓" : "123456:ABC-…"}
+              value={tgToken}
+              onChange={(e) => setTgToken(e.target.value)}
+            />
+            <label className="mono tiny">Chat ID (blank to auto-discover)</label>
+            <input
+              className="mono tiny"
+              style={{ padding: 6, width: "100%", background: "#0d1117", color: "#e6edf3", borderRadius: 6, border: "1px solid rgba(255,255,255,.08)" }}
+              placeholder="message the bot once, then leave blank"
+              value={tgChat}
+              onChange={(e) => setTgChat(e.target.value)}
+            />
+          </div>
+          <div className="col">
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              <Button size="sm" onClick={() => void saveTelegram()} disabled={tgBusy || !tgToken}>
+                {tgBusy ? "…" : "Save & connect"}
+              </Button>
+              {tg.data?.configured && (
+                <>
+                  <Button size="sm" variant={tg.data?.running ? "ghost" : "primary"} onClick={() => void toggleTelegram(tg.data?.running ? "stop" : "start")}>
+                    {tg.data?.running ? "Stop bot" : "Start bot"}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => void sendTelegramPing()}>
+                    Send test
+                  </Button>
+                </>
+              )}
+            </div>
+            {tgResult && <div className="mono tiny" style={{ marginTop: 8, opacity: 0.85, wordBreak: "break-all" }}>{tgResult}</div>}
+            <div className="mono tiny mute" style={{ marginTop: 8 }}>
+              Bot commands: /status /help /shell &lt;cmd&gt; /devices /screenshot — drive the host from anywhere.
+            </div>
+          </div>
+        </div>
+      </Panel>
 
       <div className="grid-2">
         <Panel title="Workspace paths">

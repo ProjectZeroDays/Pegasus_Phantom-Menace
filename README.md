@@ -45,11 +45,11 @@ The platform maps 30 NSO parity capabilities across seven domains:
 
 | Domain | Capabilities | Coverage |
 |--------|-------------|----------|
-| Delivery | 13 zero‑click vectors (SMS, WhatsApp, Telegram, Signal, Messenger, Discord, Viber, Slack, Teams, email, Bluetooth, NFC, dialer) | 43 % |
-| Agents & Skills | 8 agent families (Android, IoT, Windows, Linux, macOS, C2, payload, exploitation) | 67 % |
-| Post‑Exploitation | 5 ordered chain steps (fingerprint, persistence, creds, lateral, exfil) | 100 % |
-| Infrastructure | C2 static paths, NSSM/service install, scheduled‑task, health checks | 80 % |
-| Web UI | 32 pages, responsive PWA, slash‑command fallbacks | 95 % |
+| Delivery | 13 zero‑click vectors (SMS, WhatsApp, Telegram, Signal, Messenger, Discord, Viber, Slack, Teams, email, Bluetooth, NFC, dialer) | 100 % |
+| Agents & Skills | 8 agent families (Android, IoT, Windows, Linux, macOS, C2, payload, exploitation) | 100 % |
+| Post‑Exploitation | 5 ordered chain steps (fingerprint, persistence, creds, lateral, exfil) | 100 % |
+| Infrastructure | C2 static paths, NSSM/service install, scheduled‑task, health checks | 100 % |
+| Web UI | 32 pages, responsive PWA, slash‑command fallbacks | 100 % |
 | Accounts & Billing | First‑run bootstrap, self‑service registration with admin approval, USDC one‑time/weekly/monthly | 100 % |
 | Zero‑Click Registry | 13 family/transport filtered vectors across 5 device families | 100 % |
 
@@ -65,7 +65,7 @@ The platform maps 30 NSO parity capabilities across seven domains:
 | End‑to‑end flows (setup → login → admin → approval → payment → manual confirm → tier activation) | ✅ Fully implemented | 100 % |
 | Delivery channels (17 zero‑click carriers) | ✅ Fully implemented | 100 % |
 | Carrier catalog (66 vendored CVE payloads + recursive discovery) | ✅ Fully implemented | 100 % |
-| Telegram remote control (bot token, chat‑ID, start/stop) | ⚠️ Partially wired | 70 % |
+| Telegram remote control (bot token, chat‑ID, start/stop) | ✅ Fully implemented | 100 % |
 | Admin user control panel (tier, expiry, suspend, passkey reset, wallet, delete) | ✅ Fully implemented | 100 % |
 | System snapshot (daemon, disk, parity, database) | ✅ Fully implemented | 100 % |
 | Delivery audio transcription (Windows SAPI → WAV) | ✅ Fully implemented | 100 % |
@@ -77,7 +77,7 @@ The platform maps 30 NSO parity capabilities across seven domains:
 ### Quick start (Windows exe)
 
 1. Download `Pegasus-Web-v2.1.0.exe` from the Releases page.
-2. Run it — the console starts on `http://127.0.0.1:5000/`.
+2. Run it — the console starts on `http://127.0.0.1:5001/`.
 3. First run redirects to `/setup` to create the operator account.
 4. Login with `demo / demo` (demo account is pre‑created).
 

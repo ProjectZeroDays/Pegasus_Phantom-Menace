@@ -27,7 +27,18 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="pegasus" android:host="pegasus" android:path="/launch" />
+            </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ConnectionActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
     </application>
 

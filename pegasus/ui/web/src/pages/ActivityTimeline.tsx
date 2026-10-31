@@ -49,7 +49,7 @@ export default function ActivityTimeline() {
         <Stat value={appRows.length} label="Tracked packages" tone="info" />
         <Stat value={formatDuration(totalSeconds)} label="Aggregate usage" />
         <Stat value={events.data?.events.length ?? "—"} label="Platform events" />
-        <Stat value={events.data?.events[0] ? timeAgo(events.data.events[0].at * 1000) : "—"} label="Latest event" />
+        <Stat value={events.data?.events[0] ? timeAgo(Number(events.data.events[0].at) * 1000) : "—"} label="Latest event" />
       </div>
 
       {tab === "apps" ? (
@@ -90,7 +90,7 @@ export default function ActivityTimeline() {
                 <tbody>
                   {events.data.events.map((event) => (
                     <tr key={event.id}>
-                      <td className="tiny mono mute">{formatDateTime(event.at * 1000)}</td>
+                      <td className="tiny mono mute">{formatDateTime(Number(event.at) * 1000)}</td>
                       <td><Badge tone={event.level === "warn" ? "warn" : event.level === "error" ? "err" : "dim"}>{titleCase(event.kind)}</Badge></td>
                       <td className="td-strong td-truncate">{event.title}</td>
                       <td className="tiny dim td-truncate" style={{ maxWidth: 420 }}>{event.detail || "—"}</td>

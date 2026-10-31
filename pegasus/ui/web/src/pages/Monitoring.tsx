@@ -8,12 +8,51 @@ import { formatDateTime, formatMs, timeAgo } from "@/lib/format";
 
 export default function Monitoring() {
   const { system } = useApp();
-  const [tab, setTab] = useState<"events" | "jobs" | "tools" | "listeners">("events");
+  const [tab, setTab] = useState<"events" | "jobs" | "tools" | "listeners" | "infra">("events");
+  const [svcBusy, setSvcBusy] = useState(false);
+  const [svcMsg, setSvcMsg] = useState<string | null>(null);
 
   const events = useApi<{ events: EventRow[] }>("/activity?limit=150", { interval: 10000 });
   const jobList = useApi<{ jobs: Job[]; stats: Record<string, number> }>("/jobs?limit=40", { interval: 5000 });
   const tools = useApi<{ tools: ToolStatus[] }>("/system/tools", { interval: 60000 });
   const listeners = useApi<{ listeners: ListenerRow[] }>("/listeners", { interval: 20000 });
+  const infra = useApi<{
+    overall: string;
+    services: { name: string; healthy: boolean }[];
+    tools: { name: string; available: boolean }[];
+  }>("/infrastructure/health", { interval: 30000 });
+  const svcStatus = useApi<Record<string, { registered: boolean; detail: string }>>(
+    "/infrastructure/service", { interval: 30000 },
+  );
+
+  const installService = async () => {
+    setSvcBusy(true);
+    setSvcMsg(null);
+    try {
+      const r = await api.post<{ mode: string; name: string; steps: { command: string; exit: number }[] }>("/infrastructure/install", {});
+      const failed = (r.steps ?? []).filter((s) => s.exit !== 0);
+      setSvcMsg(failed.length ? `installed (${r.mode}) with ${failed.length} step errors` : `installed as ${r.mode} "${r.name}"`);
+      void svcStatus.refresh();
+    } catch (e: any) {
+      setSvcMsg(`error: ${e?.message ?? "failed"}`);
+    } finally {
+      setSvcBusy(false);
+    }
+  };
+
+  const uninstallService = async () => {
+    setSvcBusy(true);
+    setSvcMsg(null);
+    try {
+      const r = await api.post<{ mode: string; exit: number }>("/infrastructure/uninstall", {});
+      setSvcMsg(r.exit === 0 ? `uninstalled (${r.mode})` : `uninstall exit ${r.exit}`);
+      void svcStatus.refresh();
+    } catch (e: any) {
+      setSvcMsg(`error: ${e?.message ?? "failed"}`);
+    } finally {
+      setSvcBusy(false);
+    }
+  };
 
   const stats = jobList.data?.stats ?? {};
 
@@ -41,7 +80,7 @@ export default function Monitoring() {
         <Stat value={stats.running ?? 0} label="Jobs running" tone={stats.running ? "warn" : "ok"} />
         <Stat value={stats.succeeded ?? 0} label="Jobs succeeded" tone="ok" />
         <Stat value={stats.failed ?? 0} label="Jobs failed" tone={stats.failed ? "warn" : undefined} />
-        <Stat value={system?.health.uptimeSeconds ? `${Math.floor(system.health.uptimeSeconds / 60)}m` : "—"} label="API uptime" />
+        <Stat value={(system?.health as any)?.uptimeSeconds ? `${Math.floor((system?.health as any).uptimeSeconds / 60)}m` : "—"} label="API uptime" />
       </div>
 
       <Panel
@@ -55,6 +94,7 @@ export default function Monitoring() {
               { value: "jobs", label: "Jobs" },
               { value: "tools", label: "Tools" },
               { value: "listeners", label: "Listeners" },
+              { value: "infra", label: "Infrastructure" },
             ]}
           />
         }
@@ -68,7 +108,7 @@ export default function Monitoring() {
                   className="row"
                   style={{ gap: 10, padding: "7px 9px", borderBottom: "1px dashed var(--line-soft)" }}
                 >
-                  <span className="tiny mono mute" style={{ width: 130 }}>{formatDateTime(event.at * 1000)}</span>
+                  <span className="tiny mono mute" style={{ width: 130 }}>{formatDateTime(Number(event.at) * 1000)}</span>
                   <Badge tone={event.level === "warn" ? "warn" : event.level === "error" ? "err" : "dim"}>{event.kind}</Badge>
                   <span className="small td-truncate" style={{ flex: 1 }}>{event.title}</span>
                   <span className="tiny mute td-truncate" style={{ maxWidth: 280 }}>{event.detail}</span>
@@ -139,6 +179,45 @@ export default function Monitoring() {
         )}
       </Panel>
 
+      {tab === "infra" && (
+        <Panel
+          title="Infrastructure health"
+          actions={<Badge tone={infra.data?.overall === "healthy" ? "ok" : "warn"}>{infra.data?.overall ?? "—"}</Badge>}
+        >
+          <div className="grid-2" style={{ alignItems: "start" }}>
+            <div className="col" style={{ gap: 6 }}>
+              <span className="mono tiny" style={{ opacity: 0.8 }}>Services</span>
+              {(infra.data?.services ?? []).map((s) => (
+                <div className="row" key={s.name} style={{ gap: 8 }}>
+                  <Badge tone={s.healthy ? "ok" : "dim"} dot>{s.healthy ? "healthy" : "down"}</Badge>
+                  <span className="mono tiny">{s.name}</span>
+                </div>
+              ))}
+              <span className="mono tiny" style={{ opacity: 0.8, marginTop: 8 }}>Tools</span>
+              <div className="tag-row" style={{ flexWrap: "wrap" }}>
+                {(infra.data?.tools ?? []).map((t) => (
+                  <span className={`tag ${t.available ? "" : "mute"}`} key={t.name}>{t.name}</span>
+                ))}
+              </div>
+            </div>
+            <div className="col" style={{ gap: 8 }}>
+              <span className="mono tiny" style={{ opacity: 0.8 }}>Daemon service</span>
+              <div className="kv"><span className="kv-k">NSSM (windows-service)</span><span className="kv-v mono tiny">{svcStatus.data?.["windows-service"]?.registered ? "registered" : "not installed"}</span></div>
+              <div className="kv"><span className="kv-k">Scheduled task</span><span className="kv-v mono tiny">{svcStatus.data?.["scheduled-task"]?.registered ? "registered" : "not installed"}</span></div>
+              <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                <Button size="sm" onClick={() => void installService()} disabled={svcBusy}>
+                  {svcBusy ? "…" : <Server size={12} />} Install service
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => void uninstallService()} disabled={svcBusy}>
+                  Uninstall
+                </Button>
+              </div>
+              {svcMsg && <div className="mono tiny" style={{ opacity: 0.85 }}>{svcMsg}</div>}
+            </div>
+          </div>
+        </Panel>
+      )}
+
       {tab === "events" && (
         <Panel title="Environment" muted>
           <div className="grid-3">
@@ -167,7 +246,7 @@ function describePort(port: number): string {
       return "http proxy";
     case 8443:
       return "https proxy";
-    case 5000:
+    case 5001:
       return "pegasus web api";
     default:
       return "—";

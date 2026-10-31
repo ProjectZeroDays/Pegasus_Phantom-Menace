@@ -180,7 +180,7 @@ function describePort(port: number): string {
     case 8080:
     case 8443:
       return "http(s) proxy";
-    case 5000:
+    case 5001:
       return "pegasus api";
     default:
       return "unknown";

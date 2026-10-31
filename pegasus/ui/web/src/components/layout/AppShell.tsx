@@ -6,17 +6,26 @@ import { JobDrawer } from "@/components/JobDrawer";
 import { useApp } from "@/state/AppContext";
 import { ALL_NAV_ITEMS } from "@/nav";
 import { Button } from "@/components/ui";
-import { useApi } from "@/lib/api";
+import { useApi, ApiError } from "@/lib/api";
 import type { Job } from "@/lib/types";
+
+import { ChatPopup } from "@/components/ChatPopup";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { system, activeSerial, connected } = useApp();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { data: jobData } = useApi<{ jobs: Job[]; stats: Record<string, number> }>("/jobs?limit=5", {
+  const { data: jobData, error: jobError } = useApi<{ jobs: Job[]; stats: Record<string, number> }>("/jobs?limit=5", {
     interval: 5000,
   });
+
+  // Setup gate — 428 from any API call means keys/models are missing.
+  useEffect(() => {
+    if (jobError instanceof ApiError && jobError.status === 428 && location !== "/setup") {
+      window.location.href = "/setup";
+    }
+  }, [jobError, location]);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -100,6 +109,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <JobDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <ChatPopup />
     </div>
   );
 }

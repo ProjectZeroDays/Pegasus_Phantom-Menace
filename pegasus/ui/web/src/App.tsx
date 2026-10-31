@@ -36,6 +36,9 @@ import Skills from "@/pages/Skills";
 import Plugins from "@/pages/Plugins";
 import CommandCenter from "@/pages/CommandCenter";
 import Settings from "@/pages/Settings";
+import Autonomous from "@/pages/Autonomous";
+import Setup from "@/pages/Setup";
+import Logs from "@/pages/Logs";
 import NotFound from "@/pages/NotFound";
 
 export default function App() {
@@ -78,6 +81,9 @@ export default function App() {
           <Route path="/plugins" component={Plugins} />
           <Route path="/commands" component={CommandCenter} />
           <Route path="/settings" component={Settings} />
+          <Route path="/autonomous" component={Autonomous} />
+          <Route path="/setup" component={Setup} />
+          <Route path="/logs" component={Logs} />
           <Route component={NotFound} />
         </Switch>
       </AppShell>

@@ -9,6 +9,8 @@ export function Panel({
   tight,
   className,
   muted,
+  style,
+  id,
 }: {
   title?: React.ReactNode;
   actions?: React.ReactNode;
@@ -16,9 +18,11 @@ export function Panel({
   tight?: boolean;
   className?: string;
   muted?: boolean;
+  style?: React.CSSProperties;
+  id?: string;
 }) {
   return (
-    <section className={cn("panel", className)}>
+    <section id={id} className={cn("panel", className)} style={style}>
       {(title || actions) && (
         <header className="panel-head">
           {title ? (
@@ -89,14 +93,16 @@ export function Stat({
   label,
   hint,
   tone,
+  style,
 }: {
   value: React.ReactNode;
   label: string;
   hint?: React.ReactNode;
   tone?: "ok" | "warn" | "info";
+  style?: React.CSSProperties;
 }) {
   return (
-    <div className={cn("stat", tone)}>
+    <div className={cn("stat", tone)} style={style}>
       <div className="stat-value">{value}</div>
       <div className="stat-label">{label}</div>
       {hint ? <div className="stat-hint">{hint}</div> : null}
@@ -180,13 +186,15 @@ export function Field({
   label,
   children,
   hint,
+  style,
 }: {
   label: string;
   children: React.ReactNode;
   hint?: string;
+  style?: React.CSSProperties;
 }) {
   return (
-    <label className="field">
+    <label className="field" style={style}>
       <span className="field-label">{label}</span>
       {children}
       {hint ? <span className="tiny mute">{hint}</span> : null}
@@ -195,10 +203,10 @@ export function Field({
 }
 
 /* ── Progress ───────────────────────────────────────────────── */
-export function Progress({ value, thin }: { value: number; thin?: boolean }) {
+export function Progress({ value, thin, size }: { value: number; thin?: boolean; size?: number }) {
   const pct = Math.max(0, Math.min(100, value));
   return (
-    <div className={cn("progress", thin && "thin")}>
+    <div className={cn("progress", thin && "thin")} style={size ? { width: size } : undefined}>
       <span style={{ width: `${pct}%` }} />
     </div>
   );
@@ -260,20 +268,25 @@ export function Modal({
   footer,
   onClose,
   width,
+  open = true,
 }: {
   title: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
   onClose: () => void;
   width?: number;
+  open?: boolean;
 }) {
   React.useEffect(() => {
+    if (!open) return;
     const handler = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  }, [onClose, open]);
+
+  if (!open) return null;
 
   return (
     <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
@@ -290,6 +303,140 @@ export function Modal({
         {footer ? <div className="modal-foot">{footer}</div> : null}
       </div>
     </div>
+  );
+}
+
+/* ── Card (alias of Panel) ──────────────────────────────────── */
+export function Card({
+  title,
+  children,
+  style,
+  className,
+  actions,
+}: {
+  title?: React.ReactNode;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  className?: string;
+  actions?: React.ReactNode;
+}) {
+  return (
+    <Panel title={title} actions={actions} className={className} style={style}>
+      {children}
+    </Panel>
+  );
+}
+
+/* ── Table primitives ───────────────────────────────────────── */
+export function Table({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div className="table-wrap" style={style}>
+      <table className="tbl">{children}</table>
+    </div>
+  );
+}
+export function Tbody({ children }: { children: React.ReactNode }) {
+  return <tbody>{children}</tbody>;
+}
+export function Thead({ children }: { children: React.ReactNode }) {
+  return <thead>{children}</thead>;
+}
+export function Tr({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+  return <tr onClick={onClick}>{children}</tr>;
+}
+export function Th({ children, style }: { children?: React.ReactNode; style?: React.CSSProperties }) {
+  return <th style={style}>{children}</th>;
+}
+export function Td({ children, className, style, colSpan }: { children?: React.ReactNode; className?: string; style?: React.CSSProperties; colSpan?: number }) {
+  return <td className={className} style={style} colSpan={colSpan}>{children}</td>;
+}
+
+/* ── Input / Select / Textarea ──────────────────────────────── */
+export function Input({
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  className,
+  style,
+  disabled,
+  onEnter,
+}: {
+  value: string | number;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  disabled?: boolean;
+  onEnter?: () => void;
+}) {
+  return (
+    <input
+      className={cn("input mono tiny", className)}
+      style={style}
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value)}
+      onKeyDown={(e) => { if (e.key === "Enter" && onEnter) onEnter(); }}
+    />
+  );
+}
+
+export function Select({
+  value,
+  onChange,
+  children,
+  className,
+  style,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  disabled?: boolean;
+}) {
+  return (
+    <select
+      className={cn("input mono tiny", className)}
+      style={style}
+      value={value}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {children}
+    </select>
+  );
+}
+
+export function Textarea({
+  value,
+  onChange,
+  placeholder,
+  className,
+  style,
+  rows = 3,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  rows?: number;
+}) {
+  return (
+    <textarea
+      className={cn("input mono tiny", className)}
+      style={style}
+      rows={rows}
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }
 

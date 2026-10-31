@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import {
-  Activity, Battery, DeviceHub, MapPin, MessageSquare, Phone, RefreshCw, Rocket, Shield, Smartphone, TerminalSquare,
+  Activity, Battery, MapPin, MessageSquare, Phone, RefreshCw, Rocket, Shield, Smartphone,
 } from "lucide-react";
 import { useApi, api } from "@/lib/api";
 import { useApp } from "@/state/AppContext";
-import { Badge, Button, Empty, Field, PageHeader, Panel, Progress, Stat, Table, Tbody, Td, Th, Tr } from "@/components/ui";
+import { Badge, Button, Empty, Field, PageHeader, Panel, Progress, Stat } from "@/components/ui";
 
 interface Device {
   serial: string;
@@ -41,8 +41,8 @@ export default function C2Dashboard() {
 
   const { data: deliveryData } = useApi<{ vectors: any[] }>("/api/catalog", { interval: 60000 });
 
-  const run = async (task: () => Promise<unknown>, label: string) => {
-    setOutput(label + "…");
+  const run = async (task: () => Promise<unknown>, label?: string) => {
+    setOutput((label ?? "running") + "…");
     try {
       const result = await task();
       setOutput(JSON.stringify(result, null, 2));
@@ -197,11 +197,11 @@ export default function C2Dashboard() {
 
       <Panel title="Available Devices">
         <div className="stat-grid">
-          {(devices ?? []).map((d: Device) => (
+          {(devices ?? []).map((d) => (
             <div key={d.serial} className="stat" style={{ width: "30%" }}>
               <div>{d.serial}</div>
               <div className="muted small">{d.model}</div>
-              <div>{d.state} · {d.sessions} session{s:d.sessions !== 1}</div>
+              <div>{d.state} · session</div>
             </div>
           ))}
           {(!devices || devices.length === 0) && <Empty title="No devices attached" detail="Enable USB debugging and authorise this host." />}

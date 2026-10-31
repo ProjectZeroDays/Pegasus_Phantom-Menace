@@ -112,7 +112,6 @@ export default function MissionControl() {
         finishedAt: null,
         durationMs: null,
         error: error instanceof Error ? error.message : String(error),
-        cancelRequested: false,
         meta: {},
         output: "",
       });

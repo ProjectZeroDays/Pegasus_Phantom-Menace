@@ -12,6 +12,7 @@ import threading
 import webbrowser
 
 from .backend.app import create_app
+from pegasus.core.config import port, host
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -20,7 +21,7 @@ def main(argv: list[str] | None = None) -> int:
         description="Pegasus Phantom Menace v2 — Web GUI server",
     )
     parser.add_argument("--host", default="127.0.0.1", help="bind host (default 127.0.0.1)")
-    parser.add_argument("--port", default=5000, type=int, help="bind port (default 5000)")
+    parser.add_argument("--port", default=port(), type=int, help="bind port (default 5001)")
     parser.add_argument("--debug", action="store_true", help="enable Flask debug mode")
     parser.add_argument("--open", action="store_true", help="open the dashboard in a browser")
     args = parser.parse_args(argv)

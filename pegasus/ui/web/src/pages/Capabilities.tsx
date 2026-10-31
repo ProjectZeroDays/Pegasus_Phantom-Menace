@@ -83,7 +83,7 @@ export default function Capabilities() {
         <Stat value={capabilities.filter((c) => c.parity === "shell" || c.parity === "partial").length} label="Constrained" hint="permission or tooling limits" tone="warn" />
       </div>
 
-      {error ? <Panel title="API error"><Empty title="Request failed" detail={error} /></Panel> : null}
+      {error ? <Panel title="API error"><Empty title="Request failed" detail={error instanceof Error ? error.message : String(error)} /></Panel> : null}
 
       {categories.map((category) => (
         <Panel key={category} title={`${category} (${capabilities.filter((c) => c.category === category).length})`}>

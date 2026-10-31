@@ -1,30 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Pegasus Phantom Menace">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#8ecbff"/>
-      <stop offset=".55" stop-color="#2f81f7"/>
-      <stop offset="1" stop-color="#0b3a6f"/>
-    </linearGradient>
-    <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0d1b2e"/>
-      <stop offset="1" stop-color="#050a12"/>
-    </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="2.4" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-  <path d="M64 5 112 20v42c0 30-21 51-48 61-27-10-48-31-48-61V20Z" fill="url(#s)" stroke="url(#g)" stroke-width="3.5"/>
-  <path d="M64 12 105 25v37c0 25-17 43-41 52-24-9-41-27-41-52V25Z" fill="none" stroke="#1d4f8c" stroke-width="1" opacity=".7"/>
-  <g filter="url(#glow)" fill="url(#g)">
-    <path d="M43 88c-3-9-4-18-2-26 2-9 8-17 16-22l-6-9 13 4 7-8 2 11 10 3-8 8c1 4 1 8 0 12l-9 4-3 12-8 2-3-8-6 6z" opacity=".95"/>
-    <path d="M63 30c9-6 20-8 30-5l-11 7-2 8-8 3 5 8-8 5-6-6-3 9-7 2 1-12-5-6z" opacity=".85"/>
-    <circle cx="77" cy="35" r="2.2" fill="#eaf6ff"/>
-    <path d="M78 47c8 2 14 8 17 16l-4 12-6-9-8 3 3-8-6-6z" opacity=".7"/>
-  </g>
-  <g stroke="#58A6FF" stroke-width="1.4" fill="none" opacity=".55">
-    <path d="M36 96h18M36 100h12M74 96h18M80 100h12"/>
-  </g>
-  <circle cx="30" cy="34" r="1.6" fill="#8ecbff" opacity=".8"/>
-  <circle cx="98" cy="82" r="1.6" fill="#8ecbff" opacity=".8"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NSO Pegasus Icon -->
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="8" ry="8" fill="#0A0B0E"/>
+  <path d="M33 13 L25 19 L17 27 L23 33 L33 41 L41 33 L33 27 L25 19 Z" fill="#58A6FF"/>
+  <circle cx="32" cy="32" r="7" fill="#FFFFFF"/>
+  <path d="M33 27 L25 33 L17 41 L25 49 L33 55 L41 49 L49 41 L41 33 Z" fill="#58A6FF"/>
+  <path d="M13 33 L19 25 L27 17 L33 25 L41 33 L33 41 Z" fill="#58A6FF"/>
+  <path d="M33 55 L41 49 L55 41 L55 25 L49 17 L41 25 L33 33 Z" fill="#58A6FF"/>
+  <path d="M25 33 L19 41 L17 55 L25 63 L33 55 L41 63 L55 55 L55 49 Z" fill="#58A6FF"/>
+  <path d="M33 55 L41 49 L41 33 L33 27 Z" fill="#2F81F7"/>
+  <text x="32" y="58" font-family="Verdana" font-size="8" fill="#FFFFFF" text-anchor="middle">Peg</text>
+  <text x="32" y="62" font-family="Verdana" font-size="7" fill="#FFFFFF" text-anchor="middle">asu</text>
 </svg>

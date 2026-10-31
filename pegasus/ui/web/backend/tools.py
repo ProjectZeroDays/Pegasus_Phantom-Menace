@@ -111,6 +111,8 @@ class ToolStatus:
 
 
 def scan_tools() -> List[Dict[str, Any]]:
+    from pegasus.core.tool_installer import ensure_path
+    ensure_path()
     out: List[Dict[str, Any]] = []
     for spec in TOOL_SPECS:
         path = shutil.which(spec["binary"]) or shutil.which(spec["binary"] + ".exe")
@@ -291,5 +293,6 @@ def port_open(host: str, port: int, timeout: float = 0.4) -> bool:
 
 
 def listener_status(host: str = "127.0.0.1", ports: Optional[List[int]] = None) -> List[Dict[str, Any]]:
-    ports = ports or [4444, 5555, 55553, 8080, 8443, 5000]
+    from pegasus.core.config import port as _port
+    ports = ports or [4444, 5555, 55553, 8080, 8443, _port()]
     return [{"host": host, "port": p, "open": port_open(host, p)} for p in ports]

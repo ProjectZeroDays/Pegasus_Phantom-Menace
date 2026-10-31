@@ -42,13 +42,13 @@ import {
   Wrench,
   Zap,
 } from "lucide-react";
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 
 export interface NavItem {
   path: string;
   label: string;
   icon: ComponentType<{ size?: number | string; className?: string }>;
-  badge?: string;
+  badge?: ReactNode;
 }
 
 export interface NavGroup {
@@ -63,6 +63,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Command",
     items: [
       { path: "/", label: "Mission Control", icon: Gauge },
+      { path: "/autonomous", label: "Autonomous", icon: Bot },
       { path: "/devices", label: "Devices", icon: Smartphone },
       { path: "/monitoring", label: "Monitoring", icon: Activity },
     ],
@@ -75,7 +76,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { path: "/workflows", label: "Workflow Engine", icon: Rocket },
       { path: "/zero-click", label: "Zero-Click", icon: Zap },
       { path: "/delivery", label: "Delivery", icon: Radio },
-      { path: "/c2", label: "C2 Dashboard", icon: DeviceHub },
+      { path: "/c2", label: "C2 Dashboard", icon: Radio },
       { path: "/post-exploit", label: "Post-Exploitation", icon: Layers },
       { path: "/capabilities", label: "Capability Parity", icon: Shield },
       { path: "/cve", label: "CVE Scanner", icon: ShieldAlert },
@@ -126,6 +127,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { path: "/plugins", label: "Plugins", icon: Puzzle },
       { path: "/commands", label: "Command Center", icon: Command },
+      { path: "/logs", label: "Logs", icon: FileText },
       { path: "/settings", label: "Settings", icon: Settings },
     ],
   },

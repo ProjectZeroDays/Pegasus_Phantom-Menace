@@ -24,24 +24,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var webView: WebView
 
-    // Pegasus dashboard base URL — configurable via strings.xml (pegasus_base_url)
-    private val pegasusUrl: String by lazy {
-        resources.getString(R.string.pegasus_base_url)
-    }
-
-    // Section paths appended to the base URL for bottom nav navigation
+    // Section paths appended to the base URL for bottom nav navigation.
+    // Fixed to match the SPA routes (was /scan, /more — neither exists).
     private val sectionPaths = mapOf(
         R.id.nav_dashboard to "",
         R.id.nav_devices to "/devices",
-        R.id.nav_scan to "/scan",
+        R.id.nav_scan to "/network",
         R.id.nav_tools to "/tools",
         R.id.nav_c2 to "/c2",
         R.id.nav_delivery to "/delivery",
         R.id.nav_payloads to "/payloads",
         R.id.nav_post to "/post-exploit",
         R.id.nav_campaigns to "/campaigns",
-        R.id.nav_more to "/more"
+        R.id.nav_more to "/settings"
     )
+
+    // Runtime-resolved base URL: emulator uses 10.0.2.2, physical devices
+    // use the host the operator entered in ConnectionActivity (persisted).
+    private val pegasusUrl: String by lazy { PegasusHost.resolve(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -140,6 +140,20 @@ class MainActivity : AppCompatActivity() {
                 val browserIntent = Intent(Intent.ACTION_VIEW, uri)
                 startActivity(browserIntent)
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Re-resolve the host in case the operator changed it in ConnectionActivity
+        if (!PegasusHost.configured(this)) {
+            ConnectionActivity.start(this)
+            return
+        }
+        if (!this::webView.isInitialized) return
+        val url = PegasusHost.resolve(this)
+        if (!webView.url.orEmpty().startsWith(url)) {
+            webView.loadUrl(url)
         }
     }
 

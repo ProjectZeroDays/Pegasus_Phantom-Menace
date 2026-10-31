@@ -186,6 +186,20 @@ async def cmd_postexploit_chain(*args: str) -> List[Dict[str, Any]]:
     return results
 
 
+async def cmd_postexploit_full(*args: str) -> Dict[str, Any]:
+    """Run every collection module: chain plus privesc, keychain, keylogger, sms/calls, wallets, browser, hashes."""
+    from pegasus.modules.access_workflow.post_exploitation import registry
+
+    console.print("[cyan]Running every post-exploitation module...[/cyan]")
+    try:
+        result = await registry.run("full")
+    except Exception as exc:
+        console.print(f"[red]Full run failed:[/] {exc}")
+        return {"step": "full", "status": "error", "error": str(exc)}
+    console.print_json(data=result)
+    return result
+
+
 def _register_post_exploitation(scm: Any) -> None:
     if _free(scm, "/postexploit-list"):
         scm.register(
@@ -207,6 +221,13 @@ def _register_post_exploitation(scm: Any) -> None:
             "/postexploit-chain",
             "Run the full post-exploitation chain",
             cmd_postexploit_chain,
+            category="exploit",
+        )
+    if _free(scm, "/postexploit-full"):
+        scm.register(
+            "/postexploit-full",
+            "Run every post-exploitation module (chain + privesc + keychain + keylogger + sms_calls + wallets + browser + hashes)",
+            cmd_postexploit_full,
             category="exploit",
         )
 

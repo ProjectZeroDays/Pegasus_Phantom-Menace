@@ -88,6 +88,9 @@ hiddenimports = [
     "pegasus.modules.access_workflow.telegram_control",
     "pegasus.modules.access_workflow.frp_unlock",
     "pegasus.modules.access_workflow.zero_click.registry",
+    # Tool installer + service launcher.
+    "pegasus.core.tool_installer",
+    "pegasus.core.services",
 ]
 
 # Every module plugin package + submodule, so builtin loading works when frozen.

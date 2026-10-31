@@ -7,6 +7,17 @@
     <string name="pegasus_open_in_browser">Open in browser</string>
     <string name="loading_pegasus">Loading Pegasus dashboard...</string>
 
+    <!-- Connection screen -->
+    <string name="conn_intro">Enter the host running the Pegasus backend on your network.</string>
+    <string name="conn_hint_host">192.168.1.100</string>
+    <string name="conn_hint_port">5001</string>
+    <string name="conn_test">Test connection</string>
+    <string name="conn_save">Save &amp; continue</string>
+    <string name="conn_testing">Testing…</string>
+    <string name="conn_ok">Connected ✓</string>
+    <string name="conn_fail">Could not reach the backend. Check the IP and port.</string>
+    <string name="conn_enter_host">Enter a host first.</string>
+
     <!-- Bottom navigation menu labels -->
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_devices">Devices</string>

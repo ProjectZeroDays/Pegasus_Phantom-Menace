@@ -242,7 +242,7 @@ export default function Devices() {
                       <div className="kv"><span className="kv-k">Root</span><span className="kv-v"><Badge tone={device.isRooted ? "warn" : "dim"}>{device.isRooted ? "su present" : "no su"}</Badge></span></div>
                     </div>
                     <div>
-                      <div className="kv"><span className="kv-k">Fingerprint</span><span className="kv-v mono tiny" style={{ maxWidth: 320 }}>{device.fingerprint}</span></div>
+                      <div className="kv"><span className="kv-k">Fingerprint</span><span className="kv-v mono tiny" style={{ maxWidth: 320 }}>{JSON.stringify(device.fingerprint ?? "—")}</span></div>
                       <div className="kv"><span className="kv-k">Linked</span><span className="kv-v">{detail.data?.connected ? "live" : "cached snapshot"}</span></div>
                       <div className="kv"><span className="kv-k">Label</span><span className="kv-v">{device.notes?.label ?? "—"}</span></div>
                       <div className="kv"><span className="kv-k">Group</span><span className="kv-v">{device.notes?.group ?? "—"}</span></div>
@@ -259,7 +259,7 @@ export default function Devices() {
                     .map(([key, value]) => (
                       <div className="kv" key={key}>
                         <span className="kv-k mono tiny" style={{ textTransform: "none" }}>{key}</span>
-                        <span className="kv-v mono tiny" style={{ maxWidth: 520 }}>{value || "—"}</span>
+                        <span className="kv-v mono tiny" style={{ maxWidth: 520 }}>{String(value ?? "—")}</span>
                       </div>
                     ))}
                 </div>

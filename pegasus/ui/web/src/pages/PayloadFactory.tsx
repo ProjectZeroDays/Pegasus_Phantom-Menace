@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { useApi, api } from "@/lib/api";
 import { useApp } from "@/state/AppContext";
 import {
@@ -12,7 +13,8 @@ import {
   Th,
   Tr,
   Empty,
-  Card as CardComponent,
+  PageHeader,
+  Progress,
 } from "@/components/ui";
 
 interface Vector {
@@ -66,7 +68,7 @@ export default function PayloadFactory() {
         actions={
           <>
             <Button variant="ghost" onClick={() => void loadVectors()} disabled={loading}>
-              <Card size={13} />
+              <RefreshCw size={13} />
             </Button>
           </>
         }
@@ -78,10 +80,10 @@ export default function PayloadFactory() {
           <div className="card-content" style={{ marginTop: "8px" }}>
             <Select
               value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
+              onChange={(v) => setCategoryFilter(v)}
               style={{ width: "100%" }}
             >
-              {(categories as any).map((cat) => (
+              {categories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
@@ -94,7 +96,7 @@ export default function PayloadFactory() {
       <div className="grid" style={{ margin: "12px 0" }}>
         {loading ? (
           <div className="card" style={{ textAlign: "center", padding: "20px" }}>
-            <Progress size={13} />
+            <Progress value={13} size={13} />
             <div className="muted" style={{ marginTop: "8px" }}>Loading vectors…</div>
           </div>
         ) : (
@@ -104,7 +106,7 @@ export default function PayloadFactory() {
               {vectors.length === 0 ? (
                 <Empty title="No vectors match filter" />
               ) : (
-                <Table>
+                <table className="tbl">
                   <thead>
                     <tr>
                       <th>CVE</th>
@@ -116,8 +118,8 @@ export default function PayloadFactory() {
                   </thead>
                   <tbody>
                     {vectors.map((v) => (
-                      <Tr key={v.key}>
-                        <Td className="mono">{v.cve}</td>
+                      <tr key={v.key}>
+                        <td className="mono">{v.cve}</td>
                         <td>{v.title}</td>
                         <td className="muted">{v.category}</td>
                         <td className="muted small">{v.recommended_channels.join(", ")}</td>
@@ -130,14 +132,14 @@ export default function PayloadFactory() {
                             Build & Stage
                           </Button>
                         </td>
-                      </Tr>
+                      </tr>
                     ))}
                   </tbody>
-                </Table>
+                </table>
               )}
             </div>
           </Card>
-        </div>
+        )}
       </div>
 
       {output && <div className="card" style={{ marginTop: "16px" }}>{output}</div>}

