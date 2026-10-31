@@ -1,4 +1,4 @@
-# Pegasus: Phantom Menace v2.1.0
+# Pegasus: Phantom Menace v3.1.0
 
 <div align="center">
 
