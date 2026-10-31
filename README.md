@@ -160,6 +160,10 @@ The web GUI (Mission Control) provides a responsive dashboard reachable at `http
 |------|---------|
 | `/` (index) | Live metrics, device table, delivery history, operation cards |
 | `/delivery` | Zero‑click delivery console (17 channels, payload server, catalog, send history) |
+| `/c2` | C2 Infrastructure — listener start/stop, port toggle (8080/443 TLS), beacon/kill, screenshot, shell |
+| `/payload-factory` | Payload Factory — vector catalog (66 CVEs + recursive discovery), category filter (Polymorphic/DNA/Stego/QR/SSL Bypass), Build & Stage |
+| `/post-exploit` | Post‑Exploitation RAT — fingerprint → persistence → credentials → lateral → exfil chain plus RAT panel (keylog/screenshot/mic/SMS/call/GPS) |
+| `/campaigns` | Campaign Manager — create campaigns, deploy workflow (channel/payload/target), attribution stats |
 | `/admin` | System module: daemon status, disk, parity, database, log tail, install service |
 | `/admin/users` | User approval, tier, expiry, wallet, passkey reset, suspension, deletion |
 | `/admin/settings` | Operator USDC wallet, one‑time/weekly/monthly pricing, registration open/closed |
@@ -167,6 +171,16 @@ The web GUI (Mission Control) provides a responsive dashboard reachable at `http
 | `/capabilities` | NSO parity report and gap analysis |
 
 All buttons, selects and forms are wired to real API endpoints (`/api/*`). CSRF tokens are required for state‑changing operations.
+
+## Framework Integration
+
+The main repository integrates with the typed API framework at `C:\Users\Project Zero\Desktop\Pegasus-Framework`:
+
+- `lib/api-client-react` — React Query hooks for every REST endpoint (`useMutation`, `useQuery`)
+- `lib/api-zod` — Zod runtime validation schemas for request/response shapes
+- `lib/api-spec` — OpenAPI spec (`openapi.yaml`) + Orval generation config
+
+All dashboard pages (`C2Dashboard`, `PostExploit`, `PayloadFactory`, `Campaigns`) are wired to these generated API clients so request/response types are enforced end‑to‑end.
 
 Full page list and wire‑frames: see `pegasus/ui/web/README.md`.
 
