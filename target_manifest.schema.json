@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TargetManifest",
+  "type": "object",
+  "properties": {
+    "target_id": {"type": "string"},
+    "name": {"type": "string"},
+    "version": {"type": "string"},
+    "platform": {"enum": ["android","ios","windows","linux","macos"]},
+    "device_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["serial","state"],
+        "properties": {
+          "serial": {"type":"string"},
+          "state": {"type":"string"},
+          "vendor": {"type":"string"},
+          "model": {"type":"string"}
+        }
+      }
+    },
+    "binary_inventory": {"type":"array","items":{"type":"object"}},
+    "protocol_sm": {"type":"object"},
+    "guardrails": {
+      "type":"object",
+      "properties": {
+        "pcap_header_16": {"type":"boolean"},
+        "no_nul_stub": {"type":"boolean"},
+        "port_monotonic": {"type":"boolean"}
+      }
+    },
+    "capability_graph": {
+      "type":"object",
+      "additionalProperties":{"type":"string"}
+    },
+    "expiry_version": {"type":"string"}
+  },
+  "required": ["target_id","name","platform"]
+}
