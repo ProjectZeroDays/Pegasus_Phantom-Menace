@@ -1,6 +1,0 @@
-Place Pegasus-Web.exe anywhere, then run it.
-Default URL: http://127.0.0.1:5000/
-Flags: --host 0.0.0.0  --port 8080  --no-browser
-First run redirects to /setup to create the operator account.
-Demo login: demo / demo
-Authorized testing only.

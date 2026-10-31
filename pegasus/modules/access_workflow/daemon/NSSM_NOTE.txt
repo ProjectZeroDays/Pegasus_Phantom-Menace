@@ -1,0 +1,5 @@
+NSSM auto-install configured
+- NSIS installer (SEC_SERVICE) downloads from: https://github.com/tuyndoan/nssm/releases/download/v2.25/nssm-2.25-win64.zip
+- install.ps1 searches daemon/ first, then ProgramFiles, then Chocolatey
+- Pre-install option: winget install NSSM.NSSM
+- If download fails during install, scheduled task (SEC_TASK) is available as fallback

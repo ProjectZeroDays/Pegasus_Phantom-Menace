@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Pegasus Mobile</string>
-    <string name="pegasus_base_url">http://127.0.0.1:5000</string>
+    <string name="pegasus_base_url">http://127.0.0.1:5001</string>
     <string name="pegasus_load_error">Unable to load Pegasus dashboard: %1$s</string>
     <string name="pegasus_retry">Retry</string>
     <string name="pegasus_open_in_browser">Open in browser</string>
