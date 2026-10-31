@@ -1,0 +1,24 @@
+name: pegasus-phantom-menace
+version: '2.1.0'
+summary: Pegasus Phantom Menace v2.1.0 — autonomous exploitation lifecycle
+base: core22
+grade: stable
+confinement: strict
+parts:
+  pegapp:
+    plugin: python
+    source: ../..
+    python-packages:
+      - flask
+      - requests
+    build-packages:
+      - python3-dev
+    stage-packages:
+      - libglib2.0-0
+apps:
+  pegasus:
+    command: bin/python3 launch_app.py
+    daemon: simple
+    restart-condition: always
+    ports:
+      - 5001

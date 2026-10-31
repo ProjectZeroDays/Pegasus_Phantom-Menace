@@ -1,0 +1,28 @@
+{
+  "app-id": "org.projectzerodays.PegasusPhantomMenace",
+  "runtime": "org.freedesktop.Platform//23.08",
+  "runtime-version": "23.08",
+  "sdk": "org.freedesktop.Sdk//23.08",
+  "command": "pegasus-run",
+  "finish-args": [
+    "--socket=network",
+    "--socket=system-bus",
+    "--share=ipc",
+    "--share=network",
+    "--device=dri",
+    "--filesystem=home"
+  ],
+  "modules": [
+    {
+      "name": "pegasus",
+      "build-system": "simple",
+      "build-commands": [
+        "install -D launch_app.py /app/bin/pegasus-run",
+        "install -D -t /app/share/pegasus/ README.md assets/ pegasus/"
+      ],
+      "sources": [
+        { "type": "dir", "path": "../../" }
+      ]
+    }
+  ]
+}
