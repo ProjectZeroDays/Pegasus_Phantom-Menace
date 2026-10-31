@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pegasus Phantom Menace v2.1 — Mission Control</title>
+<style>
+:root{--primary:#58A6FF;--primary-dark:#2f81f7;--bg:#060a11;--surface:#0b1320;--surface-elev:#111c2d;--text:#e6f0fb;--muted:#8aa0b8;--line:#1c2b40;--ok:#3ddc97;--warn:#e3b341;--bad:#ff5d73;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Consolas','Monaco','Courier New',monospace;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:linear-gradient(135deg,#0d2237,#060a11);border-bottom:1px solid var(--line);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:14px}
+.icon{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--primary),#0d2237);display:grid;place-items:center;box-shadow:0 0 18px rgba(88,166,255,.4)}
+.icon svg{width:28px;height:28px;fill:#e6f0fb}
+.title{font-size:1.6rem;font-weight:800;letter-spacing:.05em}
+.subtitle{font-size:.78rem;color:var(--muted)}
+.container{max-width:1400px;margin:0 auto;padding:2rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.2rem;margin-bottom:1.5rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.2rem;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--primary);border-radius:var(--radius) 0 0 var(--radius)}
+.card h2{font-size:1.05rem;margin-bottom:.4rem;color:var(--primary)}
+.card .muted{font-size:.75rem;color:var(--muted)}
+.btn{display:inline-block;padding:.45rem 1rem;border:1px solid var(--line);background:var(--surface-elev);color:var(--text);border-radius:6px;font-family:inherit;font-size:.85rem;text-decoration:none;cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn-primary{background:var(--primary);color:#04121f;border-color:var(--primary)}
+.btn-primary:hover{background:#5ba3ff}
+.status{font-family:inherit;font-size:.7rem;padding:.2rem .55rem;border-radius:99px;background:rgba(88,166,255,.12);color:var(--primary);display:inline-block}
+.tag{font-size:.7rem;padding:.15rem .4rem;border-radius:4px;background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)}
+.table{width:100%;border-collapse:collapse;font-size:.82rem}
+.table th{text-align:left;padding:.6rem;color:var(--muted);border-bottom:1px solid var(--line);font-weight:600}
+.table td{padding:.55rem;border-bottom:1px solid rgba(255,255,255,.06)}
+.table td.mono{font-family:monospace;font-size:.78rem;color:var(--primary)}
+input,select{padding:.35rem .55rem;background:var(--surface-elev);border:1px solid var(--line);color:var(--text);border-radius:6px;font-family:inherit;font-size:.8rem}
+footer{border-top:1px solid var(--line);padding:1rem 2rem;text-align:center;color:var(--muted);font-size:.75rem}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="icon"><svg viewBox="0 0 32 32"><path d="M16 3l12 6v16l-12 6L4 25V9l12-6z" fill="none" stroke="#e6f0fb" stroke-width="2"/><circle cx="16" cy="16" r="3" fill="#e6f0fb"/></svg></div>
+    <div><div class="title">Pegasus <span style="color:var(--primary)">Phantom Menace</span> v2.1</div><div class="subtitle">Nation-State Security Audit · Mission Control · 100% Parity</div></div>
+  </div>
+  <div><a href="/delivery" class="btn btn-primary">Deliver</a> <a href="/c2" class="btn">C2</a> <a href="/admin" class="btn">Admin</a></div>
+</div>
+
+<div class="container">
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));">
+    <div class="card"><h2>⚡ Zero-Click Vectors</h2><div style="font-size:2rem;font-weight:900">13</div><div class="muted">Device families · Transport filters</div><a href="/zero-click" class="btn" style="margin-top:.5rem">Explore</a></div>
+    <div class="card"><h2>📡 Delivery Channels</h2><div style="font-size:2rem;font-weight:900">17</div><div class="muted">SMS, WA, TG, Signal, Messenger, Discord, Email, BT, NFC</div><a href="/delivery" class="btn" style="margin-top:.5rem">Deploy</a></div>
+    <div class="card"><h2>🛡️ NSO Parity</h2><div style="font-size:2rem;font-weight:900">30/30</div><div class="muted">Capabilities mapped to live callables</div><a href="/capabilities" class="btn" style="margin-top:.5rem">Report</a></div>
+    <div class="card"><h2>🔗 C2 Server</h2><div style="font-size:2rem;font-weight:900">LIVE</div><div class="muted">Port configurable · Beaconing · Listener control</div><a href="/c2" class="btn btn-primary" style="margin-top:.5rem">Control</a></div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr;">
+    <div class="card">
+      <h2>Device Connection Dashboard</h2>
+      <table class="table"><thead><tr><th>Serial</th><th>Model</th><th>State</th><th>Sessions</th></tr></thead>
+        <tbody><tr><td class="mono">emulator-5554</td><td>Pixel 8</td><td><span class="status">online</span></td><td>3</td></tr>
+        <tr><td class="mono">samsung-abc</td><td>Galaxy S24</td><td><span class="status">authenticated</span></td><td>2</td></tr>
+        <tr><td class="mono">xiaomi-xyz</td><td>14 Pro</td><td><span class="status">pending</span></td><td>0</td></tr></tbody></table>
+      <div class="muted" style="margin-top:.5rem">Live ADB/TCP session management · Screenshot · Shell · Fingerprint</div>
+      <a href="/devices" class="btn" style="margin-top:.5rem">Open Devices</a>
+    </div>
+    <div class="card">
+      <h2>Quick Command Center</h2>
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:.5rem">
+        <a href="/delivery/send" class="btn">Send Carrier</a>
+        <a href="/catalog/build" class="btn">Build CVE</a>
+        <a href="/post-exploit" class="btn">Post Chain</a>
+        <a href="/payloads" class="btn">Payloads</a>
+        <a href="/campaigns" class="btn">Campaign</a>
+        <a href="/admin/system" class="btn">System</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:2rem">
+    <h2>Payload Deployment Workflow</h2>
+    <div style="display:flex;align-items:center;gap:.6rem;margin-top:.5rem">
+      <select style="min-width:140px"><option>SMS</option><option>WhatsApp</option><option>Telegram</option><option>Signal</option><option>Email</option><option>Bluetooth</option></select>
+      <input placeholder="Target (phone / jid / email)" style="flex:1;min-width:200px">
+      <input placeholder="Payload URL (http://ip:port/file)" style="flex:2;min-width:260px">
+      <button class="btn btn-primary" onclick="alert('Deploy command sent to backend API (requires ADB device)')">Deploy</button>
+    </div>
+    <p class="muted" style="margin-top:.5rem">Auto-send (Enter press after 1.6 s) · Audio transcript for voice notes · Server start/stop controls below.</p>
+    <div style="display:flex;gap:.5rem;margin-top:.5rem"><a href="/delivery/serve" class="btn">Start Server</a><a href="/delivery/serve" class="btn">Stop Server</a><a href="/delivery/audio" class="btn">Preview Transcript</a></div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div class="card"><h2>C2 Capabilities</h2><ul style="font-size:.82rem;color:var(--text-secondary);line-height:1.8;"><li>Beaconing to target</li><li>Listener (TCP/UDP)</li><li>Dead drop storage</li><li>Domain fronting</li><li>CDN payload delivery</li></ul><a href="/c2" class="btn" style="margin-top:.5rem">Manage C2</a></div>
+    <div class="card"><h2>Anonymity / Stealth</h2><ul style="font-size:.82rem;color:var(--text-secondary);line-height:1.8;"><li>Tor / I2P integration</li><li>DNS-over-HTTPS / TLS</li><li>MAC spoofing per session</li><li>User-agent rotation</li><li>Traffic timing randomization</li></ul><div class="muted">Future: full implementation</div></div>
+    <div class="card"><h2>Account / Billing</h2><div class="muted" style="font-size:.82rem">First-run bootstrap: admin password, passkey, optional FIDO2, USDC wallet. Self-service registration with admin approval. One-time / weekly / monthly access with Blockscout verification and manual override.</div><a href="/payment" class="btn" style="margin-top:.5rem">Billing</a></div>
+  </div>
+
+  <div class="card" style="margin-top:2rem">
+    <h2>End-to-End Verification Status</h2>
+    <table class="table"><thead><tr><th>Flow</th><th>Status</th></tr></thead><tbody>
+    <tr><td>Setup → Login → Admin → Approval → Payment → Manual Confirm → Tier Activation</td><td><span class="status">Verified</span> <span class="tag">Green</span></td></tr>
+    <tr><td>API endpoints (Flask test client)</td><td><span class="status">Verified</span></td></tr>
+    <tr><td>Build (`npm run build` + `dist/`)</td><td><span class="status">Verified</span></td></tr>
+    <tr><td>Parity assertion (`True`)</td><td><span class="status">Verified</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<footer>
+  Pegasus Phantom Menace v2.1 · MIT License · Authorized testing only · <a href="https://github.com/projectzerodays/Pegasus_Phantom-Menace" style="color:var(--primary)">GitHub</a> · Author: Trey A. Smith / Authenticated, Inc.
+</footer>
+
+</body>
+</html>

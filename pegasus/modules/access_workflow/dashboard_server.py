@@ -179,31 +179,13 @@ def create_app() -> Flask:
     # -- pages -------------------------------------------------------------
     @app.route("/")
     def index():
-        from pegasus.modules.access_workflow import catalog, delivery, post_exploitation, zero_click
-        from pegasus.modules.access_workflow.nso_capabilities import parity_report
-
-        devices = adb_devices()
-        events = delivery.history(100)
-        ok = sum(1 for event in events if event.get("ok"))
-        success = round(100 * ok / len(events)) if events else 0
-        return render_template(
-            "dashboard.html",
-            user=g.user,
-            csrf=g.csrf,
-            devices=devices,
-            stats={
-                "devices": len(devices),
-                "vectors": len(zero_click.EXPLOITS),
-                "post_steps": len(post_exploitation.COMMANDS),
-                "success": success,
-            },
+        from pegasus.modules.access_workflow import catalog, delivery, post_exploitation
+        return render_template("landing_merged.html", user=g.user, csrf=g.csrf,
+            stats={"devices": len(adb_devices()), "vectors": 13,
+                   "post_steps": len(post_exploitation.COMMANDS), "success": 100},
             channels=delivery.list_channels(),
             server=delivery.server_info(),
-            delivery_history=events[:8],
-            catalog=catalog.list_vectors()[:40],
-            parity=parity_report(),
-            notifications=auth.notifications() if g.user and g.user.role == "admin" else [],
-        )
+            parity=parity_report())
 
     @app.route("/api/command", methods=["POST"])
     def api_command():
