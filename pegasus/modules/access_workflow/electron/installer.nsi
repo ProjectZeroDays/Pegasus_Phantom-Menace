@@ -9,11 +9,14 @@
 ; scheduled task is skipped.
 
 !define APP_NAME "Pegasus Phantom Menace v2"
-!define APP_VERSION "2.0.0"
+!define APP_VERSION "2.1.0"
 !define APP_PUBLISHER "ProjectZeroDays"
 !define APP_REGKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\PegasusPhantomMenace"
 !define SERVICE_NAME "PegasusDaemon"
 !define TASK_NAME "PegasusDaemon"
+!define NSSM_URL "https://nssm.cc/release/nssm-2.24-101-g897c7ad.zip"
+!define NSSM_ZIP "$TEMP\nssm.zip"
+!define NSSM_DIR "$TEMP\nssm"
 
 !ifndef OUTPUT
   !define OUTPUT "Pegasus-v2.0-Setup.exe"
@@ -146,10 +149,26 @@ SectionEnd
 
 Section "Windows service (auto-start)" SEC_SERVICE
   DetailPrint "Registering service ${SERVICE_NAME}..."
+
+  ; Auto-download NSSM if not present
+  ${IfNot} ${FileExists} "$INSTDIR\daemon\nssm.exe"
+    DetailPrint "Downloading NSSM for service management..."
+    nsExec::ExecToLog 'powershell -NoProfile -Command "Invoke-WebRequest -Uri https://github.com/tuyndoan/nssm/releases/download/v2.25/nssm-2.25-win64.zip -OutFile $TEMP\nssm.zip"'
+    Pop $0
+    ${If} $0 == 0
+      nsExec::ExecToLog 'powershell -NoProfile -Command "Expand-Archive -Path $TEMP\nssm.zip -DestinationPath $TEMP\nssm -Force"'
+      Pop $0
+      nsExec::ExecToLog 'copy "$TEMP\nssm\nssm-2.25-win64\nssm.exe" "$INSTDIR\daemon\nssm.exe"'
+      Pop $0
+    ${Else}
+      DetailPrint "NSSM download failed; service will use PowerShell fallback."
+    ${EndIf}
+  ${EndIf}
+
   nsExec::ExecToLog 'powershell -NoProfile -ExecutionPolicy Bypass -File "$INSTDIR\daemon\install.ps1" -InstallPath "$INSTDIR" -ServiceName "${SERVICE_NAME}"'
   Pop $0
   ${If} $0 != 0
-    MessageBox MB_ICONEXCLAMATION "Service registration failed (exit $0).$\r$\nInstall NSSM (https://nssm.cc) or choose the scheduled task component."
+    MessageBox MB_ICONEXCLAMATION "Service registration failed (exit $0).$\r$\nChoose the scheduled task component instead."
   ${EndIf}
 SectionEnd
 
@@ -184,13 +203,11 @@ Section "Uninstall"
   RMDir /r "$INSTDIR\pegasus"
   RMDir /r "$INSTDIR\.venv"
   RMDir /r "$INSTDIR\launchers"
+  RMDir /r "$INSTDIR\daemon"
   Delete "$INSTDIR\requirements.txt"
   Delete "$INSTDIR\version.txt"
   Delete "$INSTDIR\LICENSE"
   Delete "$INSTDIR\run_pegasus.bat"
-  Delete "$INSTDIR\daemon\install.ps1"
-  Delete "$INSTDIR\daemon\uninstall.ps1"
-  RMDir "$INSTDIR\daemon"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
 

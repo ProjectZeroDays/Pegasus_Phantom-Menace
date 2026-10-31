@@ -2,9 +2,9 @@
 
 <div align="center">
 
-<img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjggMTI4IiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IlBlZ2FzdXMgUGhhbnRvbSBNZW5hY2UiPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzhlY2JmZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii41NSIgc3RvcC1jb2xvcj0iIzJmODFmNyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwYjNhNmYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9InMiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMGQxYjJlIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzA1MGExMiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxmaWx0ZXIgaWQ9Imdsb3ciIHg9Ii0zMCUiIHk9Ii0zMCUiIHdpZHRoPSIxNjAlIiBoZWlnaHQ9IjE2MCUiPgogICAgICA8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIyLjQiIHJlc3VsdD0iYiIvPgogICAgICA8ZmVNZXJnZT48ZmVNZXJnZU5vZGUgaW49ImIiLz48ZmVNZXJnZU5vZGUgaW49IlNvdXJjZUdyYXBoaWMiLz48L2ZlTWVyZ2U+CiAgICA8L2ZpbHRlcj4KICA8L2RlZnM+CiAgPHBhdGggZD0iTTY0IDUgMTEyIDIwdjQyYzAgMzAtMjEgNTEtNDggNjEtMjctMTAtNDgtMzEtNDgtNjFWMjBaIiBmaWxsPSJ1cmwoI3MpIiBzdHJva2U9InVybCgjZykiIHN0cm9rZS13aWR0aD0iMy41Ii8+CiAgPHBhdGggZD0iTTY0IDEyIDEwNSAyNXYzN2MwIDI1LTE3IDQzLTQxIDUyLTI0LTktNDEtMjctNDEtNTJWMjVaIiBmaWxsPSJub25lIiBzdHJva2U9IiMxZDRmOGMiIHN0cm9rZS13aWR0aD0iMSIgb3BhY2l0eT0iLjciLz4KICA8ZyBmaWx0ZXI9InVybCgjZ2xvdykiIGZpbGw9InVybCgjZykiPgogICAgPHBhdGggZD0iTTQzIDg4Yy0zLTktNC0xOC0yLTI2IDItOSA4LTE3IDE2LTIybC02LTkgMTMgNCA3LTggMiAxMSAxMCAzLTggOGMxIDQgMSA4IDAgMTJsLTkgNC0zIDEyLTggMi0zLTgtNiA2eiIgb3BhY2l0eT0iLjk1Ii8+CiAgICA8cGF0aCBkPSJNNjMgMzBjOS02IDIwLTggMzAtNWwtMTEgNy0yIDgtOCAzIDUgOC04IDUtNi02LTMgOS03IDIgMS0xMi01LTZ6IiBvcGFjaXR5PSIuODUiLz4KICAgIDxjaXJjbGUgY3g9Ijc3IiBjeT0iMzUiIHI9IjIuMiIgZmlsbD0iI2VhZjZmZiIvPgogICAgPHBhdGggZD0iTTc4IDQ3YzggMiAxCA4IDE3IDE2bC00IDEyLTYtOS04IDMgMy04LTYtNnoiIG9wYWNpdHk9Ii43Ii8+CiAgPC9nPgogIDxnIHN0cm9rZT0iIzU4QTZGRiIgc3Ryb2tlLXdpZHRoPSIxLjQiIGZpbGw9Im5vbmUiIG9wYWNpdHk9Ii41NSI+CiAgICA8cGF0aCBkPSJNMzYgOTZoMThN... (truncated for brevity)
-
-![Windows](https://img.shields.io/badge/Windows-0078D6?logo=windows) ![macOS](https://img.shields.io/badge/macOS-000000?logo=apple) ![Android](https://img.shields.io/badge/Android-3DDC84?logo=android) ![iOS](https://img.shields.io/badge/iOS-000000?logo=apple) ![Kali](https://img.shields.io/badge/Kali-557C94?logo=linux) ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?logo=ubuntu)
+<img src="assets/icons/pegasus-512.png" width="128" alt="Pegasus Phantom Menace Icon" />
+<br/>
+<em>NSO Pegasus vector — blue shield logo with data hex motif</em>
 
 </div>
 
@@ -21,6 +21,7 @@
 - [Build from Source](#build-from-source)
 - [CLI Commands](#cli-commands)
 - [GUI Controls](#gui-controls)
+- [Framework Integration](#framework-integration)
 - [API Documentation](#api-documentation)
 - [Author](#author)
 - [Legal Disclaimers](#legal-disclaimers)
@@ -35,7 +36,7 @@
 
 **Pegasus: Phantom Menace** is an Android device management and security audit platform designed for authorized penetration testing and security research. Version 2.1.0 introduces a complete mission-control web GUI (React + TypeScript + Flask), a persistent daemon with auto-restart and health monitoring, a global command factory with 28 registered commands, NSO parity coverage across 30 capabilities, accounts and billing with USDC, and full end-to-end verification flows.
 
-The platform delivers zero-click exploit carriers over 17 messaging, calling, Bluetooth, NFC and email channels, with a payload HTTP server (`ip:port`), spoken-transcript audio, carrier catalog discovery, and admin/user control panels. All delivery intents target real Android packages; `auto_send` presses Enter after 1.6 s.
+The platform delivers zero-click exploit carriers over 17 messaging, calling, Bluetooth, NFC and email channels, with a payload HTTP server (`ip:port`), spoken-transcript audio, carrier catalog discovery, and admin/user control panels. All delivery intents target real Android packages; `auto_send` presses Enter after 1.6 s.
 
 **Demo account:** `demo` / `demo` — first‑run admin bootstrap creates an operator account; registration then closes.
 
@@ -106,8 +107,40 @@ python -m pegasus.ui.web.server --port 5000 --open
 
 ```bash
 dist\Pegasus-v2.1.0-Setup.exe
-#   Chooses: NSSM service or Scheduled‑Task
-#   Bootstraps a virtualenv and installs the daemon
+```
+
+**What the installer does:**
+
+- Bootstraps a Python virtualenv and installs all dependencies
+- Installs the Pegasus daemon + CLI launchers
+- Creates Start Menu shortcuts (Pegasus CLI, Dashboard, Uninstall)
+- Optionally adds `launchers` to the machine PATH
+
+**Windows Service (requires NSSM):**
+
+- The installer attempts to auto‑download NSSM from GitHub during setup
+- If download succeeds, NSSM is placed in `<InstallDir>\daemon\nssm.exe` and the service is registered via `install.ps1`
+- If download fails, you can manually install NSSM (`winget install NSSM.NSSM` or download from https://nssm.cc) then run `install.ps1` manually
+- Alternatively, choose the **Scheduled Task** component which requires no NSSM
+
+**To install NSSM manually:**
+
+```powershell
+# Option 1: winget
+winget install NSSM.NSSM
+
+# Option 2: Chocolatey
+choco install nssm
+
+# Option 3: Manual download
+# Download from https://nssm.cc/release/nssm-2.24.zip
+# Extract and place nssm.exe in <InstallDir>\daemon\ or add to PATH
+```
+
+Then run the service installer:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File <InstallDir>\daemon\install.ps1
 ```
 
 ### Docker (experimental)
@@ -277,6 +310,6 @@ Include:
 | **Auto‑send** | After the Android intent composer is populated, `auto_send` presses Enter after 1.6 s. |
 | **Parity assertion** | The CLI command `python -m pytest ... && echo "True"` confirming 100 % NSO coverage. |
 | **USDC** | USD‑Coin cryptocurrency used for access‑tier billing (one‑time, weekly, monthly). |
-| **NSSM** | Non‑Sucking Service Manager – Windows service wrapper. |
+| **NSSM** | Non‑Sucking Service Manager – Windows service wrapper used by the NSIS installer to register the daemon as a Windows service. |
 
 ---

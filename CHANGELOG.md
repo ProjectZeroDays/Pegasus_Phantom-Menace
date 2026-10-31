@@ -85,98 +85,38 @@ productionised web GUI.
 
 ## [2.0.0] — 2026-10-30
 
-The Web GUI release. Pegasus gains a complete operator console, the plugin
-loader actually loads every module, and the web server is packaged as a
-standalone Windows executable.
+Web GUI foundation.
 
 ### Added
 
-**Web GUI (`pegasus/ui/web`)**
-- React 18 + TypeScript + Vite 6 single-page application, 32 feature pages,
-  served by a Flask API from one process.
-- Design system with dark mission-control styling, responsive layout down to
-  phone width, installable PWA manifest.
-- Application shell: grouped collapsible sidebar, active-device selector,
-  live status bar, job drawer with streaming terminal output.
-- **Mission Control** — merged from the two dashboard mockups: stat strip,
-  device summary card, telemetry counts, quick command cards, workflow history,
-  per-vector success rates, platform surface index.
-- **Devices** — ADB inventory, full fingerprint inspector (40+ properties),
-  live shell, wireless pairing (with code), bulk telemetry collection,
-  device event feed.
-- **Access Workflow** — 8 access vectors with availability, manual controls,
-  autonomous lifecycle launch, stage visualisation.
-- **Workflow Engine** — full-lifecycle and stage-by-stage runs, run history
-  with stage inspection, per-vector success rates.
-- **Zero-Click & CVE** — 6 exploit families (Pixel 8, S24, Xiaomi, OnePlus,
-  AOSP, Android TV) and the 12-entry CVE database with live scoring.
-- **Post-Exploitation** — 6-stage chain (fingerprint → persistence →
-  credentials → lateral → exfiltration → harden), per-stage dispatch.
-- **Telemetry pages** — Locations, Geofences (CRUD), Call Logs, Contacts,
-  Messages, Browser (domain distribution), Applications, Photos & Video (with
-  thumbnails and lightbox), Wi-Fi, Keystrokes, Activity Timeline, Keywords.
-- **Operations pages** — Payloads (generation + artifact library),
-  Wordlists (profile generator), Sessions (Metasploit RPC), Campaigns, Reports.
-- **Network & tools** — nmap scanner with parsed host results, listener health,
-  tunnel guidance, binary console, slash-command palette.
-- **Skills Catalog** — 23 agent skill packs mapped to executable commands.
-- **Plugins / Command Center / Settings** — registry views, all 40 commands
-  dispatchable, workspace paths, environment and configuration reference.
-
-**Backend (`pegasus/ui/web/backend`)**
-- Flask application factory with ~90 routes and consistent
-  `{"ok": bool, "data"|"error": ...}` envelopes.
-- Background job manager: thread per job, progress, cooperative cancellation,
-  bounded history, structured result capture.
-- Output capture layer that unifies Python writes, file-descriptor writes and
-  subprocess output, with Unicode-safe Rich rendering on Windows.
-- Rich prompt shim that answers interactive modules from supplied values
-  instead of blocking on stdin.
-- Binary-safe media transfer via `adb exec-out` with a workspace cache and
-  MIME sniffing.
-- SQLite telemetry store (rolling samples, geofences, keywords, device notes)
-  and 10 resilient ADB collectors.
-- Platform event log persisted to the workspace logs directory.
-- SPA fallback routing that keeps unknown `/api/*` paths as JSON 404s.
-
-**Packaging**
-- `pegasus_web.py` launcher, `Pegasus-Web.spec` PyInstaller spec and
-  `version-web.txt` metadata; produces a single `dist/Pegasus-Web.exe`.
-- `pegasus serve` / `pegasus web` CLI commands; legacy Flask C2 dashboard moved
-  to `pegasus dashboard` on port 5050.
-- Flask/CORS added to `requirements.txt` and `pyproject.toml`.
-
-**Tests & docs**
-- 24 pytest tests for the GUI backend (routing, registries, jobs, geofence and
-  keyword CRUD, capture layer, telemetry store) — no device required.
-- `pegasus/ui/web/README.md` with page map, full API reference and
-  architecture notes; root and package READMEs updated.
+- React 18 + TypeScript + Vite 6 console (`pegasus/ui/web`) with a Flask API
+  served from one process, dark mission-control design system, responsive
+  layout and an installable PWA manifest.
+- Application shell: grouped collapsible sidebar, active-device selector, live
+  status bar and a job drawer with streaming terminal output.
+- Page set: Mission Control, Devices, Monitoring, Access Workflow, Workflow
+  Engine, Zero-Click & CVE, Post-Exploitation, Locations, Geofences, Calls,
+  Contacts, Messages, Browser, Applications, Photos & Video, Wi-Fi, Keystrokes,
+  Activity, Keywords, Payloads, Wordlists, Sessions, Campaigns, Reports,
+  Network Scanner, Toolbox, Skills Catalog, Plugins, Command Center, Settings.
+- Background job manager with output capture, progress and cancellation; ADB
+  telemetry store (samples, geofences, keywords, device notes) and 10 resilient
+  collectors.
+- `pegasus_web.py` launcher, `Pegasus-Web.spec` packaging spec and
+  `version-web.txt` metadata producing a single `dist/Pegasus-Web.exe`.
+- `pegasus/ui/web/README.md` (page map, API reference, architecture) and
+  `docs/WEB_GUI_ARCHITECTURE.md`.
 
 ### Fixed
-- **Plugin loader never bound module-level metadata.** `plugin.py` files
-  declare `metadata` at module level while the class lives in `module.py`, so
-  10 of 14 plugins failed with `type object 'X' has no attribute 'metadata'`
-  or `'NoneType' object has no attribute 'name'`. The loader now resolves the
-  factory's target class (annotation, globals, closure) and binds metadata
-  before instantiation. All 14 plugins and 40 commands now load.
-- Plugin discovery returned duplicate paths, producing "already loaded"
-  warnings; results are now de-duplicated by resolved path.
-- Plugin async initialization used `get_event_loop()` and deadlocked when
-  called from a thread with a running loop; replaced with a dedicated
-  per-thread loop runner.
-- `pegasus/pyproject.toml` contained invalid TOML (`per-file-ignores = {`
-  spanning lines), which broke `pytest`, `ruff` and any TOML reader.
-- Web launcher crashed on Windows consoles with `UnicodeEncodeError` when
-  printing an arrow glyph; replaced with ASCII output.
-- Every captured line was duplicated because the tee wrote to the original
-  stream whose descriptor was already redirected; capture now writes once.
-- Rich emitted cp437-era glyphs (`legacy_windows`) which arrived as mojibake
-  in job output; legacy mode is disabled for the duration of a job.
 
-### Changed
-- `pegasus serve` now launches the real GUI (previously printed "available in
-  Phase 3"); the old template dashboard is available as `pegasus dashboard`.
-- `.gitignore` extended for Node modules, build caches and SQLite databases.
+- Plugin loader never bound module-level metadata to the class in `module.py`,
+  so most modules failed to load.
+- Duplicate plugin discovery, and an async-init deadlock when a loop was
+  already running on the calling thread.
+- Invalid TOML in `pegasus/pyproject.toml` that broke pytest and ruff.
+- Windows launcher `UnicodeEncodeError` on arrow glyphs.
+- Duplicated and truncated job output (tee double-write, default console
+  width).
 
 ---
 

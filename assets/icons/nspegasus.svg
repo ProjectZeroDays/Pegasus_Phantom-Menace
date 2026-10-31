@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NSO Pegasus Icon -->
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <rect x="1" y="1" width="62" height="62" rx="8" ry="8" fill="#0A0B0E"/>
+  <path d="M33 13 L25 19 L17 27 L23 33 L33 41 L41 33 L33 27 L25 19 Z" fill="#58A6FF"/>
+  <circle cx="32" cy="32" r="7" fill="#FFFFFF"/>
+  <path d="M33 27 L25 33 L17 41 L25 49 L33 55 L41 49 L49 41 L41 33 Z" fill="#58A6FF"/>
+  <path d="M13 33 L19 25 L27 17 L33 25 L41 33 L33 41 Z" fill="#58A6FF"/>
+  <path d="M33 55 L41 49 L55 41 L55 25 L49 17 L41 25 L33 33 Z" fill="#58A6FF"/>
+  <path d="M25 33 L19 41 L17 55 L25 63 L33 55 L41 63 L55 55 L55 49 Z" fill="#58A6FF"/>
+  <path d="M33 55 L41 49 L41 33 L33 27 Z" fill="#2F81F7"/>
+  <text x="32" y="58" font-family="Verdana" font-size="8" fill="#FFFFFF" text-anchor="middle">Peg</text>
+  <text x="32" y="62" font-family="Verdana" font-size="7" fill="#FFFFFF" text-anchor="middle">asu</text>
+</svg>

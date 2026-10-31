@@ -28,7 +28,11 @@ if (-not (Test-Path $daemon)) { throw "daemon_service.py not found at $daemon" }
 
 $nssm = (Get-Command nssm.exe -ErrorAction SilentlyContinue)
 if (-not $nssm) {
-    $candidates = @("$env:ProgramFiles\nssm\nssm.exe", "$env:ChocolateyInstall\bin\nssm.exe")
+    $candidates = @(
+        "$InstallPath\daemon\nssm.exe",
+        "$env:ProgramFiles\nssm\nssm.exe",
+        "$env:ChocolateyInstall\bin\nssm.exe"
+    )
     $nssm = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
 }
 if (-not $nssm) { throw "NSSM not found. Install it (winget install NSSM.NSSM) or use the scheduled task." }
