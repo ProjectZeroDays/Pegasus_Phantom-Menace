@@ -10,6 +10,10 @@ export default function Campaigns() {
   const [form, setForm] = useState({ name: "", client: "", description: "", authorization: "written" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+  const [channel, setChannel] = useState<string>("sms");
+  const [payloadUrl, setPayloadUrl] = useState<string>("");
+  const [target, setTarget] = useState<string>("");
 
   const { data, loading, refresh } = useApi<{
     campaigns: CampaignRow[];
@@ -24,6 +28,26 @@ export default function Campaigns() {
       await api.post("/campaigns", form);
       setForm({ name: "", client: "", description: "", authorization: "written" });
       setShowForm(false);
+      refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const deploy = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await api.post("/campaigns/deploy", {
+        campaign_id: selectedCampaignId,
+        channel,
+        payload_url: payloadUrl,
+        target,
+      });
+      setTarget("");
+      setPayloadUrl("");
       refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -139,6 +163,59 @@ export default function Campaigns() {
           {JSON.stringify(data?.stats ?? {}, null, 2)}
         </pre>
       </Panel>
+
+      <div className="grid-2">
+        <Panel title="Deploy workflow">
+          <div className="form-row">
+            <Field label="Campaign">
+              <select className="select" value={selectedCampaignId ?? ""} onChange={(e) => setSelectedCampaignId(e.target.value)} style={{ flex: "0 0 180px" }}>
+                <option value="">— select —</option>
+                {campaigns.map((c) => (
+                  <option key={c.campaign_id ?? c.name} value={c.campaign_id ?? c.name}>{c.name ?? "—"}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Channel">
+              <select className="select" value={channel} onChange={(e) => setChannel(e.target.value)} style={{ flex: "0 0 140px" }}>
+                <option value="sms">SMS</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="telegram">Telegram</option>
+                <option value="signal">Signal</option>
+                <option value="facebook">Facebook Messenger</option>
+                <option value="email">Email / IP:port</option>
+                <option value="bluetooth">Bluetooth</option>
+              </select>
+            </Field>
+            <Field label="Payload URL">
+              <input className="input" value={payloadUrl} onChange={(e) => setPayloadUrl(e.target.value)} placeholder="http://ip:port/file.apk" style={{ flex: "0 1 320px" }} />
+            </Field>
+            <Field label="Target">
+              <input className="input" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="phone number / jid / email" style={{ flex: "0 1 200px" }} />
+            </Field>
+            <Field label="Deploy">
+              <button
+                className="btn btn-primary"
+                disabled={busy || !selectedCampaignId || !payloadUrl || !target || !channel}
+                onClick={() => void deploy()}
+              >
+                {busy ? "Deploying…" : "Deploy payload"}
+              </button>
+            </Field>
+          </div>
+        </Panel>
+
+        <Panel title="Attribution summary">
+          <div className="col" style={{ gap: 6 }}>
+            <Stat value={campaigns.filter((c) => (c.status ?? "").toLowerCase() === "active").length} label="Active campaigns" tone="ok" />
+            <Stat value={campaigns.filter((c) => (c.status ?? "").toLowerCase() === "complete").length} label="Completed" tone="info" />
+            <Stat value={campaigns.length} label="Total campaigns" tone="info" />
+            <div className="kv" style={{ fontSize: "0.75rem" }}>
+              <span className="kv-k row"><ClipboardList size={9} />Total targets:{String(campaigns.reduce((a, c) => a + Number(c.target_count ?? 0), 0))}</span>
+              <span className="kv-v mono tiny">finding records:[20]</span>
+            </div>
+          </div>
+        </Panel>
+      </div>
     </div>
   );
 }
