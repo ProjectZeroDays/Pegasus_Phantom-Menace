@@ -24,6 +24,7 @@ import WifiNetworks from "@/pages/Wifi";
 import Keylog from "@/pages/Keylog";
 import ActivityTimeline from "@/pages/ActivityTimeline";
 import Keywords from "@/pages/Keywords";
+import PayloadFactory from "@/pages/PayloadFactory";
 import Payloads from "@/pages/Payloads";
 import Wordlists from "@/pages/Wordlists";
 import Sessions from "@/pages/Sessions";
@@ -65,7 +66,8 @@ export default function App() {
           <Route path="/keylog" component={Keylog} />
           <Route path="/activity" component={ActivityTimeline} />
           <Route path="/keywords" component={Keywords} />
-          <Route path="/payloads" component={Payloads} />
+          <Route path="/payload-factory" component={PayloadFactory} />
+<Route path="/payloads" component={Payloads} />
           <Route path="/wordlists" component={Wordlists} />
           <Route path="/sessions" component={Sessions} />
           <Route path="/campaigns" component={Campaigns} />

@@ -103,6 +103,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: "operations",
     label: "Operations",
     items: [
+      { path: "/payload-factory", label: "Payload Factory", icon: Sparkles },
       { path: "/payloads", label: "Payloads", icon: Rocket },
       { path: "/wordlists", label: "Wordlists", icon: KeyRound },
       { path: "/sessions", label: "Sessions", icon: Terminal },
