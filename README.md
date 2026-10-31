@@ -4,7 +4,6 @@
 
 <img src="assets/icons/pegasus-512.png" width="128" alt="Pegasus Phantom Menace Icon" />
 <br/>
-<em>NSO Pegasus vector — blue shield logo with data hex motif</em>
 
 </div>
 
