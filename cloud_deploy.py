@@ -67,9 +67,9 @@ class CloudDeployWizard:
         out_dir.mkdir(exist_ok=True)
         manifest = out_dir / f"{self.config.provider}-{self.config.project_name}-{self.config.region}.json"
         manifest.write_text(
-            f'{"provider":"{self.config.provider}","region":"{self.config.region}",'
-            f'"project":"{self.config.project_name}","instance":"{self.config.instance_type}",'
-            f'"defensive_only":true,"date":"2026-10-31"}\n',
+            '{"provider":"' + self.config.provider + '","region":"' + self.config.region + '",'
+            '"project":"' + self.config.project_name + '","instance":"' + self.config.instance_type + '",'
+            '"defensive_only":true,"date":"2026-10-31"}\n',
             encoding="utf-8",
         )
         print(f"[green]✓ Defensive deploy manifest written: {manifest}[/green]")

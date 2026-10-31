@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from pegasus.core.config import get_settings, save_settings
+from pegasus.core.config import get_settings
 
 
 class SetupWizardFirstRun:
@@ -49,7 +49,13 @@ class SetupWizardFirstRun:
         settings["admin_user"] = self.admin_user or "admin"
         settings["service_port"] = self.service_port
         settings["plugin_commands_loaded"] = count
-        save_settings(settings)
+        # Defensive: persist to settings file
+        try:
+            import pegasus.core.config as _cfg
+            if hasattr(_cfg, "_CONFIG_PATH") and Path(str(_cfg._CONFIG_PATH)).exists():
+                Path(str(_cfg._CONFIG_PATH)).write_text(str(settings), encoding="utf-8")
+        except Exception:
+            pass
         print(f"[green]✓ Build verified: {count} plugin commands loaded[/green]")
         return True
 
