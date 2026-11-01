@@ -1,0 +1,5 @@
+-keep class com.pegasus.agent.** { *; }
+-keepclassmembers class * extends android.content.BroadcastReceiver { *; }
+-keepattributes *Annotation*
+-dontwarn okhttp3.**
+-dontwarn dnsjava.**

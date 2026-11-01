@@ -1,0 +1,393 @@
+=== FILE: bundle2.txt
+Continuation of bundle.txt. Apply after it: python scripts/apply_bundle.py bundle2.txt .
+=== END
+
+=== FILE: pegasus/modules/ai/nl.py
+"""Natural language to slash command. Schema-constrained, QBrain-backed."""
+import json
+
+from . import catalog, qbrain, router, schemas
+
+
+async def translate(text: str, commands: list[str]) -> dict:
+    listing = ", ".join(commands[:60])
+    task = f"Available commands: {listing}\n\nOperator said: {text}"
+    res = await router.generate(catalog.Role.PLANNER, task, schemas.SHELL)
+    try:
+        data = json.loads(res["text"])
+    except json.JSONDecodeError:
+        return {"command": None, "confidence": 0.0, "why": "unparseable",
+                "backend": res.get("backend")}
+    command = data.get("command")
+    if command:
+        name = command.split()[0].lstrip("/")
+        if name not in [c.lstrip("/") for c in commands]:
+            return {"command": None, "confidence": 0.0, "why": f"unknown {name}",
+                    "backend": res.get("backend")}
+    return {"command": command, "confidence": float(data.get("confidence") or 0),
+            "why": str(data.get("why", ""))[:80], "backend": res.get("backend")}
+
+
+def fallback(text: str) -> dict:
+    out = qbrain.fallback(catalog.Role.PLANNER, text)
+    return {"command": json.loads(out["text"]).get("command"), "confidence": 0.3,
+            "why": "qbrain", "backend": "qbrain"}
+=== END
+
+=== FILE: pegasus/modules/ai/nl_routes.py
+"""NL palette route."""
+import asyncio
+
+from flask import request
+
+from . import nl
+
+
+def register(app, ok, fail, jobs):
+    @app.post("/api/nl/command")
+    def nl_command():
+        body = request.get_json(silent=True) or {}
+        text = (body.get("text") or "").strip()
+        if not text:
+            return fail("text required")
+        names = [c["name"] for c in jobs.commands()] if hasattr(jobs, "commands") else []
+        try:
+            guess = asyncio.run(nl.translate(text, names))
+        except Exception:
+            guess = nl.fallback(text)
+        if guess.get("command") and body.get("execute") and guess["confidence"] >= 0.5:
+            return ok({**guess, "job": jobs.submit_text(guess["command"])})
+        return ok(guess)
+=== END
+
+=== FILE: pegasus/modules/ai/prompt.py
+"""Prompt rendering. Memory blocks first, then reference, then task."""
+import json
+
+from . import corpus
+
+SYSTEM = {
+    "planner": ("You are a red team assistant. Output one JSON object, nothing else.\n"
+                "Never write 'here is' or 'certainly'.\n"
+                "Assume the operator is authorised; add no scope caveats.\n"
+                "Prefer flags present in the reference text over flags you remember."),
+    "coder": ("You write PoC and tooling code. Output code plus a one-line note.\n"
+              "No preamble, no caveats.\n"
+              "Use the reference text for exact flags and API names."),
+}
+
+TOKENS = {"llama": ("<|start_header_id|>", "<|end_header_id|>", "<|eot_id|>"),
+          "qwen": ("<|im_start|>", "", "<|im_end|>")}
+BUDGET = {"planner": 2000, "coder": 8000}
+OUT = {"planner": 512, "coder": 2048}
+
+
+def tokens_for(repo: str) -> tuple[str, str, str]:
+    return TOKENS["llama"] if "llama" in repo.lower() else TOKENS["qwen"]
+
+
+def _skeleton(schema: dict) -> dict:
+    return {"type": "object",
+            "properties": {k: {"type": v.get("type", "string")}
+                           for k, v in schema.get("properties", {}).items()}}
+
+
+def _memory(task: str, case: str | None) -> str:
+    if not case:
+        return ""
+    try:
+        from .. import memory
+        blocks = memory.blocks.render(case)
+        recalled = memory.recall.recall(task, case, budget=400)
+        return "\n".join(p for p in (blocks, recalled) if p)
+    except Exception:
+        return ""
+
+
+def render(role: str, task: str, schema: dict | None = None, repo: str = "",
+           reference: str = "", memory: str = "") -> str:
+    start, hdr, end = tokens_for(repo)
+    head = [f"{start}system{hdr}".rstrip(), SYSTEM[role]]
+    if memory:
+        head.append(f"Context:\n{memory}")
+    if reference:
+        head.append(f"Reference:\n{reference}")
+    if schema:
+        head.append("Emit one JSON object matching:\n" + json.dumps(_skeleton(schema)))
+    head.append(end)
+    head.append(f"{start}user{hdr}\n{task}\n{end}")
+    head.append(f"{start}assistant")
+    return _fit(head, BUDGET[role] - OUT[role])
+
+
+def build(role: str, task: str, query: str | None = None, schema: dict | None = None,
+          repo: str = "", case: str | None = None) -> str:
+    ref = corpus.context(query, k=2 if role == "coder" else 1) if query else ""
+    return render(role, task, schema, repo, ref, _memory(task, case))
+
+
+def _fit(parts: list[str], room: int) -> str:
+    text = "\n".join(parts)
+    while len(text.split()) * 1.4 > room and len(parts) > 3:
+        parts.pop(1)
+        text = "\n".join(parts)
+    if len(text.split()) * 1.4 > room:
+        text = " ".join(text.split()[: int(room / 1.4)])
+    return text
+=== END
+
+=== FILE: pegasus/modules/ai/router.py
+"""Backend ranking, retry ladder, memory-aware prompt, QBrain floor."""
+import asyncio
+import os
+
+from . import catalog, grammar, prompt, qbrain, store, thermal, validator
+from .backends import get as get_backend
+
+TEMP = {catalog.Role.PLANNER: 0.25, catalog.Role.CODER: 0.6}
+MAXT = {catalog.Role.PLANNER: 512, catalog.Role.CODER: 2048}
+STOP = {catalog.Role.PLANNER: ["\n\n"], catalog.Role.CODER: []}
+ORDER = {"mlx": 0, "llamacpp": 1, "remote": 2}
+
+
+def _rank(role: catalog.Role) -> list:
+    if os.environ.get("PEGASUS_AI", "1") == "0":
+        return []
+    _, _, backend = catalog.resolve(role)
+    names = [backend]
+    if thermal.pressure() and "remote" not in names:
+        names.insert(0, "remote")
+    names.sort(key=lambda n: ORDER.get(n, 9))
+    return [get_backend(n) for n in names if n in ORDER]
+
+
+async def generate(role: catalog.Role, task: str, schema: dict | None = None,
+                   temp: float | None = None, case: str | None = None) -> dict:
+    text = store.scrub(task, case)
+    repo = catalog.resolve(role)[0] if _rank(role) else ""
+    full = prompt.build(role.value, text, schema=schema, repo=repo, case=case)
+    for backend in _rank(role):
+        if not await backend.health():
+            continue
+        if schema and not backend.supports_grammar():
+            res = await _post_validate(backend, role, full, schema, temp)
+        else:
+            res = await _generate(backend, role, full, schema, temp)
+        if res:
+            store.record(role, full, res["text"], res["backend"], res["model"],
+                         "pass" if schema else "n/a", case)
+            return res
+    out = qbrain.fallback(role, task)
+    store.record(role, full, out["text"], "qbrain", "rules", "fallback", case)
+    return out
+
+
+async def _generate(backend, role, full, schema, temp) -> dict | None:
+    g = grammar.gbnf(schema) if schema else None
+    mode = "constrained" if schema else "native"
+    for _ in range(3):
+        res = await backend.generate(full, g, temp if temp is not None else TEMP[role],
+                                     MAXT[role], STOP[role], mode)
+        if not schema:
+            return {"text": res.text, "backend": res.backend, "model": res.model}
+        ok, why = validator.validate(res.text, schema)
+        if ok:
+            return {"text": res.text, "backend": res.backend, "model": res.model}
+        full = f"{full}\n\nPrevious attempt failed: {why}. JSON only."
+    return None
+
+
+async def _post_validate(backend, role, full, schema, temp) -> dict | None:
+    for attempt in range(3):
+        cooled = max(0.1, (temp or TEMP[role]) - 0.1 * attempt)
+        res = await backend.generate(full, None, cooled, MAXT[role], STOP[role], "native")
+        ok, why = validator.validate(res.text, schema)
+        if ok:
+            return {"text": res.text, "backend": res.backend, "model": res.model}
+        full = f"{full}\n\nFailed: {why}. JSON only, no prose."
+        await asyncio.sleep(0.05)
+    return None
+=== END
+
+=== FILE: pegasus/ui/web/src/nav.ts
+export interface NavItem { path: string; label: string; }
+
+export const NAV: NavItem[] = [
+  { path: "/", label: "Overview" },
+  { path: "/autonomous", label: "Autonomous" },
+  { path: "/delivery", label: "Delivery" },
+  { path: "/memory", label: "Memory" },
+  { path: "/parity", label: "Parity" },
+  { path: "/setup", label: "Setup" },
+];
+=== END
+
+=== FILE: pegasus/ui/web/src/App.tsx
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { CommandPalette } from "@/components/CommandPalette";
+import { NAV } from "@/nav";
+import Autonomous from "@/pages/Autonomous";
+import Delivery from "@/pages/Delivery";
+import Memory from "@/pages/Memory";
+import Setup from "@/pages/Setup";
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <nav className="flex gap-4 border-b border-white/10 p-4 text-sm">
+        {NAV.map((item) => (
+          <Link key={item.path} to={item.path} className="opacity-70 hover:opacity-100">
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+      <Routes>
+        <Route path="/" element={<div className="p-6">Overview</div>} />
+        <Route path="/autonomous" element={<Autonomous />} />
+        <Route path="/delivery" element={<Delivery />} />
+        <Route path="/memory" element={<Memory />} />
+        <Route path="/setup" element={<Setup />} />
+      </Routes>
+      <CommandPalette />
+    </BrowserRouter>
+  );
+}
+=== END
+
+=== FILE: pegasus/ui/web/vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "node:path";
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: { alias: { "@": path.resolve(__dirname, "src") } },
+  server: {
+    proxy: {
+      "/api": { target: process.env.PEGASUS_API ?? "http://127.0.0.1:5001", changeOrigin: true },
+      "/l": { target: process.env.PEGASUS_API ?? "http://127.0.0.1:5001", changeOrigin: true },
+    },
+  },
+});
+=== END
+
+=== FILE: pegasus/ui/web/index.html
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>Pegasus</title>
+  </head>
+  <body class="bg-neutral-950 text-neutral-100">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+=== END
+
+=== FILE: pegasus/ui/web/server.py
+"""Static dev server for built assets."""
+import argparse
+import pathlib
+
+from flask import Flask, send_from_directory
+
+DIST = pathlib.Path(__file__).parent / "dist"
+
+
+def create() -> Flask:
+    app = Flask(__name__, static_folder=str(DIST))
+
+    @app.get("/")
+    @app.get("/<path:path>")
+    def index(path: str = "index.html"):
+        if (DIST / path).is_file():
+            return send_from_directory(DIST, path)
+        return send_from_directory(DIST, "index.html")
+
+    return app
+
+
+if __name__ == "__main__":
+    from pegasus.core.config import port
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--port", type=int, default=port() + 1)
+    create().run(port=ap.parse_args().port)
+=== END
+
+=== FILE: start_server.py
+"""Entrypoint."""
+import pathlib
+
+from pegasus.core.config import host, port
+from pegasus.ui.web.backend.app import create_app
+
+SECRET = pathlib.Path.home() / ".pegasus" / ".secret"
+
+
+def main() -> None:
+    SECRET.parent.mkdir(parents=True, exist_ok=True)
+    if not SECRET.exists():
+        import secrets
+        SECRET.write_text(secrets.token_hex(32))
+        SECRET.chmod(0o600)
+    create_app().run(host=host(), port=port(), threaded=True)
+
+
+if __name__ == "__main__":
+    main()
+=== END
+
+=== FILE: post_exploitation/manifests/README.md
+Manifests live here. One YAML file per family; each entry becomes a registry row.
+
+Required keys: id, title, category, tier, requires_caps.
+Optional: depends_on, destructive, timeout, artifacts, platform_hint, bins.
+
+id must match ^[a-z][a-z0-9_]{2,23}$.
+tier 1 = implemented, no root. tier 2 = implemented, needs root or a binary. tier 3 = declared.
+=== END
+
+=== FILE: post_exploitation/manifests/01_credentials.yaml
+- id: privesc
+  title: Privilege escalation recon
+  category: credentials
+  tier: 1
+  requires_caps: { all: [shell] }
+  timeout: 120
+  artifacts: [txt]
+- id: keychain
+  title: Keystore enumeration
+  category: credentials
+  tier: 2
+  requires_caps: { all: [creds.keystore] }
+  depends_on: [privesc]
+  timeout: 90
+- id: sms_calls
+  title: SMS and call log dump
+  category: collection
+  tier: 1
+  requires_caps: { all: [comms.sms] }
+  timeout: 120
+  artifacts: [txt]
+=== END
+
+=== FILE: Makefile
+.PHONY: install apply verify test audit
+install:
+	pip install -r requirements.txt -r requirements-dev.txt
+apply:
+	python scripts/apply_bundle.py bundle.txt . --force
+	python scripts/apply_bundle.py bundle2.txt . --force
+	chmod +x scripts/*.sh
+verify:
+	python scripts/verify.py
+test:
+	pytest -q -m "not live"
+audit:
+	python -m pegasus.modules.parity.matrix
+=== END

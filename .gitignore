@@ -36,3 +36,8 @@ pegasus-mobile/gradle-8.2-bin.zip
 # License secret (plaintext — never commit)
 _license_secret.py
 build_web.log
+
+# Local secrets / machine config (never commit; use .env.example)
+.env
+.env.local
+*.env.bak

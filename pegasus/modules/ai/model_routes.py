@@ -1,35 +1,27 @@
-#!/usr/bin/env python3
-"""AI model routes for the web GUI."""
+"""Compatibility routes for the old model picker."""
 from flask import request
-from pegasus.modules.ai import local_models
-from pegasus.ui.web.backend.app import ok, fail
 
-def register(app, ok_fn, fail_fn):
+from . import catalog, provision
+
+
+def register(app, ok, fail, jobs):
     @app.get("/api/models/recommended")
     def models_recommended():
-        return ok({"models": local_models.recommended(), "platform": local_models.platform_tier()})
-
-    @app.get("/api/models/installed")
-    def models_installed():
-        return ok({"installed": local_models.installed(), "default": local_models.installed_default()})
+        rows = []
+        for role in catalog.Role:
+            try:
+                repo, quant, backend = catalog.resolve(role)
+            except LookupError:
+                continue
+            rows.append({"id": repo, "quant": quant, "backend": backend,
+                         "role": role.value, "files": [f"{repo}:{quant}"]})
+        return ok({"tier": catalog.os_key(), "ram_gb": round(catalog.ram_gb(), 1),
+                   "models": rows})
 
     @app.post("/api/models/download")
     def models_download():
         body = request.get_json(silent=True) or {}
-        return ok(local_models.download(body.get("model","claude-sonnet-4-6"), body.get("filename","model.gguf")))
-
-    @app.post("/api/models/select")
-    def models_select():
-        body = request.get_json(silent=True) or {}
-        # Persist selection to providers.json (stub)
-        from pegasus.modules.ai.providers import load, save
-        data = load(); data["default"] = "local"; data.setdefault("keys",{}); data["localModel"] = body.get("model")
-        save(data)
-        return ok({"selected": body.get("model"), "local_path": str(local_models.MODELS / body.get("filename","model.gguf"))})
-
-    @app.post("/api/models/serve")
-    def models_serve():
-        body = request.get_json(silent=True) or {}
-        import pathlib
-        p = pathlib.Path(body.get("filename"))
-        return ok({"url": local_models.serve(local_models.MODELS / p.name, body.get("port", 8081))})
+        repo, quant = body.get("id"), body.get("quant", "Q4_K_M")
+        if not repo:
+            return fail("id required")
+        return ok({"job": jobs.submit(lambda: str(provision.fetch(repo, quant)))})

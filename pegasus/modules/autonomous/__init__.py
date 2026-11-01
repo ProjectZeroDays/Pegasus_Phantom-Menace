@@ -1,2 +1,2 @@
-"""Autonomous lifecycle package."""
-from . import engine  # noqa: F401
+"""Autonomous lifecycle."""
+from . import routes

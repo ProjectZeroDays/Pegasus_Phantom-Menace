@@ -1,2 +1,2 @@
-"""OAuth broker package."""
-from . import broker  # noqa: F401
+"""OAuth brokers."""
+from . import oauth_routes, broker

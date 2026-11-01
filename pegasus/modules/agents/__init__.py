@@ -1,2 +1,2 @@
-"""Agents package."""
-from . import bridge  # noqa: F401
+"""External agent bridge."""
+from . import agent_routes, bridge

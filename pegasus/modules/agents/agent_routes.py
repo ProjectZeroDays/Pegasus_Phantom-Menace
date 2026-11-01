@@ -1,26 +1,36 @@
-#!/usr/bin/env python3
+"""Agent routes."""
 from flask import request
-from pegasus.ui.web.backend.app import ok, fail
-import json, pathlib, shutil, subprocess, os
 
-CONFIG = pathlib.Path.home() / ".pegasus" / "agents.json"
-AGENTS = {"opencode":"opencode","mimicode":"mimicode"}
+from . import bridge
 
-def register(app, ok_fn, fail_fn):
+
+def register(app, ok, fail):
+    @app.get("/api/agents/available")
+    def agents_available():
+        return ok({"available": bridge.available()})
+
     @app.get("/api/agents/config")
-    def agent_config():
-        if CONFIG.exists():
-            try: return ok(json.loads(CONFIG.read_text()))
-            except: pass
-        return ok({"agent": None, "provider": None, "model": None, "skills": ".openfable-skills"})
+    def agents_config():
+        return ok({"config": bridge.load(), "available": bridge.available()})
 
     @app.post("/api/agents/config")
-    def agent_config_save():
+    def agents_set_config():
         body = request.get_json(silent=True) or {}
-        CONFIG.parent.mkdir(parents=True, exist_ok=True)
-        CONFIG.write_text(json.dumps(body, indent=2))
-        return ok({"saved": True})
+        cfg = bridge.load()
+        for field in ("agent", "provider", "model", "skills"):
+            if field in body:
+                cfg[field] = body[field]
+        if cfg.get("agent") and not bridge.available().get(cfg["agent"]):
+            return fail(f"{cfg['agent']} is not on PATH")
+        bridge.save(cfg)
+        return ok({"config": cfg})
 
-    @app.get("/api/agents/available")
-    def agent_available():
-        return ok({k: bool(shutil.which(v)) for k, v in AGENTS.items()})
+    @app.post("/api/agents/dispatch")
+    def agents_dispatch():
+        body = request.get_json(silent=True) or {}
+        if not body.get("prompt"):
+            return fail("prompt required")
+        try:
+            return ok(bridge.dispatch(body["prompt"], body.get("cwd", ".")))
+        except Exception as exc:
+            return fail(str(exc), 503)
