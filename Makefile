@@ -9,13 +9,6 @@ apply:
 smoke:
 	bash scripts/smoke.sh 
 
-docs/HANDOFF.md: docs/PLAN.md
-	python3 scripts/handoff.py
-
-.PHONY: handoff handoff-check handoff-guard agents agents-check agents-lint hooks hooks-check bootstrap-check plan-lint ready-check blocked gate module-new preflight doctor
-handoff: docs/HANDOFF.md
-handoff-guard: handoff-check
-	@test -s docs/HANDOFF.md || { echo "HANDOFF empty"; exit 1; }
 
 # >>> pegasus bootstrap managed targets (regenerated) >>>
 PHASE ?= P0
