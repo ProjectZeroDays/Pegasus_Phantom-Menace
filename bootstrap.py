@@ -2378,7 +2378,7 @@ PROOFS = {
 PHASES_YAML = """phases:
   - {id: P0, gate: G13, revert: "delete produced", requires: [],
      produces: [docs/PLAN.md, docs/HANDOFF.md, skills/SKILL.md, skills/agents.yaml, build/claims.frozen]}
-  - {id: P1, gate: G2, revert: "git revert", requires: [{path: docs/HANDOFF.md}, {path: LICENSE}, {path: docs/LICENSE-DECISION.md}], produces: []}
+  - {id: P1, gate: G2, revert: "git revert", requires: [{path: docs/HANDOFF.md}, {path: LICENSE, sha256: "2a06521630b1ee7725add62da05fb47f3bba6233604a402a5d5f7a3364ed8b21"}, {path: docs/LICENSE-DECISION.md}], produces: []}
   - {id: P2, gate: G2, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: [archive/root-entrypoints/DIFF.md]}
   - {id: P3a, gate: G10, revert: "delete artifacts", requires: [{path: docs/HANDOFF.md}],
      produces: [docs/api/openapi.yaml, build/openapi.routes.json, build/openapi.sha256]}

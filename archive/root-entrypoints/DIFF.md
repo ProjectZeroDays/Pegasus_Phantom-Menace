@@ -1,6 +1,6 @@
 # Root entrypoint diff
 
-Reversible from `build/.prune-backup/fb1ed584` or from git.
+Reversible from `build/.prune-backup/cbb56082` or from git.
 
 | Path | Verdict | Reason |
 |---|---|---|
