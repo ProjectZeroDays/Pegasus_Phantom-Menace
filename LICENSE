@@ -1,24 +1,57 @@
-Pegasus v1.1
+Pegasus v2.1.0
 Created by ProjectZeroDays
 
-Copyright (c) 2025 ProjectZeroDays
+Copyright (c) 2025 ProjectZeroDays. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to use
-the Software for educational and research purposes only, subject to the
-following conditions:
+This software, together with its associated documentation, assets and generated
+artifacts (the "Software"), is proprietary. It is not free software and not open
+source. No licence is granted by default, and use without permission is unlawful.
 
-1. The Software shall not be used for any illegal activity, including but not
-   limited to unauthorized access, data theft, or violation of privacy.
-2. The Software is provided "as is", without warranty of any kind, express or
+1. PERMISSION REQUIRED
+   Any use of the Software requires prior written permission from the copyright
+   holder. Absent that permission, use, copying, modification or distribution is
+   unauthorised and infringes copyright.
+
+2. SCOPE OF ANY GRANT
+   Permission, where granted, is limited to the terms stated in the grant.
+   Rights not expressly granted are reserved. No permission extends to
+   commercial use, redistribution, sublicensing, or hosting as a service unless
+   the grant says so in writing.
+
+3. MODIFICATION AND LIKENESS
+   Modification is permitted only with prior written permission. Any modified or
+   derivative version must remain in the likeness of the original:
+
+   a. the name "Pegasus" and the ProjectZeroDays attribution must be retained
+      and presented with equal prominence;
+   b. the version lineage must be recorded, naming the version derived from;
+   c. the derivative must not be rebranded, renamed, or presented as an
+      independent work;
+   d. divergent forks, where permitted, must be identified as forks.
+
+4. ATTRIBUTION
+   Every copy, deployment and derivative must carry credit to the original
+   author ("ProjectZeroDays") and a link to the official channel:
+   <INSERT OFFICIAL YOUTUBE URL>
+
+5. NO WARRANTY
+   The Software is provided "as is", without warranty of any kind, express or
    implied, including but not limited to the warranties of merchantability,
    fitness for a particular purpose and noninfringement.
-3. In no event shall the authors or copyright holders be liable for any claim,
-   damages or other liability, whether in an action of contract, tort or
-   otherwise, arising from, out of or in connection with the Software or the
-   use or other dealings in the Software.
-4. Redistribution and modification of the Software are permitted only with
-   proper credit to the original author ("ProjectZeroDays") and a link to the
-   official YouTube channel.
 
-By using this Software, you agree to these terms.
+6. NO LIABILITY
+   In no event shall the author or copyright holder be liable for any claim,
+   damages or other liability, whether in an action of contract, tort or
+   otherwise, arising from, out of or in connection with the Software or the use
+   or other dealings in the Software.
+
+7. TERMINATION
+   Permission terminates automatically on breach of these terms. On termination
+   all copies must be destroyed or returned, and continued use becomes
+   unauthorised.
+
+8. RESERVATION
+   These terms state obligations on the user only. They do not themselves grant
+   permission to use the Software.
+
+By using the Software you agree to these terms.
