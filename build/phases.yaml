@@ -1,0 +1,29 @@
+phases:
+  - {id: P0, gate: G13, revert: "delete produced", requires: [],
+     produces: [docs/PLAN.md, docs/HANDOFF.md, skills/SKILL.md, skills/agents.yaml, build/claims.frozen]}
+  - {id: P1, gate: G2, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: []}
+  - {id: P2, gate: G2, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: [archive/root-entrypoints/DIFF.md]}
+  - {id: P3a, gate: G10, revert: "delete artifacts", requires: [{path: docs/HANDOFF.md}],
+     produces: [docs/api/openapi.yaml, build/openapi.routes.json, build/openapi.sha256]}
+  - {id: P3b, gate: G4, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: []}
+  - {id: P3c, gate: G4, revert: "git revert", requires: [{path: docs/HANDOFF.md}],
+     produces: [pegasus/tests/unit, pegasus/tests/integ, pegasus/tests/contract, pegasus/tests/fixture]}
+  - {id: P4, gate: G3, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: [pegasus/db/migrations]}
+  - {id: P5, gate: G4, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: [docs/PROVENANCE.md]}
+  - {id: P6, gate: G6, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: []}
+  - {id: P7, gate: G8, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: [dist]}
+  - {id: P8, gate: G13, revert: "delete tag", requires: [{path: docs/HANDOFF.md}], produces: [README.md]}
+  - {id: P9, gate: G19, revert: "git revert", requires: [{path: docs/HANDOFF.md}],
+     produces: [core/caps.py, core/host.py, core/transport.py]}
+  - {id: P10, gate: G20, revert: "git revert", requires: [{path: docs/HANDOFF.md}],
+     produces: [post_exploitation/spec.py, post_exploitation/manifests]}
+  - {id: P11, gate: G21, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: [build/audit.md]}
+  - {id: P12, gate: G22, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: []}
+  - {id: P13, gate: G23, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: [docs/EVIDENCE.md]}
+  - {id: P14, gate: G24, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: [ai/catalog.yaml]}
+  - {id: R0, gate: G11, revert: "git revert", requires: [{path: docs/HANDOFF.md}],
+     requires_empty: [build/map.diff], produces: [build/map.diff]}
+  - {id: R1, gate: G2, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: []}
+  - {id: R2, gate: G3, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: []}
+  - {id: R3, gate: G4, revert: "git revert", requires: [{path: docs/HANDOFF.md}], produces: []}
+  - {id: R4, gate: G4, revert: "delete tag", requires: [{path: docs/HANDOFF.md}], produces: []}

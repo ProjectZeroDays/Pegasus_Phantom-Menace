@@ -1,0 +1,18 @@
+{
+  "name": "pegasus-gates",
+  "version": "1.0.0",
+  "description": "Phase, gate, map, handoff and scaffold wrappers",
+  "category": "workflow",
+  "trigger": "gates",
+  "entry_point": ".openfable-skills/pegasus-gates.json",
+  "workflows": [
+    ".openfable-skills/workflows/phase-execute.json",
+    ".openfable-skills/workflows/gate-run.json",
+    ".openfable-skills/workflows/map-complete.json",
+    ".openfable-skills/workflows/module-scaffold.json",
+    ".openfable-skills/workflows/handoff-repair.json",
+    ".openfable-skills/workflows/blocked-recovery.json"
+  ],
+  "commands": 8,
+  "installation": "skill install .openfable-skills/skill.json"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "pegasus-production-agent",
+  "version": "2.0.0",
+  "description": "Production-readiness agent that performs gap analysis between current state and production-readiness, implements missing features, hardens error handling, adds observability, implements CI/CD pipelines, and ensures compliance with production deployment standards.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "category": "production",
+  "trigger": "production-agent",
+  "entry_point": "pegasus-production-agent.json",
+  "commands": 1,
+  "workflows": [
+    ".opencode-skills/workflows/production-agent-gap-analysis.json",
+    ".opencode-skills/workflows/production-agent-harden.json",
+    "pegasus/modules/access_workflow/workflows/_production_agent_workflow.json"
+  ],
+  "installation": "skill install .opencode-skills/pegasus-production-agent.json"
+}

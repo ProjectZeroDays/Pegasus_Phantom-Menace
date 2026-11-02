@@ -1,0 +1,38 @@
+{
+  "workflow": "pegasus-docs-agent-generate",
+  "version": "1.0.0",
+  "description": "Documentation generation workflow - generates exhaustive documentation including README.md files, GitHub Wiki pages, API documentation, inline code comments, architectural diagrams, deployment guides, and contributor guides.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "generate_readme",
+      "description": "Generate comprehensive README.md with installation, usage, architecture, and contribution information",
+      "action": "Generate comprehensive README.md with installation, usage, architecture, and contribution information",
+      "output": "README.md"
+    },
+    {
+      "step": 2,
+      "action": "generate_api_docs",
+      "description": "Generate complete API documentation for all modules, classes, functions, and endpoints",
+      "action": "Generate complete API documentation for all modules, classes, functions, and endpoints",
+      "output": "api_documentation.md"
+    },
+    {
+      "step": 3,
+      "action": "generate_architecture_docs",
+      "description": "Generate architecture diagrams, data flow diagrams, and component diagrams",
+      "action": "Generate architecture diagrams, data flow diagrams, and component diagrams",
+      "output": "architecture_docs.md"
+    },
+    {
+      "step": 4,
+      "action": "generate_wiki",
+      "description": "Generate complete GitHub Wiki content including setup guides, API references, and troubleshooting guides",
+      "action": "Generate complete GitHub Wiki content including setup guides, API references, and troubleshooting guides",
+      "output": "github_wiki/"
+    }
+  ],
+  "triggers": ["docs-agent", "docs-agent-generate"],
+  "output": "documentation_complete.json"
+}

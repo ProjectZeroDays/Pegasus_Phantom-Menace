@@ -1,0 +1,16 @@
+{
+  "name": "pegasus-refract-agent",
+  "version": "2.0.0",
+  "description": "Refactoring agent that analyzes code for duplication, complexity, dead code, anti-patterns, and architectural debt, then rewrites code following clean architecture principles, SOLID principles, and DRY principles while preserving functionality.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "category": "refactoring",
+  "trigger": "refract-agent",
+  "entry_point": "pegasus-refract-agent.json",
+  "commands": 1,
+  "workflows": [
+    ".opencode-skills/workflows/refract-agent-analyze.json",
+    ".opencode-skills/workflows/refract-agent-refactor.json",
+    "pegasus/modules/access_workflow/workflows/_refract_agent_workflow.json"
+  ],
+  "installation": "skill install .opencode-skills/pegasus-refract-agent.json"
+}

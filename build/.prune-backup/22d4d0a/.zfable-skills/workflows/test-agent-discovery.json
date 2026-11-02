@@ -1,0 +1,31 @@
+{
+  "workflow": "pegasus-test-agent-discovery",
+  "version": "1.0.0",
+  "description": "Autonomous test discovery workflow - scans entire codebase, identifies all modules, functions, classes, and entry points that require test coverage, maps dependencies, and generates test plan.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "discover_codebase",
+      "description": "Scan entire repository for all Python, JavaScript, Kotlin, and configuration files",
+      "action": "Scan all source files, identify public APIs, classes, functions, entry points, and API endpoints",
+      "output": "codebase_inventory.json"
+    },
+    {
+      "step": 2,
+      "action": "analyze_coverage",
+      "description": "Analyze existing test coverage, identify untested code paths, missing test coverage, and high-risk areas",
+      "action": "Map existing tests to source files, identify gaps in test coverage, prioritize high-risk untested code",
+      "output": "coverage_gap_analysis.json"
+    },
+    {
+      "step": 3,
+      "action": "generate_test_plan",
+      "description": "Create comprehensive test plan covering unit tests, integration tests, end-to-end tests, edge cases, boundary conditions, and error scenarios",
+      "action": "Generate detailed test plan with test cases, expected inputs, expected outputs, and edge cases for every function and class",
+      "output": "test_plan.json"
+    }
+  ],
+  "triggers": ["test-agent", "test-agent-discover"],
+  "output": "test_plan.json"
+}

@@ -1,0 +1,31 @@
+{
+  "workflow": "pegasus-refract-agent-analyze",
+  "version": "1.0.0",
+  "description": "Code analysis workflow - identifies code smells, duplication, anti-patterns, and architectural debt.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "analyze_code_quality",
+      "description": "Analyze code quality metrics including cyclomatic complexity, code duplication, coupling, and cohesion",
+      "action": "Analyze code quality metrics including cyclomatic complexity, code duplication, coupling, and cohesion",
+      "output": "code_quality_analysis.json"
+    },
+    {
+      "step": 2,
+      "action": "identify_anti_patterns",
+      "description": "Identify anti-patterns, god objects, god methods, feature envy, and other code smells",
+      "action": "Identify anti-patterns, god objects, god methods, feature envy, and other code smells",
+      "output": "anti_pattern_report.json"
+    },
+    {
+      "step": 3,
+      "action": "prioritize_refactoring",
+      "description": "Prioritize refactoring efforts based on impact, effort, and risk",
+      "action": "Prioritize refactoring efforts based on impact, effort, and risk",
+      "output": "refactoring_priority.json"
+    }
+  ],
+  "triggers": ["refract-agent", "refract-agent-analyze"],
+  "output": "refactoring_priority.json"
+}

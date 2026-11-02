@@ -1,0 +1,38 @@
+{
+  "workflow": "pegasus-refract-agent-refactor",
+  "version": "1.0.0",
+  "description": "Refactoring execution workflow - rewrites code following clean architecture principles, SOLID principles, and DRY principles.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "extract_methods",
+      "description": "Extract long methods into smaller, focused methods with single responsibilities",
+      "action": "Extract long methods into smaller, focused methods with single responsibilities",
+      "output": "method_extractions.json"
+    },
+    {
+      "step": 2,
+      "action": "extract_classes",
+      "description": "Extract god classes into smaller, focused classes following single responsibility principle",
+      "action": "Extract god classes into smaller, focused classes following single responsibility principle",
+      "output": "class_extractions.json"
+    },
+    {
+      "step": 3,
+      "action": "apply_design_patterns",
+      "description": "Apply appropriate design patterns to improve code structure and maintainability",
+      "action": "Apply appropriate design patterns to improve code structure and maintainability",
+      "output": "design_patterns_applied.json"
+    },
+    {
+      "step": 4,
+      "action": "verify_refactoring",
+      "description": "Verify refactored code passes all tests and maintains functionality",
+      "action": "Verify refactored code passes all tests and maintains functionality",
+      "output": "refactoring_verification.json"
+    }
+  ],
+  "triggers": ["refract-agent", "refract-agent-refactor"],
+  "output": "refactoring_verification.json"
+}

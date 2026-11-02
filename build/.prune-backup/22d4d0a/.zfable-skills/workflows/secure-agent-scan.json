@@ -1,0 +1,31 @@
+{
+  "workflow": "pegasus-secure-agent-scan",
+  "version": "1.0.0",
+  "description": "Security audit workflow - performs comprehensive security audit of all code, configurations, and infrastructure.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "scan_dependencies",
+      "description": "Scan all dependencies for known vulnerabilities using CVE databases",
+      "action": "Scan all dependencies for known vulnerabilities using CVE databases and vulnerability databases",
+      "output": "dependency_vulnerabilities.json"
+    },
+    {
+      "step": 2,
+      "action": "scan_code",
+      "description": "Static analysis of source code for security vulnerabilities including injection flaws, insecure deserialization, hardcoded secrets, and insecure configurations",
+      "action": "Static analysis of source code for security vulnerabilities including injection flaws, insecure deserialization, hardcoded secrets, and insecure configurations",
+      "output": "code_security_scan.json"
+    },
+    {
+      "step": 3,
+      "action": "audit_configurations",
+      "description": "Audit all configuration files for insecure settings, hardcoded credentials, and insecure defaults",
+      "action": "Audit all configuration files for insecure settings, hardcoded credentials, and insecure defaults",
+      "output": "config_audit.json"
+    }
+  ],
+  "triggers": ["secure-agent", "secure-agent-scan"],
+  "output": "security_audit_report.json"
+}

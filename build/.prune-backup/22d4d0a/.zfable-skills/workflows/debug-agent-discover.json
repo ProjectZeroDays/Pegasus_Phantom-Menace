@@ -1,0 +1,31 @@
+{
+  "workflow": "pegasus-debug-agent-discover",
+  "version": "1.0.0",
+  "description": "Debug agent discovery workflow - scans codebase for potential bugs, error-prone patterns, race conditions, memory leaks, and logic errors.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "scan_for_bugs",
+      "description": "Scan entire codebase for common bug patterns, logic errors, race conditions, deadlocks, memory leaks, null pointer dereferences, and unhandled exceptions",
+      "action": "Static analysis of all source files to identify potential bugs, race conditions, memory leaks, and error-prone patterns",
+      "output": "bug_report_initial.json"
+    },
+    {
+      "step": 2,
+      "action": "analyze_stack_traces",
+      "description": "Analyze existing error logs, stack traces, and crash reports to identify recurring failure patterns",
+      "action": "Parse existing error logs, correlate stack traces with source code, identify recurring failure patterns",
+      "output": "error_analysis.json"
+    },
+    {
+      "step": 3,
+      "action": "prioritize_bugs",
+      "description": "Prioritize bugs by severity, frequency, and impact on system stability",
+      "action": "Prioritize bugs by severity, frequency, and impact on system stability",
+      "output": "bug_priority.json"
+    }
+  ],
+  "triggers": ["debug-agent", "debug-agent-discover"],
+  "output": "bug_priority.json"
+}

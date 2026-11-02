@@ -1,0 +1,31 @@
+{
+  "workflow": "pegasus-debug-agent-trace",
+  "version": "1.0.0",
+  "description": "Debug tracing workflow - traces execution flow, identifies root causes of failures, applies fixes, and verifies resolution through regression testing.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "trace_execution",
+      "description": "Trace execution flow from entry point to failure point, identify root cause of each bug",
+      "action": "Trace execution flow from entry point to failure point using debuggers, logs, and stack traces",
+      "output": "execution_trace.json"
+    },
+    {
+      "step": 2,
+      "action": "apply_fixes",
+      "description": "Apply fixes for each identified root cause, verify each fix resolves the issue",
+      "action": "Apply fixes for each identified root cause, verify each fix resolves the issue without introducing new bugs",
+      "output": "fixes_applied.json"
+    },
+    {
+      "step": 3,
+      "action": "regression_test",
+      "description": "Run regression tests to verify all fixes work correctly and no regressions introduced",
+      "action": "Run full test suite to verify all fixes work correctly and no regressions introduced",
+      "output": "regression_test_results.json"
+    }
+  ],
+  "triggers": ["debug-agent", "debug-agent-trace"],
+  "output": "regression_test_results.json"
+}

@@ -1,0 +1,66 @@
+{
+  "workflow": "pegasus-your-turn-build-manifest",
+  "version": "1.0.0",
+  "description": "Complete build manifest for Pegasus Phantom Menace v2 - autonomous exploitation workflow engine",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "trigger": "your-turn",
+  "steps": [
+    {
+      "step": 1,
+      "command": "access-menu",
+      "description": "Access workflow main menu - choose manual or autonomous mode"
+    },
+    {
+      "step": 2,
+      "command": "access-vectors",
+      "description": "Scan and list all available access vectors (ADB, Fastboot, QR, USB, Bluetooth, NFC, SMS, messaging, email, Wi-Fi, MITM, zero-click)"
+    },
+    {
+      "step": 3,
+      "command": "access-zero-click",
+      "description": "Execute zero-click exploits (Pixel 8 modem/Wi-Fi/Titan M2/NFC, Samsung S24 Exynos/Knox, Xiaomi MIUI/HyperOS, OnePlus OxygenOS/Qualcomm, Android general Binder/MediaCodec/Bluetooth)"
+    },
+    {
+      "step": 4,
+      "command": "access-autonomous",
+      "description": "Run autonomous full lifecycle workflow - discover vectors, exploit, establish access, trigger post-exploitation chain"
+    },
+    {
+      "step": 5,
+      "command": "access-manual",
+      "description": "Manual access vector controls - select specific vector and method"
+    },
+    {
+      "step": 6,
+      "command": "post-exploit-menu",
+      "description": "Post-exploitation main menu - fingerprinting, persistence, credentials, lateral movement, exfiltration"
+    },
+    {
+      "step": 7,
+      "command": "post-exploit-chain",
+      "description": "Run full post-exploitation chain - fingerprinting, persistence, credentials, lateral movement, exfiltration"
+    },
+    {
+      "step": 8,
+      "command": "brutdroid-menu",
+      "description": "BrutDroid main menu - emulator creation, Magisk rooting, Frida server, Burp certificate, custom scripts"
+    },
+    {
+      "step": 9,
+      "command": "passgen",
+      "description": "Wordlist generator wizard - personal info based wordlist with case/leet/separator/numeric variations"
+    },
+    {
+      "step": 10,
+      "command": "access-workflow-history",
+      "description": "Show workflow run history with success rates and durations"
+    },
+    {
+      "step": 11,
+      "command": "access-workflow-rates",
+      "description": "Show exploit success rates by vector for optimization"
+    }
+  ],
+  "triggers": ["your-turn", "build-manifest", "full-build", "pegasus-build"],
+  "output": "pegasus/build-manifest/"
+}

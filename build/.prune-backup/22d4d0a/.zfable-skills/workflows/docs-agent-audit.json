@@ -1,0 +1,24 @@
+{
+  "workflow": "pegasus-docs-agent-audit",
+  "version": "1.0.0",
+  "description": "Documentation audit workflow - identifies missing documentation, outdated documentation, and documentation gaps.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "audit_documentation",
+      "description": "Audit all existing documentation, identify gaps, outdated information, and missing documentation",
+      "action": "Audit all existing documentation, identify gaps, outdated information, and missing documentation",
+      "output": "documentation_gap_analysis.json"
+    },
+    {
+      "step": 2,
+      "action": "identify_missing_docs",
+      "description": "Identify all missing documentation including API docs, architecture docs, deployment guides, and contributor guides",
+      "action": "Identify all missing documentation including API docs, architecture docs, deployment guides, and contributor guides",
+      "output": "missing_docs_report.json"
+    }
+  ],
+  "triggers": ["docs-agent", "docs-agent-audit"],
+  "output": "missing_docs_report.json"
+}

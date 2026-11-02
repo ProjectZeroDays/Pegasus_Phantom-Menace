@@ -1,0 +1,8 @@
+# Caps deliberately without a transport provider.
+#
+# Format: <cap-value>   # <reason>
+#
+# A cap listed here reports as WAIVED in the matrix and does not fail either
+# lint. A waiver for a cap that IS provided reports as STALE — remove it.
+# The baseline in build/caps_baseline.json still records the edge count, so
+# waiving an orphan does not hide a later provider regression.

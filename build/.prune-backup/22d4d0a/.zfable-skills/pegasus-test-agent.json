@@ -1,0 +1,16 @@
+{
+  "name": "pegasus-test-agent",
+  "version": "2.0.0",
+  "description": "Autonomous testing agent that analyzes the repository, generates exhaustive test scripts for every module, executes them against the codebase, and fixes all failing tests iteratively until 100% pass rate is achieved.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "category": "testing",
+  "trigger": "test-agent",
+  "entry_point": "pegasus-test-agent.json",
+  "commands": 1,
+  "workflows": [
+    ".opencode-skills/workflows/test-agent-discovery.json",
+    ".opencode-skills/workflows/test-agent-generate.json",
+    "pegasus/modules/access_workflow/workflows/_test_agent_workflow.json"
+  ],
+  "installation": "skill install .opencode-skills/pegasus-test-agent.json"
+}

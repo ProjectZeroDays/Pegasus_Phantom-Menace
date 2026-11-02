@@ -1,0 +1,24 @@
+{
+  "workflow": "pegasus-production-agent-gap-analysis",
+  "version": "1.0.0",
+  "description": "Gap analysis workflow - identifies all gaps between current state and production-readiness including missing features, security gaps, performance bottlenecks, and operational gaps.",
+  "author": "ProjectZeroDays (All-Knowing Deity)",
+  "steps": [
+    {
+      "step": 1,
+      "action": "audit_production_readiness",
+      "description": "Audit all aspects of the application for production readiness including security, performance, scalability, reliability, and observability",
+      "action": "Audit all aspects of the application for production readiness including security, performance, scalability, reliability, and observability",
+      "output": "production_readiness_gap_analysis.json"
+    },
+    {
+      "step": 2,
+      "action": "prioritize_gaps",
+      "description": "Prioritize gaps based on impact, effort, and risk",
+      "action": "Prioritize gaps based on impact, effort, and risk",
+      "output": "gap_prioritization.json"
+    }
+  ],
+  "triggers": ["production-agent", "production-agent-gap-analysis"],
+  "output": "gap_prioritization.json"
+}

@@ -1,0 +1,58 @@
+# Capability matrix
+
+STATUS: PASS
+50 caps, 78 provider edges, 0 blocking orphan, 0 waived, 0 phantom
+
+
+| Cap | Providers | Conformant | Note |
+|---|---|---|---|
+| `shell` | adb, agent.rpc, ssh | - |  |
+| `file.get` | adb, idevice, agent.rpc, ssh, smb | - |  |
+| `file.put` | adb, idevice, agent.rpc | - |  |
+| `file.list` | adb, idevice, agent.rpc, ssh, smb | - |  |
+| `pkg.list` | adb, idevice, agent.rpc, wmi | - |  |
+| `pkg.install` | adb | - |  |
+| `proc.list` | adb, agent.rpc, ssh, wmi | - |  |
+| `ui.inject` | adb, rdp | - |  |
+| `screen.capture` | adb, idevice, rdp, rtsp | - |  |
+| `camera` | adb, onvif | - |  |
+| `mic` | adb | - |  |
+| `comms.sms` | adb | - |  |
+| `comms.calls` | adb | - |  |
+| `comms.contacts` | adb | - |  |
+| `pos.location` | adb, mavlink | - |  |
+| `radio.wifi` | adb | - |  |
+| `radio.bt` | adb, bt | - |  |
+| `radio.nfc` | adb, nfc | - |  |
+| `radio.sdr` | sdr | - |  |
+| `creds.store` | agent.rpc | - |  |
+| `creds.keystore` | adb | - |  |
+| `creds.dpapi` | agent.rpc | - |  |
+| `creds.shadow` | ssh | - |  |
+| `creds.sam` | agent.rpc | - |  |
+| `creds.lsass` | agent.rpc | - |  |
+| `os.registry` | wmi | - |  |
+| `os.systemd` | ssh | - |  |
+| `os.launchd` | ssh | - |  |
+| `os.cron` | adb, ssh | - |  |
+| `proto.mqtt` | mqtt | - |  |
+| `proto.coap` | coap | - |  |
+| `proto.tr069` | tr069 | - |  |
+| `proto.snmp` | snmp | - |  |
+| `proto.modbus` | modbus | - |  |
+| `proto.dnp3` | dnp3 | - |  |
+| `proto.s7` | s7 | - |  |
+| `proto.rtsp` | rtsp | - |  |
+| `proto.onvif` | onvif | - |  |
+| `proto.mavlink` | mavlink | - |  |
+| `vehicle.can` | can | - |  |
+| `vehicle.obd` | obd | - |  |
+| `net.smb` | smb | - |  |
+| `net.wmi` | wmi | - |  |
+| `net.rdp` | rdp | - |  |
+| `net.ssh` | ssh | - |  |
+| `net.ldap` | ldap | - |  |
+| `net.adb` | adb | - |  |
+| `net.idevice` | idevice | - |  |
+| `agent.rpc` | agent.rpc | - |  |
+| `net.pivot` | agent.rpc, ssh | - |  |
