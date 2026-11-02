@@ -10,6 +10,47 @@ WORKFLOWS = ("phase-execute", "gate-run", "map-complete",
              "module-scaffold", "handoff-repair", "blocked-recovery")
 GATES = {f"G{i}" for i in range(1, 25)}
 
+# Workflow definitions referenced by skill.json. Each step is (command, make
+# target, description) and must line up with the commands declared in
+# skills/agents.yaml, otherwise the manifest advertises files that do not exist.
+WORKFLOWS_SPEC = {
+    "phase-execute": (
+        "Run a phase end to end: prerequisites, gate, then refresh the map.",
+        [("phase", "require", "Enter the phase and load its prerequisites"),
+         ("ready", "ready-check", "Confirm definition-of-ready before work starts"),
+         ("gate", "gate", "Run the phase terminal gate"),
+         ("map", "map", "Refresh the plan map once the phase completes")],
+    ),
+    "gate-run": (
+        "Run a single gate and audit the surface it touched.",
+        [("gate", "gate", "Run the requested gate"),
+         ("audit", "audit", "Audit the module surface the gate inspected")],
+    ),
+    "map-complete": (
+        "Regenerate the plan map and confirm every item has an owner.",
+        [("map", "map", "Regenerate the plan map from tracked files"),
+         ("audit", "audit", "Confirm every mapped item has an owner")],
+    ),
+    "module-scaffold": (
+        "Scaffold a module, audit it, then record the handoff.",
+        [("module-new", "module-new", "Scaffold the module skeleton"),
+         ("audit", "audit", "Audit the new module against the manifest"),
+         ("handoff", "handoff", "Record the handoff note")],
+    ),
+    "handoff-repair": (
+        "Rewrite a stale handoff and capture anything blocked.",
+        [("handoff", "handoff", "Rewrite the handoff from the current tree"),
+         ("blocked", "blocked", "Capture blocked items found while repairing")],
+    ),
+    "blocked-recovery": (
+        "Record a blocked item, then audit for collateral drift.",
+        [("blocked", "blocked", "Record the blocked item and its owner"),
+         ("audit", "audit", "Audit for collateral drift")],
+    ),
+}
+
+assert tuple(WORKFLOWS_SPEC) == WORKFLOWS, "WORKFLOWS and WORKFLOWS_SPEC drifted"
+
 
 def targets():
     if not MAKE.exists():
@@ -53,6 +94,20 @@ def render(spec):
                           "make": c["make"], "skill": c["skill"]}
                          for c in spec["commands"]],
             "agents": spec["agents"]}, indent=2) + "\n"
+        for wf, (desc, steps) in WORKFLOWS_SPEC.items():
+            unknown = {make for _, make, _ in steps} - known
+            if unknown:
+                sys.exit(f"PRECONDITION: workflow {wf} uses unknown make "
+                         f"targets {sorted(unknown)}")
+            out[f"{base}/workflows/{wf}.json"] = json.dumps({
+                "workflow": f"pegasus-{wf}", "version": "1.0.0",
+                "description": desc,
+                "steps": [{"step": i, "command": f"/{name}", "make": make,
+                           "description": text}
+                          for i, (name, make, text) in enumerate(steps, 1)],
+                "triggers": [wf],
+                "output": ".pegasus/reports/",
+            }, indent=2) + "\n"
     return out
 
 

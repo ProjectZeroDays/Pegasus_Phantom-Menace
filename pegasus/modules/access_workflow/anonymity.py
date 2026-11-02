@@ -18,6 +18,7 @@ import asyncio
 import hashlib
 import hmac
 import json
+import logging
 import os
 import random
 import socket
@@ -32,6 +33,8 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
 import aiohttp
+
+logger = logging.getLogger(__name__)
 
 
 class AnonymityLevel(str, Enum):

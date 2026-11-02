@@ -70,8 +70,11 @@ def test_skills_referenced_exist(spec):
 
 
 def test_adapters_identical_across_tools():
+    # Bodies embed the tool's own install path, so normalise that before
+    # comparing; everything else must be byte-identical.
     for name in ("skill.json", "pegasus-gates.json"):
-        bodies = {t: Path(f".{t}-skills/{name}").read_text(encoding="utf-8") for t in TOOLS}
+        bodies = {t: Path(f".{t}-skills/{name}").read_text(encoding="utf-8")
+                  .replace(f".{t}-skills", "%BASE%") for t in TOOLS}
         assert len(set(bodies.values())) == 1, f"{name} differs across tools"
 
 

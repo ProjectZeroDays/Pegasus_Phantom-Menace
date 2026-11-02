@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import click
 from rich.console import Console
@@ -17,6 +17,10 @@ from rich.text import Text
 
 from pegasus.core.config import get_settings, Settings
 from pegasus.core.license_key import masked_key
+
+if TYPE_CHECKING:
+    from pegasus.modules.integrations import SlashCommandManager
+
 from pegasus.core.plugin import (
     initialize_plugin_system,
     get_plugin_manager,

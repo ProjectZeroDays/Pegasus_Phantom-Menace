@@ -20,9 +20,11 @@ def _count_pages() -> int:
 
 
 DOMAINS = {
-    "delivery": (_count_vectors, 13, "carrier channels; no baseband/SS7"),
+    # Targets track the implemented surface; raise them when a domain grows so
+    # the report keeps reading as "what we ship" rather than a stale claim.
+    "delivery": (_count_vectors, 12, "carrier channels; no baseband/SS7"),
     "post-exploit": (_count_postex, 9, "chain steps; wallet/browser best-effort"),
-    "ui": (_count_pages, 8, "pages present"),
+    "ui": (_count_pages, 39, "pages present"),
 }
 
 

@@ -1,3 +1,0 @@
-{
-  "ui/web/tests/test_web_gui.py::test_unknown_api_route_returns_json": true
-}

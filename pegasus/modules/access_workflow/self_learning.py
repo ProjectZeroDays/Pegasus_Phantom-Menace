@@ -320,7 +320,7 @@ class SelfLearningEngine:
         conn = sqlite3.connect(str(self.db_path))
         c = conn.cursor()
         c.execute("""
-            INSERT OR REPLACE INTO decisions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO decisions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             decision.decision_id,
             decision.decision_type.value,
@@ -340,7 +340,7 @@ class SelfLearningEngine:
         conn = sqlite3.connect(str(self.db_path))
         c = conn.cursor()
         c.execute("""
-            INSERT OR REPLACE INTO vector_performance VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO vector_performance VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             perf.vector_type,
             perf.total_attempts,
@@ -361,7 +361,7 @@ class SelfLearningEngine:
         conn = sqlite3.connect(str(self.db_path))
         c = conn.cursor()
         c.execute("""
-            INSERT OR REPLACE INTO adaptation_rules VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO adaptation_rules VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             rule.rule_id,
             rule.condition,

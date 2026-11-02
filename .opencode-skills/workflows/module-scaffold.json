@@ -1,0 +1,29 @@
+{
+  "workflow": "pegasus-module-scaffold",
+  "version": "1.0.0",
+  "description": "Scaffold a module, audit it, then record the handoff.",
+  "steps": [
+    {
+      "step": 1,
+      "command": "/module-new",
+      "make": "module-new",
+      "description": "Scaffold the module skeleton"
+    },
+    {
+      "step": 2,
+      "command": "/audit",
+      "make": "audit",
+      "description": "Audit the new module against the manifest"
+    },
+    {
+      "step": 3,
+      "command": "/handoff",
+      "make": "handoff",
+      "description": "Record the handoff note"
+    }
+  ],
+  "triggers": [
+    "module-scaffold"
+  ],
+  "output": ".pegasus/reports/"
+}

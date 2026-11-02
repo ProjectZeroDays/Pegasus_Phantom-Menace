@@ -1,0 +1,23 @@
+{
+  "workflow": "pegasus-gate-run",
+  "version": "1.0.0",
+  "description": "Run a single gate and audit the surface it touched.",
+  "steps": [
+    {
+      "step": 1,
+      "command": "/gate",
+      "make": "gate",
+      "description": "Run the requested gate"
+    },
+    {
+      "step": 2,
+      "command": "/audit",
+      "make": "audit",
+      "description": "Audit the module surface the gate inspected"
+    }
+  ],
+  "triggers": [
+    "gate-run"
+  ],
+  "output": ".pegasus/reports/"
+}

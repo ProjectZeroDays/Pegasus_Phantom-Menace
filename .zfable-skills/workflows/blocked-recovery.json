@@ -1,0 +1,23 @@
+{
+  "workflow": "pegasus-blocked-recovery",
+  "version": "1.0.0",
+  "description": "Record a blocked item, then audit for collateral drift.",
+  "steps": [
+    {
+      "step": 1,
+      "command": "/blocked",
+      "make": "blocked",
+      "description": "Record the blocked item and its owner"
+    },
+    {
+      "step": 2,
+      "command": "/audit",
+      "make": "audit",
+      "description": "Audit for collateral drift"
+    }
+  ],
+  "triggers": [
+    "blocked-recovery"
+  ],
+  "output": ".pegasus/reports/"
+}

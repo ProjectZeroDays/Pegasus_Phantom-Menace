@@ -9,7 +9,7 @@ import inspect
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import lru_cache
@@ -17,6 +17,9 @@ from functools import lru_cache
 from pydantic import BaseModel, Field
 
 from pegasus.core.config import get_settings
+
+if TYPE_CHECKING:
+    from pegasus.core.config import Settings
 
 
 class PluginStatus(Enum):
@@ -807,7 +810,6 @@ def get_plugin_manager() -> PluginManager:
 def initialize_plugin_system() -> PluginManager:
     """Initialize the plugin system and load all plugins."""
     global plugin_manager
-    from pegasus.core.config import get_settings
     settings = get_settings()
     context = AppContext(settings)
     plugin_manager = PluginManager(context)

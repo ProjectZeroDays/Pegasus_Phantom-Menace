@@ -1,0 +1,23 @@
+{
+  "workflow": "pegasus-handoff-repair",
+  "version": "1.0.0",
+  "description": "Rewrite a stale handoff and capture anything blocked.",
+  "steps": [
+    {
+      "step": 1,
+      "command": "/handoff",
+      "make": "handoff",
+      "description": "Rewrite the handoff from the current tree"
+    },
+    {
+      "step": 2,
+      "command": "/blocked",
+      "make": "blocked",
+      "description": "Capture blocked items found while repairing"
+    }
+  ],
+  "triggers": [
+    "handoff-repair"
+  ],
+  "output": ".pegasus/reports/"
+}

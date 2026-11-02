@@ -62,7 +62,6 @@ class PayloadModule(BaseModule):
 
     async def cmd_payload_gen(self, *args) -> None:
         """Generate a single msfvenom payload."""
-        from pegasus.core.config import get_settings
         settings = get_settings()
 
         payloads = {
@@ -119,7 +118,6 @@ class PayloadModule(BaseModule):
 
     async def cmd_payload_mass(self, *args) -> None:
         """Generate multiple payloads with different ports."""
-        from pegasus.core.config import get_settings
         settings = get_settings()
 
         lhost = self.prompt("LHOST", default="127.0.0.1")
@@ -155,7 +153,6 @@ class PayloadModule(BaseModule):
 
     async def cmd_payload_dna(self, *args) -> None:
         """Manage DNA tracking registry."""
-        from pegasus.core.config import get_settings
         dna_dir = self.context.get_dna_dir()
         registry_file = dna_dir / "registry.json"
 

@@ -1,0 +1,23 @@
+{
+  "workflow": "pegasus-map-complete",
+  "version": "1.0.0",
+  "description": "Regenerate the plan map and confirm every item has an owner.",
+  "steps": [
+    {
+      "step": 1,
+      "command": "/map",
+      "make": "map",
+      "description": "Regenerate the plan map from tracked files"
+    },
+    {
+      "step": 2,
+      "command": "/audit",
+      "make": "audit",
+      "description": "Confirm every mapped item has an owner"
+    }
+  ],
+  "triggers": [
+    "map-complete"
+  ],
+  "output": ".pegasus/reports/"
+}

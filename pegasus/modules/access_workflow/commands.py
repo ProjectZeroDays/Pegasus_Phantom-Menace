@@ -11,6 +11,8 @@ CLI can call it on every startup without duplicating commands.
 from __future__ import annotations
 
 import json
+import time
+from pathlib import Path
 from typing import Any, Dict, List
 
 from rich.console import Console

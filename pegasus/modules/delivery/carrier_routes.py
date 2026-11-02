@@ -24,10 +24,6 @@ def register(app, ok, fail):
             abort(404)
         return send_from_directory(MEDIA, name)
 
-    @app.get("/api/delivery/health")
-    def delivery_health():
-        return ok(health.all_channels())
-
     @app.get("/api/delivery/receipts")
     def delivery_receipts():
         return ok({"receipts": receipts.list_for(request.args.get("run_id"))})

@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Optional, Callable
 from dataclasses import dataclass, field
 from enum import Enum
 import threading
+from pathlib import Path
 
 from rich.console import Console
 from rich.prompt import Prompt, Confirm, IntPrompt
@@ -1078,7 +1079,6 @@ class SlashCommandHandlers:
 
     async def _test_cli_smoke(self) -> None:
         """Test CLI smoke test."""
-        import subprocess
         proc = await asyncio.create_subprocess_exec(
             "python", "-m", "pegasus.core.__main__", "--help",
             stdout=asyncio.subprocess.PIPE,

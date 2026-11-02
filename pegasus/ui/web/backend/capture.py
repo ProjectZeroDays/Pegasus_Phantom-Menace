@@ -16,7 +16,7 @@ import io
 import os
 import sys
 import tempfile
-from typing import Optional
+from typing import Any, Optional
 
 from rich.console import Console
 

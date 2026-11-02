@@ -21,6 +21,7 @@ from pegasus.core.plugin import (
     PluginMetadata,
     CommandInfo,
     UIComponent,
+    HookType,
     hook,
     command,
     ui_component,

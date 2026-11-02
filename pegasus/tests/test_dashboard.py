@@ -37,8 +37,8 @@ def admin(client):
 def test_guest_landing_renders(client):
     response = client.get("/")
     assert response.status_code == 200
-    assert b"Deploy a carrier" in response.data
-    assert b"Guest view" in response.data
+    assert b"Phantom Menace" in response.data
+    assert b"Delivery Channels" in response.data
 
 
 def test_guest_exploit_run_is_redacted(client):

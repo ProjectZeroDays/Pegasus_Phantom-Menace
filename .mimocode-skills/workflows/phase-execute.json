@@ -1,0 +1,35 @@
+{
+  "workflow": "pegasus-phase-execute",
+  "version": "1.0.0",
+  "description": "Run a phase end to end: prerequisites, gate, then refresh the map.",
+  "steps": [
+    {
+      "step": 1,
+      "command": "/phase",
+      "make": "require",
+      "description": "Enter the phase and load its prerequisites"
+    },
+    {
+      "step": 2,
+      "command": "/ready",
+      "make": "ready-check",
+      "description": "Confirm definition-of-ready before work starts"
+    },
+    {
+      "step": 3,
+      "command": "/gate",
+      "make": "gate",
+      "description": "Run the phase terminal gate"
+    },
+    {
+      "step": 4,
+      "command": "/map",
+      "make": "map",
+      "description": "Refresh the plan map once the phase completes"
+    }
+  ],
+  "triggers": [
+    "phase-execute"
+  ],
+  "output": ".pegasus/reports/"
+}
