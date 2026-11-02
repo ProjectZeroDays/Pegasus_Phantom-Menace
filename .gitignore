@@ -41,3 +41,6 @@ build_web.log
 .env
 .env.local
 *.env.bak
+bootstrap.py.v33.*.bak
+node_modules/
+*.tsbuildinfo
