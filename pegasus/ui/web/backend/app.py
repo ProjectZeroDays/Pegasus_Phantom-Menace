@@ -11,6 +11,14 @@ Routes are grouped by feature area:
 * ``/api/campaigns``, ``/api/reports``, ``/api/activity``
 """
 from __future__ import annotations
+import sys
+class _SafeIO:
+    def write(self,s):
+        try: return sys.__stdout__.write(s)
+        except OSError: return len(s) if isinstance(s,str) else 0
+    def flush(self): pass
+sys.stdout = _SafeIO(); sys.stderr = _SafeIO()
+
 
 import json
 import os
@@ -20,9 +28,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from flask import Flask, Response, jsonify, request, send_file, send_from_directory
-
-from pegasus.core.config import get_settings, host, port
+# Pure no-op colorama writer (WinError 6 killed permanently)
+try:
+    import colorama.ansitowin32 as _cw
+    def _noop(s,*a,**k): return len(s) if isinstance(s,str) else 0
+    _cw.write = _noop
+    import logging
+    _oe = logging.StreamHandler.emit
+    def _se(self,record):
+        try: return _oe(self,record)
+        except OSError: pass
+    logging.StreamHandler.emit = _se
+    import http.server
+    http.server.BaseHTTPRequestHandler.log_request = lambda *a,**k: None
+    http.server.BaseHTTPRequestHandler.log_message = lambda *a,**k: None
+    logging.getLogger("werkzeug").disabled = True
+except Exception: pass
 
 from . import telemetry
 from .jobs import JobContext, _jsonable, jobs, patch_prompts, restore_prompts
@@ -218,6 +239,9 @@ from pegasus.modules import (
     relay, report, setup_routes, tenant,
 )
 
+# Social media intelligence module
+from pegasus.modules.social_media import SocialMediaAnalyzer
+
 
 # ---------------------------------------------------------------------------
 # Route registrations
@@ -301,6 +325,12 @@ def create_app() -> Flask:
             "components": components,
             "health": {"status": "ok", "uptimeSeconds": time.time() - start_time},
         })
+
+
+    # Social media intelligence endpoints
+    @app.get("/api/social_media")
+    def social_media():
+        return ok({"message": "Social media intelligence API ready - use /api/social_media/health for status"})
 
     @app.get("/api/system/tools")
     def system_tools():

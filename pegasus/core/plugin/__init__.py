@@ -287,6 +287,16 @@ class AppContext:
         """Register a UI component with the context."""
         self.ui_components.append(component)
     
+    def get_dna_dir(self):
+        from pathlib import Path
+        import os
+        return Path(self.settings.get("dna_dir", "dna") if hasattr(self.settings, "get") else os.environ.get("PEGASUS_DNA_DIR", "dna"))
+
+    def get_payloads_dir(self):
+        from pathlib import Path
+        import os
+        return Path(self.settings.get("payloads_dir", "payloads") if hasattr(self.settings, "get") else os.environ.get("PEGASUS_PAYLOADS_DIR", "payloads"))
+
     def get_plugin(self, name: str) -> Optional["Plugin"]:
         return self.plugins.get(name)
     

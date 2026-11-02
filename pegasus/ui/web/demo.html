@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pegasus Phantom Menace v2 - Network Discovery Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #FF3D00;
+            --primary-dark: #BF3600;
+            --secondary: #58A6FF;
+            --success: #3FB950;
+            --warning: #D29922;
+            --error: #D73A49;
+            --bg: #0A0B0E;
+            --surface: #161B22;
+            --surface-elev: #1F2430;
+            --text-primary: #C9D1D9;
+            --text-secondary: #8B949E;
+            --border: #30363D;
+            --network: #2196F3;
+            --database: #9C27B0;
+            --security: #FF9800;
+        }
+        body {
+            font-family: 'Consolas', monospace;
+            background: var(--bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            height: 100vh;
+        }
+        .app-header {
+            background: linear-gradient(135deg, #161B22, #0D1117);
+            border-bottom: 2px solid var(--primary);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+        }
+        .app-logo { display: flex; align-items: center; gap: 1rem; }
+        .app-icon {
+            width: 48px; height: 48px; background: linear-gradient(135deg, #FF3D00, #BF3600);
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; box-shadow: 0 4px 15px rgba(255,61,0,0.4); animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 4px 15px rgba(255,61,0,0.4); }
+            50% { box-shadow: 0 4px 25px rgba(255,61,0,0.7); }
+        }
+        .app-title { font-size: 1.75rem; font-weight: 900; background: linear-gradient(90deg,#FF3D00,#58A6FF);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .app-subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem; }
+        .nav-tabs { display: flex; gap: 0.5rem; }
+        .nav-tab { padding: 0.5rem 1rem; background: var(--surface-elev); border: 1px solid var(--border);
+            color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; cursor: pointer; }
+        .nav-tab:hover { border-color: var(--primary); color: var(--primary); }
+        .nav-tab.active { background: rgba(255,61,0,0.15); border-color: var(--primary); color: var(--primary); }
+        .container { max-width: 1600px; margin: 80px auto 2rem auto; padding: 0 2rem; }
+        .demo-grid { display: grid; grid-template-columns: 400px 1fr; gap: 1.5rem; height: calc(100vh - 140px); }
+        /* Left panel */
+        .network-panel { background: var(--surface-elev); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; background: #0A0B0E; border-bottom: 1px solid var(--border); }
+        .panel-title { font-size: 1.1rem; color: var(--network); font-weight: bold; display: flex; align-items: center; gap: 0.5rem; }
+        .network-tabs { display: flex; border-bottom: 1px solid var(--border); }
+        .network-tab { flex: 1; padding: 0.75rem; text-align: center; cursor: pointer; color: var(--text-secondary); font-size: 0.85rem; }
+        .network-tab:hover { background: rgba(33,150,243,0.1); }
+        .network-tab.active { background: rgba(33,150,243,0.2); color: var(--network); border-bottom: 2px solid var(--network); }
+        .button-container { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        .network-btn { flex: 1; padding: 0.8rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; font-size: 0.9rem; }
+        .network-btn:hover { background: rgba(33,150,243,0.15); border-color: var(--network); color: var(--network); }
+        .network-btn.active { background: rgba(33,150,243,0.25); border-color: var(--network); color: var(--network); box-shadow: 0 0 10px rgba(33,150,243,0.3); }
+        .scan-area { padding: 1.5rem; }
+        .scan-toolbar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .scan-input { flex: 1; padding: 0.5rem; background: var(--bg); border: 1px solid var(--border); color: var(--text-primary); }
+        .scan-button { padding: 0.5rem 1rem; background: var(--network); color: white; border: none; cursor: pointer; }
+        .scan-button:hover { background: var(--secondary); }
+        .network-devices { max-height: 400px; overflow-y: auto; }
+        .network-device { padding: 0.75rem; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .network-device:hover { background: rgba(33,150,243,0.1); }
+        .device-info { display: flex; align-items: center; gap: 1rem; }
+        .device-avatar { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg,#2196F3,#9C27B0); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .device-details { flex: 1; }
+        .device-name { font-weight: bold; color: var(--text-primary); font-size: 0.95rem; }
+        .device-ip { color: var(--text-secondary); font-size: 0.85rem; }
+        /* Right panel */
+        .right-panel { display: flex; flex-direction: column; gap: 1.5rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        .stat-card { background: var(--surface-elev); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+        .stat-value { font-size: 1.8rem; font-weight: 900; color: var(--network); }
+        .stat-label { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; margin-top: 0.5rem; }
+        .status-panel { background: var(--surface-elev); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; }
+        .status-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .status-title { font-size: 1rem; color: var(--primary); font-weight: bold; }
+        .status-indicator { display: flex; align-items: center; gap: 0.5rem; }
+        .indicator-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+        .indicator-text { color: var(--success); font-size: 0.9rem; }
+        .protocol-selector { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .protocol-btn { padding: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; }
+        .protocol-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .protocol-btn.active { background: rgba(255,61,0,0.2); border-color: var(--primary); color: var(--primary); }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .data-table th { text-align: left; padding: 0.75rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+        .data-table td { padding: 0.75rem; border-bottom: 1px solid var(--border); }
+        .data-table tr:hover { background: rgba(255,61,0,0.1); }
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #0A0B0E; border-top: 1px solid var(--border); padding: 0.5rem 2rem; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .bar-left, .bar-right { display: flex; align-items: center; gap: 1rem; font-size: 0.8rem; color: var(--text-secondary); }
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .demo-grid { grid-template-columns: 350px 1fr; }
+        }
+        @media (max-width: 900px) {
+            .demo-grid { grid-template-columns: 1fr; }
+            .network-panel { min-height: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-header">
+        <div class="app-logo">
+            <div class="app-icon">🛡️</div>
+            <div>
+                <div class="app-title">PEGASUS PHANTOM MENACE v2</div>
+                <div class="app-subtitle">Autonomous Android Security Audit & Exploitation Platform</div>
+            </div>
+        </div>
+        <div class="nav-tabs">
+            <div class="nav-tab">Dashboard</div>
+            <div class="nav-tab">Access Workflow</div>
+            <div class="nav-tab">Zero-Click Exploits</div>
+            <div class="nav-tab">Post-Exploitation</div>
+            <div class="nav-tab">Campaigns</div>
+            <div class="nav-tab">Monitoring</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="demo-grid">
+            <!-- Left Panel: Network Discovery -->
+            <div class="network-panel">
+                <div class="panel-header">
+                    <div class="panel-title">● Network Discovery</div>
+                </div>
+                <div class="network-tabs">
+                    <div class="network-tab active" onclick="switchNetworkTab('scan')">Scan</div>
+                    <div class="network-tab" onclick="switchNetworkTab('devices')">Devices</div>
+                    <div class="network-tab" onclick="switchNetworkTab('results')">Results</div>
+                </div>
+
+                <div id="scan-tab" class="scan-area">
+                    <div class="scan-toolbar">
+                        <input type="text" class="scan-input" placeholder="Enter IP range, hostname, or CIDR..." id="scan-target">
+                        <button class="scan-button" onclick="performScan()">Scan Network</button>
+                    </div>
+
+                    <div class="button-container">
+                        <button class="network-btn active" onclick="selectProtocol('nmap')">nmap</button>
+                        <button class="network-btn" onclick="selectProtocol('arp')">arp</button>
+                        <button class="network-btn" onclick="selectProtocol('dhcp')">dhcp</button>
+                        <button class="network-btn" onclick="selectProtocol('snmp')">snmp</button>
+                        <button class="network-btn" onclick="selectProtocol('http')">http</button>
+                    </div>
+
+                    <div class="network-devices" id="network-devices-list">
+                        <div class="network-device" onclick="selectDevice('192.168.1.1')">
+                            <div class="device-info">
+                                <div class="device-avatar">P8</div>
+                                <div class="device-details">
+                                    <div class="device-name">192.168.1.1</div>
+                                    <div class="device-ip">Gateway - Lenovo P8</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="network-device" onclick="selectDevice('192.168.1.5')">
+                            <div class="device-info">
+                                <div class="device-avatar">S24</div>
+                                <div class="device-details">
+                                    <div class="device-name">192.168.1.5</div>
+                                    <div class="device-ip">Samsung Galaxy S24</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="network-device" onclick="selectDevice('192.168.1.10')">
+                            <div class="device-info">
+                                <div class="device-avatar">X1</div>
+                                <div class="device-details">
+                                    <div class="device-name">192.168.1.10</div>
+                                    <div class="device-ip">Xiaomi Mi 12</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="network-device" onclick="selectDevice('192.168.1.15')">
+                            <div class="device-info">
+                                <div class="device-avatar">OP</div>
+                                <div class="device-details">
+                                    <div class="device-name">192.168.1.15</div>
+                                    <div class="device-ip">OnePlus 11</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="devices-tab" class="scan-area" style="display: none;">
+                    <div class="scan-toolbar">
+                        <input type="text" class="scan-input" placeholder="Filter devices..." id="device-filter">
+                        <select class="scan-input" id="device-type-filter">
+                            <option value="">All Types</option>
+                            <option value="android">Android</option>
+                            <option value="ios">iOS</option>
+                            <option value="usb">USB</option>
+                        </select>
+                    </div>
+
+                    <div class="network-devices" id="device-table">
+                        <div class="network-device" onclick="connectDevice('emulator-5554')">
+                            <div class="device-info">
+                                <div class="device-avatar">E5</div>
+                                <div class="device-details">
+                                    <div class="device-name">emulator-5554</div>
+                                    <div class="device-ip">USB - Android Emulator</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="network-device" onclick="connectDevice('SM-G970B')">
+                            <div class="device-info">
+                                <div class="device-avatar">S9</div>
+                                <div class="device-details">
+                                    <div class="device-name">SM-G970B</div>
+                                    <div class="device-ip">Samsung Galaxy S9</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="results-tab" class="scan-area" style="display: none;">
+                    <div class="scan-toolbar">
+                        <button class="scan-button" onclick="exportResults()">Export Results</button>
+                        <button class="scan-button" onclick="clearResults()">Clear Results</button>
+                    </div>
+                    <div class="network-devices" id="scan-results">
+                        <div class="network-device">
+                            <div class="device-info">
+                                <div class="device-avatar">✓</div>
+                                <div class="device-details">
+                                    <div class="device-name">192.168.1.1 - OpenPorts: 21, 22, 80</div>
+                                    <div class="device-ip">Service: SSH, HTTP, FTP</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="network-device">
+                            <div class="device-info">
+                                <div class="device-avatar">⚠</div>
+                                <div class="device-details">
+                                    <div class="device-name">192.168.1.5 - OpenPorts: 22, 80, 443</div>
+                                    <div class="device-ip">Service: SSH, HTTP, HTTPS</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">0</div>
+                        <div class="stat-label">Total Devices</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Network Scans</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">15</div>
+                        <div class="stat-label">Open Ports</div>
+                    </div>
+                </div>
+
+                <div class="status-panel">
+                    <div class="status-header">
+                        <div class="status-title">● System Status</div>
+                        <div class="status-indicator">
+                            <div class="indicator-dot"></div>
+                            <span class="indicator-text">Operational</span>
+                        </div>
+                    </div>
+                    <div class="protocol-selector">
+                        <button class="protocol-btn active" onclick="selectProtocolTab('all')">All</button>
+                        <button class="protocol-btn" onclick="selectProtocolTab('nmap')">nmap</button>
+                        <button class="protocol-btn" onclick="selectProtocolTab('snmp')">snmp</button>
+                        <button class="protocol-btn" onclick="selectProtocolTab('arp')">arp</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Protocol</th>
+                                <th>Ports</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>192.168.1.1</td>
+                                <td>TCP</td>
+                                <td>21, 22, 80</td>
+                                <td><span style="color: var(--success);">Open</span></td>
+                            </tr>
+                            <tr>
+                                <td>192.168.1.5</td>
+                                <td>Both</td>
+                                <td>22, 80, 443</td>
+                                <td><span style="color: var(--warning);">Filtered</span></td>
+                            </tr>
+                            <tr>
+                                <td>192.168.1.10</td>
+                                <td>UDP</td>
+                                <td>53</td>
+                                <td><span style="color: var(--success);">Open</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="bar-left">
+            <div class="bar-item"><div class="dot"></div><span>System: Operational</span></div>
+            <div class="bar-item"><div class="dot"></div><span>Network: Active</span></div>
+            <div class="bar-item"><div class="dot"></div><span>Security: Enabled</span></div>
+        </div>
+        <div class="bar-right">
+            <div class="bar-item"><span>Pegasus Phantom Menace v2.0</span></div>
+        </div>
+    </div>
+
+    <script>
+        // Network discovery functionality
+        function switchNetworkTab(tab) {
+            // Hide all tabs
+            document.querySelectorAll('.network-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.scan-area').forEach(area => {
+                area.style.display = 'none';
+            });
+            
+            // Show selected tab
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').style.display = 'block';
+            
+            // Update devices list for devices tab
+            if (tab === 'devices') {
+                refreshDeviceTable();
+            }
+        }
+
+        function selectNetworkTab(tabName) {
+            document.querySelectorAll('.network-tab').forEach((tab, index) => {
+                tab.classList.toggle('active', index === ['scan', 'devices', 'results'].indexOf(tabName));
+            });
+            document.querySelectorAll('.scan-area').forEach(area => area.style.display = 'none');
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            if (tabName === 'devices') refreshDeviceTable();
+        }
+
+        function selectProtocol(protocol) {
+            document.querySelectorAll('.network-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function performScan() {
+            const target = document.getElementById('scan-target').value;
+            if (!target) {
+                alert('Please enter a target');
+                return;
+            }
+            alert(`Scanning network: ${target}`);
+        }
+
+        function selectDevice(deviceId) {
+            document.querySelectorAll('.network-device').forEach(device => {
+                device.style.border = 'none';
+            });
+            const selected = event.target.closest('.network-device');
+            selected.style.border = '2px solid var(--primary)';
+        }
+
+        function connectDevice(deviceId) {
+            alert(`Connecting to device: ${deviceId}`);
+        }
+
+        function selectProtocolTab(tab) {
+            document.querySelectorAll('.protocol-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function refreshDeviceTable() {
+            // Refresh device list logic here
+        }
+
+        function exportResults() {
+            alert('Exporting scan results...');
+        }
+
+        function clearResults() {
+            alert('Clearing results...');
+        }
+
+        // Initialize with scan tab active
+        window.onload = function() {
+            document.querySelector('.network-tab.active').click();
+        };
+    </script>
+</body>
+</html>

@@ -17,6 +17,23 @@ from uuid import uuid4
 
 from .capture import StreamCapture
 
+# Hard-stop colorama WinError 6 in worker threads (global emit guard)
+try:
+    import colorama.ansitowin32 as _cw
+    _orig_write = _cw.write
+    def _safe_write(s, *a, **k):
+        try: return _orig_write(s, *a, **k)
+        except OSError: return len(s)
+    _cw.write = _safe_write
+    import logging
+    _orig_emit = logging.StreamHandler.emit
+    def _safe_emit(self, record):
+        try: return _orig_emit(self, record)
+        except OSError: pass
+    logging.StreamHandler.emit = _safe_emit
+except Exception:
+    pass
+
 MAX_JOBS = 120
 
 

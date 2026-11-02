@@ -20,6 +20,21 @@ from pegasus.modules.base import BaseModule
 from pegasus.core.plugin import CommandInfo, UIComponent, hook, command, ui_component, HookType
 from pegasus.core.config import get_settings
 
+# Suppress WinError 6 logging crashes globally
+try:
+    import logging, colorama.ansitowin32 as _cw
+    _orig = _cw.write
+    def _safe(s,*a,**k):
+        try: return _orig(s,*a,**k)
+        except OSError: return len(s)
+    _cw.write = _safe
+    _oe = logging.StreamHandler.emit
+    def _se(self,record):
+        try: return _oe(self,record)
+        except OSError: pass
+    logging.StreamHandler.emit = _se
+except Exception: pass
+
 
 class PayloadModule(BaseModule):
     """Payload generation, binding, DNA tracking, and mutation module."""
@@ -204,7 +219,7 @@ class PayloadModule(BaseModule):
     async def cmd_payload_mutate(self, *args) -> None:
         """AI mutation engine - scan APK and suggest mutations."""
         apk_path = self.prompt("Path to APK file")
-        if not apk_path or not os.path.exists(apk_path):
+        if not apk_path or not Path(apk_path).exists():
             self.print_error("File not found")
             return
 
