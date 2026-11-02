@@ -1,0 +1,148 @@
+{
+  "name": "pegasus-gates",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "phase",
+      "command": "/phase",
+      "make": "require",
+      "skill": "phase-runner"
+    },
+    {
+      "name": "ready",
+      "command": "/ready",
+      "make": "ready-check",
+      "skill": "definition-of-ready"
+    },
+    {
+      "name": "gate",
+      "command": "/gate",
+      "make": "gate",
+      "skill": "gate-map"
+    },
+    {
+      "name": "map",
+      "command": "/map",
+      "make": "map",
+      "skill": "map-assign"
+    },
+    {
+      "name": "handoff",
+      "command": "/handoff",
+      "make": "handoff",
+      "skill": "handoff-guard"
+    },
+    {
+      "name": "module-new",
+      "command": "/module-new",
+      "make": "module-new",
+      "skill": "module-scaffold"
+    },
+    {
+      "name": "audit",
+      "command": "/audit",
+      "make": "audit",
+      "skill": "module-scaffold"
+    },
+    {
+      "name": "blocked",
+      "command": "/blocked",
+      "make": "blocked",
+      "skill": "blocked-recovery"
+    }
+  ],
+  "agents": [
+    {
+      "id": "gate-runner",
+      "max_steps": 6,
+      "terminal_gate": "G2",
+      "may": [
+        "make test",
+        "make integ",
+        "make contract",
+        "make lint",
+        "make import"
+      ],
+      "may_not": [
+        "edit build/phases.yaml",
+        "edit docs/PLAN.md",
+        "edit scripts/",
+        "git push"
+      ]
+    },
+    {
+      "id": "map-auditor",
+      "max_steps": 8,
+      "terminal_gate": "G11",
+      "may": [
+        "make map",
+        "edit docs/PLAN.md section 9",
+        "run git ls-files"
+      ],
+      "may_not": [
+        "edit build/",
+        "edit scripts/",
+        "git push"
+      ]
+    },
+    {
+      "id": "module-builder",
+      "max_steps": 7,
+      "terminal_gate": "G4",
+      "may": [
+        "make module-new",
+        "edit post_exploitation/manifests",
+        "make contract"
+      ],
+      "may_not": [
+        "edit core/",
+        "edit build/",
+        "git push"
+      ]
+    },
+    {
+      "id": "manifest-auditor",
+      "max_steps": 6,
+      "terminal_gate": "G20",
+      "may": [
+        "make modules-lint",
+        "make audit",
+        "edit post_exploitation/manifests"
+      ],
+      "may_not": [
+        "edit pegasus/modules",
+        "edit build/",
+        "git push"
+      ]
+    },
+    {
+      "id": "cap-auditor",
+      "max_steps": 5,
+      "terminal_gate": "G20",
+      "may": [
+        "make caps-matrix",
+        "make caps-consistency",
+        "edit build/caps_orphans.allow"
+      ],
+      "may_not": [
+        "edit core/caps.py",
+        "edit pegasus/modules",
+        "git push"
+      ]
+    },
+    {
+      "id": "handoff-keeper",
+      "max_steps": 3,
+      "terminal_gate": "G13",
+      "may": [
+        "make handoff",
+        "make handoff-check",
+        "git add docs/HANDOFF.md"
+      ],
+      "may_not": [
+        "edit docs/PLAN.md",
+        "git push"
+      ]
+    }
+  ]
+}

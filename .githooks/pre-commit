@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+staged=$(git diff --cached --name-only)
+if printf '%s\n' "$staged" | grep -Eq '^(docs/PLAN\.md|skills/agents\.yaml)$' || [ ! -s docs/HANDOFF.md ]; then
+  python3 scripts/handoff.py
+  git add docs/HANDOFF.md
+fi
+if printf '%s\n' "$staged" | grep -qx 'skills/agents.yaml'; then
+  python3 scripts/emit_agents.py
+  git add .opencode-skills .mimocode-skills .zcode-skills .openfable-skills .zfable-skills
+fi
+python3 scripts/handoff.py --check || { echo "handoff drift — commit blocked" >&2; exit 1; }
+python3 scripts/emit_agents.py --check || { echo "adapter drift — commit blocked" >&2; exit 1; }
+python3 scripts/modules_lint.py || { echo "manifest invalid — commit blocked" >&2; exit 1; }
+python3 scripts/caps_consistency.py || { echo "cap lints disagree — commit blocked" >&2; exit 1; }
+exit 0

@@ -1,11 +1,18 @@
 {
-  "name": "pegasus-your-turn",
+  "name": "pegasus-gates",
   "version": "1.0.0",
-  "description": "Deity-level comprehensive breakdown of how to build Pegasus Phantom Menace v2",
-  "author": "ProjectZeroDays (All-Knowing Deity)",
-  "category": "architecture",
-  "trigger": "your-turn",
-  "entry_point": ".mimocode-skills/pegasus-your-turn.json",
-  "commands": 1,
-  "installation": "skill install .mimocode-skills/pegasus-your-turn.json"
+  "description": "Phase, gate, map, handoff and scaffold wrappers",
+  "category": "workflow",
+  "trigger": "gates",
+  "entry_point": ".mimocode-skills/pegasus-gates.json",
+  "workflows": [
+    ".mimocode-skills/workflows/phase-execute.json",
+    ".mimocode-skills/workflows/gate-run.json",
+    ".mimocode-skills/workflows/map-complete.json",
+    ".mimocode-skills/workflows/module-scaffold.json",
+    ".mimocode-skills/workflows/handoff-repair.json",
+    ".mimocode-skills/workflows/blocked-recovery.json"
+  ],
+  "commands": 8,
+  "installation": "skill install .mimocode-skills/skill.json"
 }

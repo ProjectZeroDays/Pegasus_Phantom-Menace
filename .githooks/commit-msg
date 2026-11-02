@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+msg=$(head -n1 "$1")
+printf '%s' "$msg" | grep -Eq '^(P[0-9][a-c]?|R[0-4]|PLAN): .+' || {
+  echo "commit must start with a phase prefix, e.g. 'P11: add browser_creds'" >&2
+  exit 1
+}
+exit 0

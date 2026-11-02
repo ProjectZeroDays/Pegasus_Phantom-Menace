@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+python3 scripts/handoff.py --check      || { echo "handoff drift — push blocked" >&2; exit 1; }
+python3 scripts/emit_agents.py --check  || { echo "adapter drift — push blocked" >&2; exit 1; }
+python3 scripts/require.py --lint       || { echo "phases invalid — push blocked" >&2; exit 1; }
+python3 scripts/version_check.py        || { echo "version drift — push blocked" >&2; exit 1; }
+python3 scripts/caps_consistency.py     || { echo "cap lints disagree — push blocked" >&2; exit 1; }
+python3 scripts/risk_lint.py            || { echo "risk record incomplete — push blocked" >&2; exit 1; }
+python3 scripts/no_platform_branch.py   || { echo "platform branch — push blocked" >&2; exit 1; }
+python3 scripts/audit_derive.py --check || { echo "audit drift — push blocked" >&2; exit 1; }
+python3 scripts/bootstrap-check.py      || { echo "tooling tampered — push blocked" >&2; exit 1; }
+exit 0

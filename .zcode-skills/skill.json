@@ -1,11 +1,18 @@
 {
-  "name": "pegasus-your-turn",
+  "name": "pegasus-gates",
   "version": "1.0.0",
-  "description": "Deity-level comprehensive breakdown of how to build Pegasus Phantom Menace v2",
-  "author": "ProjectZeroDays (All-Knowing Deity)",
-  "category": "architecture",
-  "trigger": "your-turn",
-  "entry_point": ".zcode-skills/pegasus-your-turn.json",
-  "commands": 1,
-  "installation": "skill install .zcode-skills/pegasus-your-turn.json"
+  "description": "Phase, gate, map, handoff and scaffold wrappers",
+  "category": "workflow",
+  "trigger": "gates",
+  "entry_point": ".zcode-skills/pegasus-gates.json",
+  "workflows": [
+    ".zcode-skills/workflows/phase-execute.json",
+    ".zcode-skills/workflows/gate-run.json",
+    ".zcode-skills/workflows/map-complete.json",
+    ".zcode-skills/workflows/module-scaffold.json",
+    ".zcode-skills/workflows/handoff-repair.json",
+    ".zcode-skills/workflows/blocked-recovery.json"
+  ],
+  "commands": 8,
+  "installation": "skill install .zcode-skills/skill.json"
 }
