@@ -1,0 +1,51 @@
+# One record per risk. Every field mandatory: no risk without a detector,
+# no detector without a proof test that makes it fire.
+- {id: R-DEV-01, title: content query deprecated on A13+, area: device, severity: high,
+   detector: probes.content_query_rc, ladder: [content_query, sqlite_pull, provider_read],
+   auto: [fallback, profile_write, alert_if_all_fail],
+   proof: tests/device/test_sms_paths.py, owner: collection, sla_hours: 24,
+   budget: {max_fail_rate: 0.15, window: 7d}}
+- {id: R-DEV-02, title: /dev/input SELinux-gated, area: device, severity: medium,
+   detector: probes.input_readable, ladder: [direct, su_chmod, root_required],
+   auto: [degrade, remediation_hint], proof: tests/device/test_input_probe.py,
+   owner: capture, sla_hours: 48}
+- {id: R-DEV-03, title: keylogger shim dies on reboot, area: device, severity: high,
+   detector: probes.shim_absent, ladder: [supervisor_restart, hook_reinstall, degrade],
+   auto: [self_heal, persistence_assert, escalate_after_5],
+   proof: tests/device/test_shim_survival.py, owner: capture, sla_hours: 12}
+- {id: R-DATA-01, title: auto-pull thrash on large DB, area: data, severity: high,
+   detector: metrics.pull_p95, ladder: [delta_pull, adaptive_interval, coalesce],
+   auto: [backoff, alert], proof: tests/perf/test_pull_storm.py, owner: data,
+   sla_hours: 24, budget: {max_fail_rate: 0.10, window: 7d}}
+- {id: R-TRUTH-01, title: unvalidated exploit auto-fires, area: truth, severity: critical,
+   detector: truth.autofire_check, ladder: [block, demote], auto: [block_autofire, issue],
+   proof: tests/truth/test_promotion.py, owner: orchestrator, sla_hours: 4}
+- {id: R-TRUTH-02, title: declared percentages drift, area: truth, severity: high,
+   detector: audit.table_match, ladder: [regenerate], auto: [ci_fail, regenerate],
+   proof: tests/truth/test_audit_derivation.py, owner: platform, sla_hours: 24}
+- {id: R-TRUTH-03, title: the two cap lints disagree, area: truth, severity: high,
+   detector: caps.consistency, ladder: [report, block], auto: [ci_fail, block],
+   proof: tests/caps/test_consistency.py, owner: platform, sla_hours: 12}
+- {id: R-CRYPTO-01, title: cosmetic crypto, area: crypto, severity: critical,
+   detector: crypto.selftest, ladder: [refuse_start, xor_fallback], auto: [hard_fail, banner],
+   proof: tests/crypto/test_selftest.py, owner: crypto, sla_hours: 1}
+- {id: R-CRYPTO-02, title: tampered export bundle, area: crypto, severity: critical,
+   detector: crypto.verify_bundle, ladder: [abort_download, name_artifact],
+   auto: [abort, page], proof: tests/crypto/test_bundle_sig.py, owner: crypto, sla_hours: 1}
+- {id: R-INFRA-01, title: attribution leak, area: infra, severity: critical,
+   detector: infra.egress_mismatch, ladder: [quarantine_node, rotate, page],
+   auto: [quarantine, page], proof: tests/infra/test_egress.py, owner: infra, sla_hours: 1}
+- {id: R-OPS-01, title: multi-device pull storm, area: ops, severity: high,
+   detector: scheduler.queue_depth, ladder: [serialize, jitter, debounce],
+   auto: [throttle], proof: tests/perf/test_multi_connect.py, owner: ops, sla_hours: 24}
+- {id: R-OPS-02, title: destructive action without undo, area: ops, severity: high,
+   detector: ops.rollback_available, ladder: [presnapshot, plan_mode, mark_risky],
+   auto: [presnapshot], proof: tests/ops/test_rollback.py, owner: ops, sla_hours: 12}
+- {id: R-CAP-01, title: implant advertises caps it lacks, area: truth, severity: high,
+   detector: probes.cap_lie, ladder: [clamp, demote_build, alert],
+   auto: [clamp, issue], proof: tests/caps/test_cap_lie.py, owner: broker, sla_hours: 24,
+   budget: {max_fail_rate: 0.01, window: 7d}}
+- {id: R-CAP-06, title: partial rate masks breakage, area: truth, severity: high,
+   detector: metrics.partial_rate, ladder: [family_review, demote_tier],
+   auto: [alert, demote], proof: tests/audit/test_partial_masking.py, owner: platform,
+   sla_hours: 12, budget: {max_fail_rate: 0.15, window: 7d}}

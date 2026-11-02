@@ -1,0 +1,54 @@
+# provides is written from conformance passes, never declared by hand.
+# conformant flips true only when the suite is green for that transport.
+# Every value must exist in core/caps.py; capreg reports a typo as a phantom.
+- {name: adb, cost: 10, conformant: false,
+   provides: [net.adb, shell, file.get, file.put, file.list, pkg.list, pkg.install,
+              proc.list, ui.inject, screen.capture, comms.sms, comms.calls,
+              comms.contacts, pos.location, radio.wifi, radio.bt, radio.nfc,
+              creds.keystore, os.cron, camera, mic]}
+- {name: idevice, cost: 12, conformant: false,
+   provides: [net.idevice, file.get, file.put, file.list, pkg.list, screen.capture]}
+- {name: agent.rpc, cost: 40, conformant: false,
+   provides: [agent.rpc, shell, file.get, file.put, file.list, proc.list, pkg.list,
+              creds.store, creds.sam, creds.lsass, creds.dpapi, net.pivot]}
+- {name: ssh, cost: 20, conformant: false,
+   provides: [net.ssh, shell, file.get, file.list, proc.list, os.systemd, os.cron,
+              os.launchd, creds.shadow, net.pivot]}
+- {name: smb, cost: 30, conformant: false,
+   provides: [net.smb, file.get, file.list]}
+- {name: wmi, cost: 35, conformant: false,
+   provides: [net.wmi, proc.list, pkg.list, os.registry]}
+- {name: rdp, cost: 45, conformant: false,
+   provides: [net.rdp, ui.inject, screen.capture]}
+- {name: ldap, cost: 40, conformant: false,
+   provides: [net.ldap]}
+- {name: snmp, cost: 60, conformant: false,
+   provides: [proto.snmp]}
+- {name: mqtt, cost: 60, conformant: false,
+   provides: [proto.mqtt]}
+- {name: coap, cost: 60, conformant: false,
+   provides: [proto.coap]}
+- {name: tr069, cost: 60, conformant: false,
+   provides: [proto.tr069]}
+- {name: modbus, cost: 65, conformant: false,
+   provides: [proto.modbus]}
+- {name: dnp3, cost: 65, conformant: false,
+   provides: [proto.dnp3]}
+- {name: s7, cost: 65, conformant: false,
+   provides: [proto.s7]}
+- {name: rtsp, cost: 50, conformant: false,
+   provides: [proto.rtsp, screen.capture]}
+- {name: onvif, cost: 55, conformant: false,
+   provides: [proto.onvif, camera]}
+- {name: mavlink, cost: 55, conformant: false,
+   provides: [proto.mavlink, pos.location]}
+- {name: can, cost: 70, conformant: false,
+   provides: [vehicle.can]}
+- {name: obd, cost: 70, conformant: false,
+   provides: [vehicle.obd]}
+- {name: bt, cost: 25, conformant: false,
+   provides: [radio.bt]}
+- {name: nfc, cost: 25, conformant: false,
+   provides: [radio.nfc]}
+- {name: sdr, cost: 80, conformant: false,
+   provides: [radio.sdr]}

