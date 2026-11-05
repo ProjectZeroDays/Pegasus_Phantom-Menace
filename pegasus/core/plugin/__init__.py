@@ -297,6 +297,11 @@ class AppContext:
         import os
         return Path(self.settings.get("payloads_dir", "payloads") if hasattr(self.settings, "get") else os.environ.get("PEGASUS_PAYLOADS_DIR", "payloads"))
 
+    def get_reports_dir(self):
+        from pathlib import Path
+        import os
+        return Path(self.settings.get("reports_dir", "reports") if hasattr(self.settings, "get") else os.environ.get("PEGASUS_REPORTS_DIR", "reports"))
+
     def get_plugin(self, name: str) -> Optional["Plugin"]:
         return self.plugins.get(name)
     
@@ -571,7 +576,7 @@ class PluginManager:
         """Load all plugins from the given directories.
 
         Falls back to importing built-in modules directly when file discovery
-        yields nothing — the case in a PyInstaller bundle, where ``plugin.py``
+        yields nothing -- the case in a PyInstaller bundle, where ``plugin.py``
         sources exist only inside the archive.
         """
         dirs = plugin_dirs or self.context.settings.plugins.plugin_dirs

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2019-11931 — WhatsApp MP4 metadata parsing overflow. Zero-click: a
+"""CVE-2019-11931 -- WhatsApp MP4 metadata parsing overflow. Zero-click: a
 crafted MP4 sent as a message. Public PoC. Confidence: HIGH."""
 import struct, sys
 from pathlib import Path

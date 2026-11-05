@@ -1,108 +1,123 @@
-/** Formatting helpers shared across the Pegasus web GUI. */
+/** Display formatters. All tolerate null, undefined and non-numeric input. */
 
-export function formatBytes(n: number | null | undefined, digits = 1): string {
-  if (n === null || n === undefined || Number.isNaN(n)) return "—";
-  if (n < 1024) return `${n} B`;
-  const units = ["KB", "MB", "GB", "TB"];
-  let v = n / 1024;
-  let i = 0;
-  while (v >= 1024 && i < units.length - 1) {
-    v /= 1024;
-    i += 1;
+const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB"] as const;
+
+function num(value: unknown): number | null {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+export function formatBytes(value: unknown, digits = 1): string {
+  const bytes = num(value);
+  if (bytes === null || bytes < 0) return "—";
+  if (bytes < 1024) return `${Math.round(bytes)} B`;
+  let scale = 0;
+  let size = bytes;
+  while (size >= 1024 && scale < BYTE_UNITS.length - 1) {
+    size /= 1024;
+    scale += 1;
   }
-  return `${v.toFixed(digits)} ${units[i]}`;
+  return `${size.toFixed(digits)} ${BYTE_UNITS[scale]}`;
 }
 
-export function formatNumber(n: number | null | undefined): string {
-  if (n === null || n === undefined || Number.isNaN(n)) return "—";
-  return new Intl.NumberFormat().format(n);
+export function formatNumber(value: unknown, digits = 0): string {
+  const parsed = num(value);
+  if (parsed === null) return "—";
+  return parsed.toLocaleString(undefined, {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
 }
 
-export function formatDuration(ms: number | null | undefined): string {
-  if (ms === null || ms === undefined || Number.isNaN(ms)) return "—";
-  if (ms < 1000) return `${Math.round(ms)}ms`;
-  const s = ms / 1000;
-  if (s < 60) return `${s.toFixed(1)}s`;
-  const m = Math.floor(s / 60);
-  const rs = Math.round(s % 60);
-  if (m < 60) return `${m}m ${rs}s`;
-  const h = Math.floor(m / 60);
-  return `${h}h ${m % 60}m`;
+function toDate(value: unknown): Date | null {
+  if (value === null || value === undefined || value === "") return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+  if (typeof value === "number" || (typeof value === "string" && /^\d+$/.test(value))) {
+    const numeric = Number(value);
+    const ms = numeric > 1e11 ? numeric : numeric * 1000;
+    const date = new Date(ms);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+  const date = new Date(String(value));
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function formatMs(ms: number | null | undefined): string {
-  return formatDuration(ms);
+export function formatTime(value: unknown): string {
+  const date = toDate(value);
+  return date ? date.toLocaleTimeString() : "—";
 }
 
-export function formatTime(t: number | string | null | undefined): string {
-  const d = toDate(t);
-  return d ? d.toLocaleTimeString() : "—";
+export function formatDateTime(value: unknown): string {
+  const date = toDate(value);
+  if (!date) return "—";
+  return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 }
 
-export function formatDateTime(t: number | string | null | undefined): string {
-  const d = toDate(t);
-  if (!d) return "—";
-  return `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+/** Duration from milliseconds. */
+export function formatMs(value: unknown): string {
+  const ms = num(value);
+  if (ms === null || ms < 0) return "—";
+  if (ms < 1000) return `${Math.round(ms)} ms`;
+  return formatDuration(ms / 1000);
 }
 
-export function timeAgo(t: number | string | Date | null | undefined): string {
-  const d = toDate(t);
-  if (!d) return "—";
-  const diff = Date.now() - d.getTime();
-  if (diff < 0) return formatDateTime(d as any);
-  const s = Math.floor(diff / 1000);
-  if (s < 10) return "just now";
-  if (s < 60) return `${s}s ago`;
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const days = Math.floor(h / 24);
-  if (days < 30) return `${days}d ago`;
-  return d.toLocaleDateString();
+/** Duration from seconds. */
+export function formatDuration(value: unknown): string {
+  const seconds = num(value);
+  if (seconds === null || seconds < 0) return "—";
+  const total = Math.floor(seconds);
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const rest = total % 60;
+  if (hours) return `${hours}h ${minutes}m`;
+  if (minutes) return `${minutes}m ${rest}s`;
+  return `${rest}s`;
 }
 
-export function titleCase(s: string | null | undefined): string {
-  if (!s) return "";
-  return String(s)
+/** Relative time from an epoch value in milliseconds. */
+export function timeAgo(value: unknown): string {
+  const date = toDate(value);
+  if (!date) return "—";
+  const delta = Math.round((Date.now() - date.getTime()) / 1000);
+  if (delta < 0) return "just now";
+  if (delta < 45) return "just now";
+  if (delta < 3600) return `${Math.round(delta / 60)}m ago`;
+  if (delta < 86400) return `${Math.round(delta / 3600)}h ago`;
+  if (delta < 2592000) return `${Math.round(delta / 86400)}d ago`;
+  return date.toLocaleDateString();
+}
+
+export function titleCase(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  return String(value)
     .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
     .trim()
-    .split(" ")
-    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
 
-export function initials(s: string | null | undefined): string {
-  if (!s) return "?";
-  return String(s)
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join("");
+export function initials(value: unknown): string {
+  if (value === null || value === undefined) return "?";
+  const words = String(value).trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "?";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }
 
-export function severityClass(sev: string | null | undefined): string {
-  const s = (sev ?? "").toLowerCase();
-  if (["critical", "high", "9", "10"].includes(s)) return "text-red-400";
-  if (["medium", "moderate"].includes(s)) return "text-amber-400";
-  if (["low"].includes(s)) return "text-sky-400";
-  return "text-slate-400";
-}
+const SEVERITY_TONES: Record<string, string> = {
+  critical: "err",
+  high: "warn",
+  medium: "info",
+  moderate: "info",
+  low: "dim",
+  info: "dim",
+  none: "dim",
+};
 
-function toDate(t: any): Date | null {
-  if (t === null || t === undefined) return null;
-  if (t instanceof Date) return t;
-  if (typeof t === "number") {
-    // seconds vs milliseconds
-    return new Date(t < 1e12 ? t * 1000 : t);
-  }
-  const s = String(t);
-  if (/^\d+(\.\d+)?$/.test(s)) {
-    const n = Number(s);
-    return new Date(n < 1e12 ? n * 1000 : n);
-  }
-  const d = new Date(s);
-  return Number.isNaN(d.getTime()) ? null : d;
+export function severityClass(value: unknown): string {
+  const key = String(value ?? "").toLowerCase().trim();
+  return SEVERITY_TONES[key] ?? "dim";
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-31864 — KD-tree corruption. Malformed node record with an
+"""CVE-2023-31864 -- KD-tree corruption. Malformed node record with an
 out-of-bounds child index and a poisoned split axis."""
 import struct, sys
 from pathlib import Path

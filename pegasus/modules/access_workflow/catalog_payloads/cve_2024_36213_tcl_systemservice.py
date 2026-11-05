@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2024-36213 — TCL System Service. System-property burst with an
+"""CVE-2024-36213 -- TCL System Service. System-property burst with an
 out-of-range property index via the shell."""
 import subprocess, sys
 

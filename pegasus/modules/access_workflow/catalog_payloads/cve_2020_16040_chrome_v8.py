@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-16040 — Chrome V8 type confusion in SimplifiedLowering
+"""CVE-2020-16040 -- Chrome V8 type confusion in SimplifiedLowering
 (Sar/Shr on NumberOrOddball). Zero-click via web page. Public (Project Zero).
 Confidence: HIGH."""
 import sys

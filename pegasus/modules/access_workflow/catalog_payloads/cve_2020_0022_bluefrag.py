@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-0022 — BlueFrag. Android Fluoride L2CAP heap overflow.
+"""CVE-2020-0022 -- BlueFrag. Android Fluoride L2CAP heap overflow.
 True over-the-air via raw HCI + scapy. Root + Linux + idle BR/EDR adapter.
 
 Trigger: single ACL first-fragment (PB=0b10) whose L2CAP length field is

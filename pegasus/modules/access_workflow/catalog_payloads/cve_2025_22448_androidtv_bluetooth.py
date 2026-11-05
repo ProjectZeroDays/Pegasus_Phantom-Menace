@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2025-22448 — Android TV Bluetooth. L2CAP fragmented SDU with a declared
+"""CVE-2025-22448 -- Android TV Bluetooth. L2CAP fragmented SDU with a declared
 length larger than delivered -> reassembly overflow (Fluoride). Raw HCI."""
 import sys, time, socket, struct
 try:

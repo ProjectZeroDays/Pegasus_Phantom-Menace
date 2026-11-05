@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local AI model manager for Pegasus v2.1 — GGUF / MLX / abliterated."""
+"""Local AI model manager for Pegasus v2.1 -- GGUF / MLX / abliterated."""
 from __future__ import annotations
 import os, sys, platform, json, pathlib
 from typing import List, Dict, Optional
@@ -31,13 +31,13 @@ def download(model_id: str) -> Dict[str, str]:
     return {"status": "queued", "model": model_id, "dir": str(MODELS_DIR), "message": "Download queued to workspace/models/"}
 
 def fallback_local_models() -> List[Dict]:
-    """Defensive local-model fallbacks — GGUF download registry only.
+    """Defensive local-model fallbacks -- GGUF download registry only.
     No integration into payload delivery / exploit lifecycle."""
     return [
         {"id": "downloadhuihui-ai/BaronLLM_Offensive_Security-abliterated-GGUF", "label": "BaronLLM (defensive inference fallback only)", "formats": ["gguf"], "source": "hf", "defensive_only": True},
         {"id": "orcarouter/Qwen3.8-Flash-Next-Uncensored-GGUF", "label": "Qwen3.8-Flash-Next (defensive inference fallback only)", "formats": ["gguf"], "source": "hf", "defensive_only": True},
         {"id": "gaston-parravicini/LFM2.5-8B-A1B-Uncensored-Gaston-GGUF", "label": "LFM2.5-8B-Uncensored (defensive inference fallback only)", "formats": ["gguf"], "source": "hf", "defensive_only": True},
-        {"id": "JoasASantos/Offensive-Security-AI-Models", "label": "Offensive-Security-AI-Models (defensive inference fallback only — not payload delivery)", "formats": ["gguf"], "source": "hf", "defensive_only": True},
+        {"id": "JoasASantos/Offensive-Security-AI-Models", "label": "Offensive-Security-AI-Models (defensive inference fallback only -- not payload delivery)", "formats": ["gguf"], "source": "hf", "defensive_only": True},
         {"id": "cyjin-yl/Qwen3.8-27B-Uncensored-Cyber-agentic-imatrix-GGU", "label": "Qwen3.8-27B-Cyber (defensive inference fallback only)", "formats": ["gguf"], "source": "hf", "defensive_only": True},
     ]
 

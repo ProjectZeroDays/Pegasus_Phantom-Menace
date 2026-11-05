@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2022-42896 — Bluetooth L2CAP use-after-free (l2cap_le_connect_req
+"""CVE-2022-42896 -- Bluetooth L2CAP use-after-free (l2cap_le_connect_req
 vs l2cap_conn_del race). Zero-click on Linux. Public PoC. HIGH."""
 import struct, sys
 from pathlib import Path

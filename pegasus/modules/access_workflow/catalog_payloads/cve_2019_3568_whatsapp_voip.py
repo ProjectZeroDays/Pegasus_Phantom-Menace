@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2019-3568 — WhatsApp VOIP stack buffer overflow. Zero-click: the
+"""CVE-2019-3568 -- WhatsApp VOIP stack buffer overflow. Zero-click: the
 target must merely be reachable; a crafted SDP/call-setup packet overflows
 the RTP/SRTP handler. Public PoC. Confidence: HIGH (NSO Pegasus chain)."""
 import sys

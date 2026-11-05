@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-26084 — Android TV Binder. Parcel with an inflated array length
+"""CVE-2023-26084 -- Android TV Binder. Parcel with an inflated array length
 in a typed field -> OOB in the service's readArray."""
 import struct, sys
 from pathlib import Path

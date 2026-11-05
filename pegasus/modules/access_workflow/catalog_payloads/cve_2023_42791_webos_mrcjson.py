@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-42791 — LG webOS mrcJSON. Deeply nested / duplicate-key JSON that
+"""CVE-2023-42791 -- LG webOS mrcJSON. Deeply nested / duplicate-key JSON that
 overflows the parser's fixed stack."""
 import sys
 from pathlib import Path

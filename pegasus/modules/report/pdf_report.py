@@ -16,7 +16,7 @@ def build(run_id: str, out: pathlib.Path, operator: str = "operator") -> pathlib
     doc = SimpleDocTemplate(str(out), pagesize=A4, topMargin=18 * mm,
                             bottomMargin=18 * mm)
     styles = getSampleStyleSheet()
-    flow = [Paragraph("Pegasus â€” Engagement Report", styles["Title"]),
+    flow = [Paragraph("Pegasus -- Engagement Report", styles["Title"]),
             Paragraph(f"Run {run_id} Â· {operator} Â· "
                       f"{time.strftime('%Y-%m-%d %H:%M')}", styles["Normal"]),
             Spacer(1, 8 * mm)]
@@ -42,7 +42,7 @@ def build(run_id: str, out: pathlib.Path, operator: str = "operator") -> pathlib
                     continue
                 digest = hashlib.sha256(artifact.read_bytes()).hexdigest()[:24]
                 flow.append(Paragraph(f"<font size=8>{artifact.name} Â· "
-                                      f"sha256 {digest}â€¦</font>", styles["Normal"]))
+                                      f"sha256 {digest}--¦</font>", styles["Normal"]))
 
     gaps = [e["message"] for e in events if e["message"].startswith("fail ")]
     flow += [Spacer(1, 6 * mm), Paragraph("Gaps", styles["Heading2"])]

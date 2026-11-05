@@ -44,3 +44,18 @@ build_web.log
 bootstrap.py.v33.*.bak
 node_modules/
 *.tsbuildinfo
+
+# Transient debug / patch scripts and operational logs (never commit)
+*.log
+patch*.py
+q11_*.log
+log/
+
+# Stray git internals accidentally tracked under a vendored tool (never commit)
+weapons/remote-admin-tool/remote-admin-tool-main/config
+weapons/remote-admin-tool/remote-admin-tool-main/FETCH_HEAD
+weapons/remote-admin-tool/remote-admin-tool-main/HEAD
+weapons/remote-admin-tool/remote-admin-tool-main/ORIG_HEAD
+weapons/remote-admin-tool/remote-admin-tool-main/packed-refs
+weapons/remote-admin-tool/remote-admin-tool-main/description
+weapons/remote-admin-tool/remote-admin-tool-main/index

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-9759 — LG webOS WebAppLauncher. Launch an arbitrary installed app
+"""CVE-2020-9759 -- LG webOS WebAppLauncher. Launch an arbitrary installed app
 by id over the Luna/ssap channel, bypassing the launcher's allowlist."""
 import json, sys
 

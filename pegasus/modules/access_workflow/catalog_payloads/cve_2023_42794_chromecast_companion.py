@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-42794 — Cast Companion Library. mDNS discovery packet with a
+"""CVE-2023-42794 -- Cast Companion Library. mDNS discovery packet with a
 malformed TXT record set (oversized / duplicate keys)."""
 import socket, struct, sys
 

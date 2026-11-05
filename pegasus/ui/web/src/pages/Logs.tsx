@@ -22,13 +22,15 @@ interface LogContent {
 }
 
 export default function Logs() {
-  const index = useApi<{ logs: LogFile[]; count: number; directory: string }>("/logs", { interval: 30000 });
+  const index = useApi<{ logs: LogFile[]; count: number; directory: string; categories?: Record<string, number> }>("/logs", { interval: 30000 });
   const [selected, setSelected] = useState<string | null>(null);
   const [log, setLog] = useState<LogContent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [search, setSearch] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [editedContent, setEditedContent] = useState("");
 
   const load = async (id: string) => {
     setSelected(id);
@@ -70,6 +72,24 @@ export default function Logs() {
     }
   };
 
+  const clear = async () => {
+    if (!selected) return;
+    try {
+      await api.del(`/logs/${selected}`);
+      setSelected(null);
+      setLog(null);
+      void index.refresh();
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const copyCategories = () => {
+    const cats = index.data?.categories ?? {};
+    const text = Object.entries(cats).map(([k, v]) => `${k}: ${v}`).join("\n");
+    navigator.clipboard.writeText(text).catch(() => {});
+  };
+
   const download = (url: string) => {
     const a = document.createElement("a");
     a.href = url;
@@ -88,6 +108,15 @@ export default function Logs() {
           <>
             <Button size="sm" variant="ghost" onClick={() => void index.refresh()}>
               <RefreshCw size={12} /> Refresh
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => { setEditMode((v) => !v); setEditedContent(log?.content ?? ""); }} disabled={!log}>
+              <FileText size={12} /> {editMode ? "view" : "edit"}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={copyCategories} title="Copy category counts">
+              <Copy size={12} /> categories
+            </Button>
+            <Button size="sm" variant="ghost" onClick={clear} disabled={!selected} title="Delete selected log">
+              <ScrollText size={12} /> clear
             </Button>
             <Button
               size="sm"
@@ -176,7 +205,25 @@ export default function Logs() {
             </>
           }
         >
-          {loading ? (
+          {editMode ? (
+            <div style={{ padding: 8 }}>
+              <textarea
+                className="input mono tiny"
+                style={{ width: "100%", height: 420, fontFamily: "monospace", fontSize: 12, background: "#0d1117", color: "#c9d1d9", border: "1px solid #30363d", borderRadius: 6, padding: 10 }}
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                spellCheck={false}
+              />
+              <div style={{ paddingTop: 6 }}>
+                <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(editedContent).catch(() => {}); }}>
+                  <Copy size={12} /> copy edited
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditMode(false)}>
+                  cancel
+                </Button>
+              </div>
+            </div>
+          ) : loading ? (
             <div style={{ padding: 24, textAlign: "center" }}>
               <Loader2 size={16} className="animate-spin" />
             </div>

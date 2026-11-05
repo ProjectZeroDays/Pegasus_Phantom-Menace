@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-24588 — FragAttacks: A-MSDU spoofing. The receiver honours the
+"""CVE-2020-24588 -- FragAttacks: A-MSDU spoofing. The receiver honours the
 A-MSDU Present bit but mishandles the inner LLC/SNAP, so a forged header is
 interpreted as IP payload -> packet injection/spoofing. Zero-click.
 Public (Mathy Vanhoef). Confidence: HIGH.

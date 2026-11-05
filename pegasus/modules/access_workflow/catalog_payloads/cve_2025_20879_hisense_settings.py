@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2025-20879 — Hisense VIDAA Settings. Settings key with an oversized
+"""CVE-2025-20879 -- Hisense VIDAA Settings. Settings key with an oversized
 value string pushed over the local config API."""
 import sys, urllib.request
 

@@ -18,7 +18,7 @@ from pegasus.core.config import port, host
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="pegasus-web",
-        description="Pegasus Phantom Menace v2 — Web GUI server",
+        description="Pegasus Phantom Menace v2 -- Web GUI server",
     )
     parser.add_argument("--host", default="127.0.0.1", help="bind host (default 127.0.0.1)")
     parser.add_argument("--port", default=port(), type=int, help="bind port (default 5001)")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-6418 — Chrome V8 type confusion in TurboFan (Array.prototype
+"""CVE-2020-6418 -- Chrome V8 type confusion in TurboFan (Array.prototype
 iteration). Zero-click via any web page. Public PoC. Confidence: HIGH."""
 import sys
 from pathlib import Path

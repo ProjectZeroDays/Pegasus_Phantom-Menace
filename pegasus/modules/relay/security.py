@@ -11,10 +11,10 @@ from enum import Enum
 from datetime import datetime
 import asyncio
 import logging
+from pydantic import BaseModel
 from cryptography import x509
-from cryptography.hazmatprim import PrivateKey
-from cryptography.hazmatprim import serialization
-from cryptography.hazmatprim import hashes
+from cryptography.hazmat.primitives.asymmetric import rsa, ec
+from cryptography.hazmat.primitives import serialization, hashes
 import ssl
 from typing_extensions import TypedDict
 
@@ -22,7 +22,7 @@ from typing_extensions import TypedDict
 logger = logging.getLogger(__name__)
 
 class SecurityPolicy(BaseModel):
-    """"Security policy configuration"""
+    """Security policy configuration"""
     authentication: str = "certificate"
     authorization: str = "rbac"
     encryption: str = "aes256"
@@ -37,7 +37,7 @@ class SecurityPolicy(BaseModel):
     forbidden_ips: List[str] = []
 
 class SecurityEvent(BaseModel):
-    """"Security event model"""
+    """Security event model"""
     event_id: str
     event_type: str
     severity: str
@@ -50,7 +50,7 @@ class SecurityEvent(BaseModel):
     metadata: Dict[str, Any] = {}
 
 class SecurityGateway:
-    """"Security Gateway for Relay Infrastructure""""
+    """Security Gateway for Relay Infrastructure"""
 
     def __init__(self, config: SecurityPolicy):
         self.config = config
@@ -64,7 +64,7 @@ class SecurityGateway:
 
 
     async def setup_certificate(self, cert_id: str, certificate_path: str, private_key_path: str) -> bool:
-        """"Setup TLS certificate"""
+        """Setup TLS certificate"""
         try:
             # Load certificate
             with open(certificate_path, "rb") as f:

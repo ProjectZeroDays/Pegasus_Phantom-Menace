@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-42793 — Tizen Browser. HTML page exercising the renderer.
+"""CVE-2023-42793 -- Tizen Browser. HTML page exercising the renderer.
 Serve it and open on the TV browser; or push via the Tizen web app channel."""
 import sys, http.server, socketserver
 from pathlib import Path

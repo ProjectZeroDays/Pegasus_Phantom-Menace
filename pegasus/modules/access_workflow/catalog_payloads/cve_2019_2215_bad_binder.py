@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""CVE-2019-2215 — Android Binder UAF ("BAD BINDER"). Zero-click via any app
+"""CVE-2019-2215 -- Android Binder UAF ("BAD BINDER"). Zero-click via any app
 that receives a Binder transaction; unlink of an epoll wait entry frees a
 still-referenced binder_buffer. Public exploit (Project Zero / Maddie Stone).
-Confidence: HIGH — deterministic, widely reproduced."""
+Confidence: HIGH -- deterministic, widely reproduced."""
 import sys
 from pathlib import Path
 
 C_STUB = r'''
-/* bad_binder.c — minimal trigger + reclaim skeleton.
+/* bad_binder.c -- minimal trigger + reclaim skeleton.
  * cc bad_binder.c -o bad_binder && ./bad_binder
  * Uses binder thread exit to trigger unlink of the epoll entry, then
  * reclaims the freed binder_buffer with a controlled sendmsg() iovec. */

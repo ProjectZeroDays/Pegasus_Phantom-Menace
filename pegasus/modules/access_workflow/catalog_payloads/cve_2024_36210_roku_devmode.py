@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2024-36210 — Roku Developer Mode. The dev webserver on :8080 accepts a
+"""CVE-2024-36210 -- Roku Developer Mode. The dev webserver on :8080 accepts a
 zip whose entry paths escape the install dir (zip-slip)."""
 import io, sys, urllib.request, zipfile
 

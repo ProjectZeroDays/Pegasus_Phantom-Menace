@@ -233,6 +233,7 @@ def report_job(job_id: str, kind: str, title: str) -> None:
 # Imports from existing modules
 # ---------------------------------------------------------------------------
 
+from flask import Flask
 from pegasus.modules import (
     ai, alerts, antiforensics, auth, autonomous, c2,
     crypto, delivery, exploits, memory, oauth, ota, parity,
@@ -261,9 +262,23 @@ EXEMPT = (
 start_time = time.time()
 
 
+from pegasus.ui.web.backend import device_routes
+
 def create_app() -> Flask:
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.environ.get("PEGASUS_SECRET", "development-secret")
+    import pathlib
+    import secrets
+    secret_file = pathlib.Path.home().joinpath(".pegasus", ".secret")
+    if not secret_file.exists():
+        secret_file.parent.mkdir(parents=True, exist_ok=True)
+        secret_file.write_text(secrets.token_hex(32), encoding="utf-8")
+        try:
+            secret_file.chmod(0o600)
+        except OSError:
+            pass
+    app.config["SECRET_KEY"] = (
+        os.environ.get("PEGASUS_SECRET") or secret_file.read_text(encoding="utf-8").strip()
+    )
 
     ok = lambda data, code=200: (jsonify({"ok": True, "data": data}), code)
     fail = lambda err, code=400: (jsonify({"ok": False, "error": err}), code)
@@ -304,6 +319,7 @@ def create_app() -> Flask:
     parity.parity_routes.register(app, ok, fail)
     tenant.tenant_routes.register(app, ok, fail)
     memory.routes.register(app, ok, fail)
+    device_routes.register(app, ok, fail)
 
     # System endpoints
     @app.get("/api/system")
@@ -339,6 +355,22 @@ def create_app() -> Flask:
     @app.get("/api/system/listeners")
     def system_listeners():
         return ok({"listeners": listener_status()})
+
+    @app.route("/api/logs", methods=["GET"])
+    def api_logs():
+        import json, time
+        from pathlib import Path
+        log_path = Path("C:/Projects/Pegasus_Phantom-Menace/log/events.jsonl")
+        logs = []
+        if log_path.exists():
+            for line in log_path.read_text(encoding="utf-8", errors="ignore").splitlines():
+                if line.strip():
+                    try: logs.append(json.loads(line))
+                    except: pass
+        by_cat = {}
+        for entry in logs: by_cat.setdefault(entry.get("event","unknown"),[]).append(entry.get("ts",""))
+        from flask import jsonify
+        return jsonify({"main":len(logs),"categories":{k:len(v) for k,v in by_cat.items()},"dashboard":by_cat})
 
     # Plugins endpoints
     @app.get("/api/plugins")
@@ -693,6 +725,9 @@ def create_app() -> Flask:
 
     return app
 
+
+def host() -> str: return os.getenv("PEGASUS_HOST", "0.0.0.0")
+def port() -> int: return int(os.getenv("PEGASUS_PORT", "5000"))
 
 if __name__ == "__main__":
     create_app().run(host=host(), port=port())

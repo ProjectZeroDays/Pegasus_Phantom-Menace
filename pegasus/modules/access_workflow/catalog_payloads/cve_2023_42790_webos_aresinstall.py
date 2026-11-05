@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-42790 — LG webOS ares-install. IPK with a malformed control file
+"""CVE-2023-42790 -- LG webOS ares-install. IPK with a malformed control file
 that the installer trusts without bounds checks."""
 import sys, io, zipfile
 from pathlib import Path

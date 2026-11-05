@@ -678,7 +678,7 @@ class SlashCommandHandlers:
         """Toggle persistent execution - keep the workflow alive after disconnect."""
         state = self.toggle("/persistent")
         if state == SlashCommandStatus.ON:
-            self.console.print("[green]Persistent mode: ON — workflows continue after disconnect.[/green]")
+            self.console.print("[green]Persistent mode: ON -- workflows continue after disconnect.[/green]")
         else:
             self.console.print("[yellow]Persistent mode: OFF.[/yellow]")
 
@@ -697,15 +697,15 @@ class SlashCommandHandlers:
             self.console.print(f"[green]Goal set: {goal}[/green]")
 
     async def cmd_auto(self, *args) -> None:
-        """Toggle full autonomous mode — every decision made without asking."""
+        """Toggle full autonomous mode -- every decision made without asking."""
         state = self.toggle("/auto")
         if state == SlashCommandStatus.ON:
             self.toggle_states["/never-ask"] = SlashCommandStatus.ON
             self.toggle_states["/persistent"] = SlashCommandStatus.ON
-            self.console.print("[green]Auto mode: ON — autonomous decisions, no confirmations, persistent.[/green]")
+            self.console.print("[green]Auto mode: ON -- autonomous decisions, no confirmations, persistent.[/green]")
         else:
             self.toggle_states["/never-ask"] = SlashCommandStatus.OFF
-            self.console.print("[yellow]Auto mode: OFF — confirmations restored.[/yellow]")
+            self.console.print("[yellow]Auto mode: OFF -- confirmations restored.[/yellow]")
 
     async def cmd_finish(self, *args) -> None:
         """Complete the current task and report."""
@@ -719,7 +719,7 @@ class SlashCommandHandlers:
         """Answer yes to every confirmation automatically."""
         state = self.toggle("/never-ask")
         if state == SlashCommandStatus.ON:
-            self.console.print("[green]Never-ask: ON — all confirmations auto-yes.[/green]")
+            self.console.print("[green]Never-ask: ON -- all confirmations auto-yes.[/green]")
         else:
             self.console.print("[yellow]Never-ask: OFF.[/yellow]")
 
@@ -727,11 +727,11 @@ class SlashCommandHandlers:
         """Yield control to the agent until it needs input."""
         self.console.print("[cyan]Agent has the floor. Interrupt with any command.[/cyan]")
         self.toggle_states["/auto"] = SlashCommandStatus.ON
-        self.console.print("[green]Autonomy engaged — run /auto to take back control.[/green]")
+        self.console.print("[green]Autonomy engaged -- run /auto to take back control.[/green]")
 
     async def cmd_debug(self, *args) -> None:
         """Attach diagnostics to the current task."""
-        self.console.print("[cyan]> Collecting diagnostics…[/cyan]")
+        self.console.print("[cyan]> Collecting diagnostics...[/cyan]")
         sections = []
         sections.append(f"platform: {platform.system()} {platform.release()}")
         sections.append(f"python: {sys.version.split()[0]}")
@@ -755,7 +755,7 @@ class SlashCommandHandlers:
     async def cmd_push(self, *args) -> None:
         """Push commits to the remote and report status."""
         import subprocess as _sp
-        self.console.print("[cyan]> git push…[/cyan]")
+        self.console.print("[cyan]> git push...[/cyan]")
         try:
             proc = await asyncio.create_subprocess_exec(
                 "git", "push",

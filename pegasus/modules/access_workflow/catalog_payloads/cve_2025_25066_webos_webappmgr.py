@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2025-25066 — LG webOS WebApp Manager. appinfo.json with a path-traversal
+"""CVE-2025-25066 -- LG webOS WebApp Manager. appinfo.json with a path-traversal
 main entry that escapes the app sandbox root."""
 import sys
 from pathlib import Path

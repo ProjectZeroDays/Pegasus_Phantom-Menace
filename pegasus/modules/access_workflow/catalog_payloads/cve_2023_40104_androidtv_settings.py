@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-40104 — Android TV Settings. Intent that smuggles a Parcelable
+"""CVE-2023-40104 -- Android TV Settings. Intent that smuggles a Parcelable
 with a mismatched type, causing a class-cast in Settings."""
 import subprocess, sys
 

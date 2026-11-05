@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { Menu, Terminal as TerminalIcon, Activity, CircleDot } from "lucide-react";
+import { Menu, Terminal as TerminalIcon, Activity, CircleDot, FileText } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { JobDrawer } from "@/components/JobDrawer";
 import { useApp } from "@/state/AppContext";
@@ -68,23 +68,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="row" style={{ gap: 8 }}>
+            <span className="badge badge-dim" title="Logs dashboard" onClick={() => { window.location.href = "/logs"; }} style={{ cursor: "pointer" }}>
+              <FileText size={10} /> logs
+            </span>
             <span className="badge badge-dim" title="Plugin count">
               <CircleDot size={10} /> {system?.plugins ?? 0} plugins
             </span>
             <span className="badge badge-dim" title="Command count">
               <Activity size={10} /> {system?.commands ?? 0} commands
             </span>
-            <Button size="sm" variant="ghost" onClick={() => setDrawerOpen(true)}>
-              <TerminalIcon size={13} />
-              <span>Jobs</span>
+            <span className="badge badge-dim" title="Job queue" onClick={() => setDrawerOpen(true)} style={{ cursor: "pointer" }}>
+              <TerminalIcon size={10} /> {activeJobs} jobs
               {activeJobs > 0 && <span className="badge badge-primary">{activeJobs}</span>}
-            </Button>
+            </span>
           </div>
         </header>
 
         <main className="content">{children}</main>
 
-        <footer className="bottombar">
+        <footer style={{padding:8,fontSize:11,color:"#aaa",display:"flex",justifyContent:"space-between"}}><div>External IP: 10.1.10.27 • Settings: VPN/DNSCrypt/Tor/Proxy (defaults on / configurable)</div><div>📋Logs | 🔒VPN | 🔑DNS | 🧅Tor | 🌐Proxy</div></footer>
+      <footer className="bottombar">
           <div className="row" style={{ gap: 16 }}>
             <span className="row" style={{ gap: 6 }}>
               <span className={`dot ${system ? "ok" : "err"}`} /> API {system ? "operational" : "offline"}

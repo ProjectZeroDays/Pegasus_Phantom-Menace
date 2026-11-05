@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2024-0044 — Android TV DtvService. Oversized tuner-descriptor blob
+"""CVE-2024-0044 -- Android TV DtvService. Oversized tuner-descriptor blob
 pushed to the DTV service via binder-backed shell call."""
 import struct, sys, subprocess
 from pathlib import Path

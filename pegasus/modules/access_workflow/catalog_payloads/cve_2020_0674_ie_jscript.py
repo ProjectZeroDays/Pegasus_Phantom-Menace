@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-0674 — Internet Explorer JScript use-after-free. Zero-click-ish:
+"""CVE-2020-0674 -- Internet Explorer JScript use-after-free. Zero-click-ish:
 open a page / HTML email. Public PoC. Confidence: HIGH."""
 import sys
 from pathlib import Path

@@ -716,7 +716,7 @@ class GlobalCommandFactory:
         target_dir.mkdir(parents=True, exist_ok=True)
         target = target_dir / (path.name if path.suffix else "SKILL.md")
         body = path.read_text(encoding="utf-8", errors="replace")
-        if not body.lstrip().startswith("---") and target.suffix == ".md":
+        if not body.lstrip().startswith("---) and target.suffix == ".md":
             body = f"---\nname: {target_dir.name}\ndescription: imported from {path}\n---\n\n{body}"
         target.write_text(body, encoding="utf-8")
         state = self._skill_state()

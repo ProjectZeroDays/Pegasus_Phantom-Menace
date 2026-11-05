@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2024-36211 — Vizio Cast Service. SSDP M-SEARCH with a malformed
+"""CVE-2024-36211 -- Vizio Cast Service. SSDP M-SEARCH with a malformed
 LOCATION/USN pair, plus an HTTP fetch that follows the advertised URL."""
 import socket, sys, urllib.request
 

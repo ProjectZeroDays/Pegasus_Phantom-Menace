@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2019-9506 — KNOB (Key Negotiation Of Bluetooth). An MITM forces the
+"""CVE-2019-9506 -- KNOB (Key Negotiation Of Bluetooth). An MITM forces the
 BR/EDR session key entropy down to 1 byte, making it brute-forceable. Zero-
 click for the key; needs an MITM position. Public (Antonioli et al.). HIGH.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2025-20878 — Roku Media Player. MP4 with a corrupted stsz (sample-size)
+"""CVE-2025-20878 -- Roku Media Player. MP4 with a corrupted stsz (sample-size)
 box: declared count far exceeds the table -> OOB read."""
 import struct, sys
 from pathlib import Path

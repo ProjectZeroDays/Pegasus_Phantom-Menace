@@ -118,7 +118,7 @@ export default function MissionControl() {
     }
   };
 
-  const counts = summary.data?.summary.counts ?? {};
+  const counts = (summary.data?.summary.counts ?? {}) as Record<string, any>;
   const deviceDetail = summary.data?.device ?? null;
 
   return (

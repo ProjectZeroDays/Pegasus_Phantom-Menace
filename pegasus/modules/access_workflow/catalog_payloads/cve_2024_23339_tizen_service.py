@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2024-23339 — Tizen Service. Malformed service config descriptor.
+"""CVE-2024-23339 -- Tizen Service. Malformed service config descriptor.
 Push to /opt/usr/apps/<app>/ and trigger service launch."""
 import struct, sys
 from pathlib import Path

@@ -1,50 +1,123 @@
-import { useCallback, useEffect, useState } from "react";
+/** HTTP client for the Pegasus web GUI.
+ *
+ *  Two call styles coexist in the pages: bare paths ("/devices") and
+ *  explicitly prefixed paths ("/api/catalog"). Both normalise onto a single
+ *  base here so no page has to change.
+ */
+import { useCallback, useEffect, useRef, useState } from "react";
 
-const BASE = "/api";
+const RAW_BASE = String(import.meta.env?.VITE_API_BASE ?? "").replace(/\/+$/, "");
+const BASE_IS_PREFIXED = /\/api$/i.test(RAW_BASE);
+const API_ROOT = BASE_IS_PREFIXED ? RAW_BASE.replace(/\/api$/i, "") : RAW_BASE;
+
+const DEFAULT_TIMEOUT = 30_000;
 
 export class ApiError extends Error {
-  status: number;
-  constructor(message: string, status: number) {
+  readonly status: number;
+  readonly body: unknown;
+
+  constructor(message: string, status: number, body?: unknown) {
     super(message);
+    this.name = "ApiError";
     this.status = status;
+    this.body = body;
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    ...init,
-    credentials: "same-origin",
-    headers: { "Content-Type": "application/json", ...(init.headers ?? {}) },
-  });
-  if (res.status === 428 && !location.pathname.startsWith("/setup")) {
-    location.assign("/setup");
-    throw new ApiError("setup required", 428);
-  }
-  const text = await res.text();
-  let body: any = null;
+/** Resolve a caller path onto the API root, exactly once. */
+export function resolveUrl(path: string): string {
+  const clean = path.startsWith("/") ? path : `/${path}`;
+  const alreadyPrefixed = clean === "/api" || clean.startsWith("/api/");
+  if (alreadyPrefixed) return `${API_ROOT}${clean}`;
+  return `${API_ROOT}/api${clean}`;
+}
+
+function csrf(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|;\s*)(?:csrf_token|csrf)=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+interface RequestOptions {
+  timeout?: number;
+  signal?: AbortSignal;
+  keepalive?: boolean;
+}
+
+async function request<T>(method: string, path: string, body?: unknown, options: RequestOptions = {}): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), options.timeout ?? DEFAULT_TIMEOUT);
+  const onAbort = () => controller.abort();
+  options.signal?.addEventListener("abort", onAbort);
+
+  const headers: Record<string, string> = { Accept: "application/json" };
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const token = csrf();
+  if (token) headers["X-CSRF-Token"] = token;
+
   try {
-    body = text ? JSON.parse(text) : null;
-  } catch {
-    throw new ApiError(`Bad JSON (${res.status})`, res.status);
+    const response = await fetch(resolveUrl(path), {
+      method,
+      headers,
+      credentials: "same-origin",
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: controller.signal,
+      keepalive: options.keepalive,
+    });
+
+    if (response.status === 204) return undefined as T;
+
+    const text = await response.text();
+    let parsed: unknown = null;
+    if (text) {
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        parsed = text;
+      }
+    }
+
+    const envelope = parsed as { ok?: boolean; data?: unknown; error?: unknown } | null;
+    const failed = envelope && typeof envelope === "object" && envelope.ok === false;
+
+    if (!response.ok || failed) {
+      const message =
+        (envelope && typeof envelope.error === "string" && envelope.error) ||
+        (typeof parsed === "string" && parsed) ||
+        `${response.status} ${response.statusText}`.trim();
+      if (response.status === 428 && !window.location.pathname.startsWith("/setup")) {
+        window.location.assign("/setup");
+      }
+      throw new ApiError(message, response.status, parsed);
+    }
+
+    if (envelope && typeof envelope === "object" && "ok" in envelope) {
+      return (envelope.data ?? null) as T;
+    }
+    return parsed as T;
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    if ((error as Error)?.name === "AbortError") {
+      throw new ApiError("request timed out", 0, null);
+    }
+    throw new ApiError((error as Error)?.message || "network error", 0, null);
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", onAbort);
   }
-  if (!res.ok) throw new ApiError(body?.error ?? `Failed (${res.status})`, res.status);
-  return (body?.data ?? body) as T;
 }
 
 export const api = {
-  get: <T,>(p: string) => request<T>(p),
-  post: <T,>(p: string, d?: unknown) => request<T>(p, { method: "POST", body: JSON.stringify(d ?? {}) }),
-  put: <T,>(p: string, d?: unknown) => request<T>(p, { method: "PUT", body: JSON.stringify(d ?? {}) }),
-  patch: <T,>(p: string, d?: unknown) => request<T>(p, { method: "PATCH", body: JSON.stringify(d ?? {}) }),
-  del: <T,>(p: string) => request<T>(p, { method: "DELETE" }),
+  get: <T>(path: string, options?: RequestOptions) => request<T>("GET", path, undefined, options),
+  post: <T>(path: string, body?: unknown, options?: RequestOptions) => request<T>("POST", path, body, options),
+  put: <T>(path: string, body?: unknown, options?: RequestOptions) => request<T>("PUT", path, body, options),
+  patch: <T>(path: string, body?: unknown, options?: RequestOptions) => request<T>("PATCH", path, body, options),
+  del: <T>(path: string, options?: RequestOptions) => request<T>("DELETE", path, undefined, options),
 };
 
 export interface UseApiOptions {
-  /** Poll interval in milliseconds. Omit for a one-shot fetch. */
   interval?: number;
-  /** When false the request is skipped (and any poll is stopped). */
   enabled?: boolean;
-  /** Extra values that should trigger a refetch when they change. */
   deps?: unknown[];
 }
 
@@ -52,69 +125,58 @@ export interface UseApiResult<T> {
   data: T | null;
   loading: boolean;
   error: Error | null;
-  /** Refetch now. */
   refresh: () => void;
 }
 
-/**
- * Fetch an API path (relative to `/api`) with optional polling.
- *
- * Passing `null` as the path clears the state, which is how pages handle
- * "no device selected": `useApi(serial ? `/devices/${serial}` : null)`.
- */
-export function useApi<T>(
-  path: string | null,
-  { interval, enabled = true, deps = [] }: UseApiOptions = {},
-): UseApiResult<T> {
+/** Poll a path. A null path suspends the request without unmounting. */
+export function useApi<T>(path: string | null, options: UseApiOptions = {}): UseApiResult<T> {
+  const { interval, enabled = true, deps = [] } = options;
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState<boolean>(Boolean(path) && enabled);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [nonce, setNonce] = useState(0);
+
+  const serial = useRef(0);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
+
+  const fetchNow = useCallback(async () => {
+    if (!path || !enabled) return;
+    const ticket = ++serial.current;
+    setLoading(true);
+    try {
+      const result = await api.get<T>(path);
+      if (!active.current || ticket !== serial.current) return;
+      setData(result);
+      setError(null);
+    } catch (caught) {
+      if (!active.current || ticket !== serial.current) return;
+      setError(caught as Error);
+    } finally {
+      if (active.current && ticket === serial.current) setLoading(false);
+    }
+  }, [path, enabled]);
+
+  const refresh = useCallback(() => {
+    void fetchNow();
+  }, [fetchNow]);
 
   useEffect(() => {
-    if (!path || !enabled) {
-      if (!path) {
-        setData(null);
-        setError(null);
-      }
-      setLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    setLoading(true);
-
-    const load = async () => {
-      try {
-        const result = await request<T>(path);
-        if (cancelled) return;
-        setData(result);
-        setError(null);
-      } catch (exc) {
-        if (cancelled) return;
-        setError(exc instanceof Error ? exc : new Error(String(exc)));
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    void load();
-
-    if (interval && interval > 0) {
-      const timer = window.setInterval(() => void load(), interval);
-      return () => {
-        cancelled = true;
-        window.clearInterval(timer);
-      };
-    }
-    return () => {
-      cancelled = true;
-    };
-    // `deps` is spread so callers control the dependency list explicitly.
+    void fetchNow();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, enabled, interval, nonce, ...deps]);
+  }, [fetchNow, ...deps]);
 
-  const refresh = useCallback(() => setNonce((n) => n + 1), []);
+  useEffect(() => {
+    if (!interval || !path || !enabled) return;
+    const timer = setInterval(() => void fetchNow(), interval);
+    return () => clearInterval(timer);
+  }, [interval, path, enabled, fetchNow]);
 
   return { data, loading, error, refresh };
 }
+
+export default api;

@@ -1,0 +1,7 @@
+{
+  "vpn": {"enabled": true, "provider": "wireguard", "default_server": "127.0.0.1:51820", "configurable": true},
+  "dnscrypt": {"enabled": true, "provider": "dnscrypt-proxy", "default_port": 53, "configurable": true},
+  "tor": {"enabled": true, "provider": "tor", "default_port": 9050, "configurable": true},
+  "proxy": {"enabled": true, "provider": "socks5", "default_port": 1080, "configurable": true},
+  "note": "All enabled by default; configure via AppShell footer / settings panel."
+}

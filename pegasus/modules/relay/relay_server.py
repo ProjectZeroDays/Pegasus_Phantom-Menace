@@ -21,7 +21,7 @@ from typing_extensions import Literal
 logger = logging.getLogger(__name__)
 
 class RelayConnection(BaseModel):
-    """"Relay connection model""""
+    """Relay connection model"""
     connection_id: str
     remote_host: str
     remote_port: int
@@ -33,7 +33,7 @@ class RelayConnection(BaseModel):
     metadata: Dict[str, Any] = {}
 
 class RelayConfig(BaseModel):
-    """"Relay server configuration""""
+    """Relay server configuration"""
     host: str = "0.0.0.0.0"
     port: int = 8080
     max_connections: int = 1000
@@ -45,7 +45,7 @@ class RelayConfig(BaseModel):
     compression_enabled: bool = True
 
 class RelayServer:
-    """"Cloud Relay Server Implementation""""
+    """Cloud Relay Server Implementation"""
 
     def __init__(self, config: RelayConfig):
         self.config = config
@@ -58,7 +58,7 @@ class RelayServer:
         self.server = None
 
     async def start(self) -> None:
-        """"Start relay server"""
+        """Start relay server"""
         logger.info(f"Starting relay server on {self.config.host}:{self.config.port}")
 
         try:
@@ -99,14 +99,14 @@ class RelayServer:
             raise
 
     async def stop(self) -> None:
-        """"Stop relay server"""
+        """Stop relay server"""
         if self.server:
             self.server.shutdown()
             self.running = False
             logger.info("Relay server stopped")
 
     def _setup_security(self) -> asyncio.Future:
-        """"Setup security gateway"""
+        """Setup security gateway"""
         async def setup():
             # Initialize security components
             security_config = {
@@ -121,7 +121,7 @@ class RelayServer:
         return asyncio.create_task(setup())
 
     def _setup_monitoring(self) -> asyncio.Future:
-        """"Setup monitoring system""""
+        """Setup monitoring system"""
         async def setup():
             # Initialize monitoring components
             monitoring_config = {
@@ -136,7 +136,7 @@ class RelayServer:
         return asyncio.create_task(setup())
 
     def _setup_load_balancer(self) -> asyncio.Future:
-        """"Setup load balancer""""
+        """Setup load balancer"""
         async def setup():
             # Initialize load balancing components
             load_balancer_config = {
@@ -151,7 +151,7 @@ class RelayServer:
         return asyncio.create_task(setup())
 
     def _setup_routes(self) -> None:
-        """"Setup API routes""""
+        """Setup API routes"""
 
         @self.app.get("/health")
         async def health_check(request: Request) -> Dict[str, str]:
@@ -216,10 +216,11 @@ class RelayServer:
             }
 
         @self.app.delete("/relay/{relay_id}")
-        async def delete_relay(self, request: Request, relay_id: str) -> Dict[str, str]:\n            if relay_id not in self.connections:
+        async def delete_relay(self, request: Request, relay_id: str) -> Dict[str, str]:
+            if relay_id not in self.connections:
                 return {"error": "Relay connection not found"}, 404
 
-            del self.connections.pop(relay_id)
+            self.connections.pop(relay_id, None)
             logger.info(f"Deleted relay connection {relay_id}")
             return {"message": f"Relay connection {relay_id} deleted", "status": "deleted"}
 
@@ -256,7 +257,7 @@ class RelayServer:
         headers: Optional[Dict[str, str]] = None,
         options: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
-        """"Create a tunnel between source and target"""
+        """Create a tunnel between source and target"""
         tunnel_id = f"tunnel_{datetime.now().timestamp()}"
 
         tunnel_config = {
@@ -341,7 +342,7 @@ class RelayServer:
             },
             "performance_metrics": {
                 "requests_per_second": 0,  # TODO: Implement metrics collection
-                "bandwidth_usage": 0, 1 TODO: Implement bandwidth tracking
-                "error_rate": 0.0, 1 TODO: Implement error rate calculation
+                "bandwidth_usage": 0,  # TODO: Implement bandwidth tracking
+                "error_rate": 0.0,  # TODO: Implement error rate calculation
             }
         }

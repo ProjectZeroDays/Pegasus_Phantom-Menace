@@ -127,7 +127,7 @@ class AISettings(BaseModel):
     temperature: float = 0.7
     cache_enabled: bool = True
     cache_ttl: int = 3600
-    system_prompt: str = """You are Pegasus AI — an expert Android security and penetration testing assistant.
+    system_prompt: str = """You are Pegasus AI -- an expert Android security and penetration testing assistant.
 You assist authorised security professionals with:
 - Android vulnerability assessment and pen testing techniques
 - ADB commands and device management

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-42792 — TCL Android TV Intent. Implicit intent with a spoofed
+"""CVE-2023-42792 -- TCL Android TV Intent. Implicit intent with a spoofed
 component that the framework resolves to a privileged activity."""
 import subprocess, sys
 

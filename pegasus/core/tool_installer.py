@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Tool installer — installs missing Pegasus dependencies on Windows/macOS/Linux.
+"""Tool installer -- installs missing Pegasus dependencies on Windows/macOS/Linux.
 
 Strategy per tool (in order of preference):
-  1. Already on PATH — skip.
-  2. Python package (frida) — pip install.
+  1. Already on PATH -- skip.
+  2. Python package (frida) -- pip install.
   3. winget / apt / brew package.
   4. Direct download from the vendor into ~/.pegasus/tools/<name>.
 
@@ -33,7 +33,7 @@ def ensure_path() -> None:
     parts = os.environ.get("PATH", "").split(os.pathsep)
     if s not in parts:
         os.environ["PATH"] = s + os.pathsep + os.pathsep.join(parts)
-    # Wireshark's tshark installs to Program Files — expose it if present
+    # Wireshark's tshark installs to Program Files -- expose it if present
     ws = Path(os.environ.get("PROGRAMFILES", r"C:\Program Files")) / "Wireshark"
     if ws.exists() and str(ws) not in parts:
         os.environ["PATH"] = str(ws) + os.pathsep + os.environ["PATH"]
@@ -77,7 +77,7 @@ def _mark_executable(path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Individual installers — each returns (status, detail)
+# Individual installers -- each returns (status, detail)
 # ---------------------------------------------------------------------------
 
 def _install_frida() -> tuple[str, str]:
@@ -102,7 +102,7 @@ def _install_apktool() -> tuple[str, str]:
             try:
                 _download(url, jar)
                 break
-            except Exception as exc:  # noqa: BLE001 — try next mirror
+            except Exception as exc:  # noqa: BLE001 -- try next mirror
                 last_err = exc
         else:
             return ("error", f"all mirrors failed: {last_err}")
@@ -167,7 +167,7 @@ def _install_tshark_wireshark() -> tuple[str, str]:
             ensure_path()
             return ("installed", "winget: Wireshark (tshark included)")
         return ("error", out[-300:])
-    return ("error", "winget unavailable — install Wireshark manually")
+    return ("error", "winget unavailable -- install Wireshark manually")
 
 
 def _persist_path() -> None:
@@ -263,5 +263,5 @@ def install_missing(keys: list[str] | None = None) -> list[dict]:
         if spec["key"] in INSTALLERS:
             results.append(install(spec["key"]))
         else:
-            results.append({"key": spec["key"], "status": "missing", "detail": "no auto-installer — install manually"})
+            results.append({"key": spec["key"], "status": "missing", "detail": "no auto-installer -- install manually"})
     return results

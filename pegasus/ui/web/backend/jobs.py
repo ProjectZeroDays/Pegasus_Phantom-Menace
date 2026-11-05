@@ -56,7 +56,7 @@ class Job:
     def to_dict(self, include_output: bool = True, tail: Optional[int] = None) -> Dict[str, Any]:
         output = self.output
         if tail is not None and len(output) > tail:
-            output = "…\n" + output[-tail:]
+            output = "...\n" + output[-tail:]
         data = {
             "id": self.id,
             "kind": self.kind,

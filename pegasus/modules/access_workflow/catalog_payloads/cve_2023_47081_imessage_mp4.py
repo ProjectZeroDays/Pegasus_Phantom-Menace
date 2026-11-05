@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-47081 — iMessage MP4/BlastDoor. Carrier: MP4 with a malformed
+"""CVE-2023-47081 -- iMessage MP4/BlastDoor. Carrier: MP4 with a malformed
 moov/mvhd (oversized duration) plus a mismatched stsc."""
 import struct, sys
 from pathlib import Path

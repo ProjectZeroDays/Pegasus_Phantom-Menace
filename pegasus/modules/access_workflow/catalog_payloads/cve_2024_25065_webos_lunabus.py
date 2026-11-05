@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2024-25065 — LG webOS Luna Bus. Crafted SSAP call that reaches a
+"""CVE-2024-25065 -- LG webOS Luna Bus. Crafted SSAP call that reaches a
 privileged service over the ws://<tv>:3000 socket. Pure-stdlib websocket."""
 import base64, json, os, socket, struct, sys
 

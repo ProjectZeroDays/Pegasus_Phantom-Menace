@@ -30,7 +30,7 @@ import Wordlists from "@/pages/Wordlists";
 import Sessions from "@/pages/Sessions";
 import Campaigns from "@/pages/Campaigns";
 import Reports from "@/pages/Reports";
-import NetworkScanner from "@/pages/NetworkScanner";
+import NetworkDashboard from "@/pages/NetworkDashboard";
 import Toolbox from "@/pages/Toolbox";
 import Skills from "@/pages/Skills";
 import Plugins from "@/pages/Plugins";
@@ -75,7 +75,7 @@ export default function App() {
           <Route path="/sessions" component={Sessions} />
           <Route path="/campaigns" component={Campaigns} />
           <Route path="/reports" component={Reports} />
-          <Route path="/network" component={NetworkScanner} />
+          <Route path="/network-dashboard" component={NetworkDashboard} />
           <Route path="/tools" component={Toolbox} />
           <Route path="/skills" component={Skills} />
           <Route path="/plugins" component={Plugins} />

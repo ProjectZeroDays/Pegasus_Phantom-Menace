@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-45866 — Bluetooth HID unauthenticated keystroke injection.
+"""CVE-2023-45866 -- Bluetooth HID unauthenticated keystroke injection.
 Zero-click: connect to an unpaired host that's in HID pairing mode and send
 keystrokes. Public PoC (Marc Newlin). Confidence: HIGH.
 

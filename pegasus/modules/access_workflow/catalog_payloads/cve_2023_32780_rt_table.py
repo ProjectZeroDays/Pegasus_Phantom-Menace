@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-32780 — Routing-table corruption. Entry with a poisoned metric
+"""CVE-2023-32780 -- Routing-table corruption. Entry with a poisoned metric
 and an out-of-range next-hop."""
 import socket, struct, sys
 from pathlib import Path

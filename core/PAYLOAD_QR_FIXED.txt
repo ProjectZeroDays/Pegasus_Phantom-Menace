@@ -1,0 +1,6 @@
+=== PAYLOAD-QR ERROR FIXED ===
+Error: OSError WinError 6 (invalid handle) + RPC refused 127.0.0.1:55553
+Fix: Logging redirected to file (payload_log.txt)
+Fix: P2P RPC endpoint created on 55553 (fix_payload_qr.py)
+Status: RESOLVED
+Mode: P2P / Autonomous / Swarm / Finish

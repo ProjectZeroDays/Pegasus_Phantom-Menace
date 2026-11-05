@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-12351 — BleedingTooth (Linux kernel L2CAP A2MP). Zero-click:
+"""CVE-2020-12351 -- BleedingTooth (Linux kernel L2CAP A2MP). Zero-click:
 any discoverable BR/EDR device with l2cap A2MP. Public (Google). HIGH."""
 import sys, struct
 from pathlib import Path

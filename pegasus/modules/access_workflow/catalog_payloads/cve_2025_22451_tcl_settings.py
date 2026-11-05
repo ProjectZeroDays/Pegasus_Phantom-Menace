@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2025-22451 — TCL Android TV Settings. ContentProvider query with a
+"""CVE-2025-22451 -- TCL Android TV Settings. ContentProvider query with a
 crafted selection that escapes the projection bounds."""
 import subprocess, sys
 

@@ -43,8 +43,14 @@ class StreamCapture:
         # truncated (e.g. CVE identifiers) in captured output.
         self._old_columns = os.environ.get("COLUMNS")
         os.environ["COLUMNS"] = "180"
-        sys.stdout.flush()
-        sys.stderr.flush()
+        try:
+            sys.stdout.flush()
+        except OSError:
+            pass
+        try:
+            sys.stderr.flush()
+        except OSError:
+            pass
         self._old_stdout, self._old_stderr = sys.stdout, sys.stderr
         # Python-level writes go only into the string buffer; descriptor-level
         # writes (subprocess children, C extensions) land in the temp file.
@@ -139,7 +145,7 @@ class StreamCapture:
     def console(self, **kwargs) -> Console:
         """A Rich console writing plain text into this capture.
 
-        ``legacy_windows=False`` keeps Unicode box-drawing/icon glyphs intact —
+        ``legacy_windows=False`` keeps Unicode box-drawing/icon glyphs intact --
         otherwise Rich substitutes cp437-era characters and the captured log
         renders as mojibake in the HTTP response.
         """

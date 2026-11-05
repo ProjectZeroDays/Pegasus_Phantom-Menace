@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-2569 — WhatsApp MP4/MediaCodec parsing.
+"""CVE-2023-2569 -- WhatsApp MP4/MediaCodec parsing.
 Carrier: MP4 with a corrupted stsc (sample-to-chunk) entry count."""
 import struct, sys
 from pathlib import Path

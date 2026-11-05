@@ -1,4 +1,4 @@
-""""
+"""
 Social Media Server for Enterprise Intelligence Gathering
 Enterprise-grade social media intelligence platform for reconnaissance, threat monitoring, and intelligence sharing
 Implements social media API integrations, content scraping and analysis, threat intelligence correlation, and automated monitoring
@@ -19,7 +19,7 @@ from pydantic import BaseModel, Field
 logger = logging.getLogger(__name__)
 
 class SocialMediaPlatform(BaseModel):
-    """""Social media platform configuration"""""
+    """Social media platform configuration"""
     platform_id: str
     name: str
     platform_type: Literal["twitter", "linkedin", "facebook", "instagram", "tiktok", "reddit", "github", "discord"]
@@ -34,7 +34,7 @@ class SocialMediaPlatform(BaseModel):
     metadata: Dict[str, Any] = {}
     enabled: bool = True
 class SocialMediaContent(BaseModel):
-    """""Social media content analysis"""""
+    """Social media content analysis"""
     content_id: str
     platform: str
     author: str
@@ -48,7 +48,7 @@ class SocialMediaContent(BaseModel):
     topics: List[str] = []
     entities: List[str] = []
 class ThreatIntelligence(BaseModel):
-    """""Threat intelligence data"""""
+    """Threat intelligence data"""
     intelligence_id: str
     source: str
     threat_type: Literal["phishing", "malware", "ransomware", "scam", "social_engineering", "disinformation", "coordination"]
@@ -60,7 +60,7 @@ class ThreatIntelligence(BaseModel):
     remediation_actions: List[str] = []
     metadata: Dict[str, Any] = {}
 class SocialMediaCampaign(BaseModel):
-    """""Social media campaign tracking"""""
+    """Social media campaign tracking"""
     campaign_id: str
     name: str
     platform: str
@@ -74,7 +74,7 @@ class SocialMediaCampaign(BaseModel):
     collected_intelligence: List[ThreatIntelligence] = []
     metadata: Dict[str, Any] = {}
 class SocialMediaServer:
-    """"Social Media Server Implementation""""
+    """Social Media Server Implementation"""
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
@@ -89,7 +89,7 @@ class SocialMediaServer:
         self.intelligence_analyzer = None
 
     async def start(self) -> None:
-        """"Start social media server""""
+        """Start social media server"""
         logger.info("Starting social media server")
 
         try:
@@ -132,7 +132,7 @@ class SocialMediaServer:
             raise
 
     async def stop(self) -> None:
-        """"Stop social media server""""
+        """Stop social media server"""
         if self.server:
             self.server.shutdown()
             self.is_running = False
@@ -140,7 +140,7 @@ class SocialMediaServer:
         logger.info("Social media server stopped")
 
     def _setup_routes(self) -> None:
-        """"Setup API routes""""
+        """Setup API routes"""
 
         @self.app.get("/health")
         async def health_check(request: Request) -> Dict[str, str]:
@@ -159,7 +159,7 @@ class SocialMediaServer:
             platform_id = f"platform_{datetime.now().timestamp()}"
             platform = SocialMediaPlatform(
                 platform_id=platform_id,
-                name=platform_data.get("name", ""New Platform"),
+                name=platform_data.get("name", "New Platform"),
                 platform_type=platform_data.get("platform_type", "twitter"),
                 api_key=platform_data.get("api_key", """),
                 api_secret=platform_data.get("api_secret", """),
@@ -286,8 +286,8 @@ class SocialMediaServer:
             campaign_id = f"campaign_{datetime.now().timestamp()}"
             campaign = SocialMediaCampaign(
                 campaign_id=campaign_id,
-                name=campaign_data.get("name", ""New Campaign"),
-                platform=campaign_data.get("platform", """),
+                name=campaign_data.get("name", "New Campaign"),
+                platform=campaign_data.get("platform", ""),
                 campaign_type=campaign_data.get("campaign_type", "recon"),
                 start_time=datetime.now(),
                 end_time=campaign_data.get("end_time"),

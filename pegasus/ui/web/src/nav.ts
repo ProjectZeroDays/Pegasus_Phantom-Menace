@@ -117,6 +117,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Network & Tools",
     items: [
       { path: "/network", label: "Network Scanner", icon: Network },
+      { path: "/network-dashboard", label: "Network Dashboard", icon: Globe },
       { path: "/tools", label: "Toolbox", icon: Wrench },
       { path: "/skills", label: "Skills Catalog", icon: Sparkles },
     ],

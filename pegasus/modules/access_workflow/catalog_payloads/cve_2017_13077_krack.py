@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2017-13077 — KRACK. 802.11 4-way handshake key reinstallation.
+"""CVE-2017-13077 -- KRACK. 802.11 4-way handshake key reinstallation.
 Carrier: EAPOL-Key msg#3 with a retransmitted (replayed) replay counter.
 Inject via a monitor-mode interface with a raw radiotap+802.11 frame."""
 import struct, sys

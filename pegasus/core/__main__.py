@@ -59,6 +59,7 @@ def show_status_bar() -> None:
     table.add_row("Workspace", str(settings.app.workspace))
     table.add_row("Database", settings.database.type)
     table.add_row("Plugins Loaded", str(len(plugin_list)))
+    table.add_row("Logs (main + by category)", "Ready -- /log/events.jsonl")
     table.add_row("AI Status", "Configured" if settings.ai.api_key else "Not configured")
     table.add_row("Metasploit RPC", f"{settings.metasploit.rpc_host}:{settings.metasploit.rpc_port}")
 

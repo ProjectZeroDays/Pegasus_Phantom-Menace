@@ -140,7 +140,7 @@ async def _seed_default_data() -> None:
         default_cves = [
             {
                 "cve_id": "CVE-2024-31317",
-                "title": "ZygoteProcess command injection — system-level code execution",
+                "title": "ZygoteProcess command injection -- system-level code execution",
                 "description": "A vulnerability in ZygoteProcess allows arbitrary code execution at system level.",
                 "severity": "critical",
                 "cvss_score": 9.8,
@@ -184,7 +184,7 @@ async def _seed_default_data() -> None:
             },
             {
                 "cve_id": "CVE-2022-20465",
-                "title": "Lockscreen bypass — access device without PIN",
+                "title": "Lockscreen bypass -- access device without PIN",
                 "description": "Lockscreen bypass allows access without PIN authentication.",
                 "severity": "critical",
                 "cvss_score": 9.1,
@@ -228,7 +228,7 @@ async def _seed_default_data() -> None:
             },
             {
                 "cve_id": "CVE-2020-0041",
-                "title": "Binder OOB write — full root exploit chain",
+                "title": "Binder OOB write -- full root exploit chain",
                 "description": "Binder out-of-bounds write allows full root exploit chain.",
                 "severity": "critical",
                 "cvss_score": 9.8,
@@ -250,7 +250,7 @@ async def _seed_default_data() -> None:
             },
             {
                 "cve_id": "CVE-2017-13156",
-                "title": "Janus vulnerability — APK signature bypass",
+                "title": "Janus vulnerability -- APK signature bypass",
                 "description": "Janus vulnerability allows APK signature bypass and code injection.",
                 "severity": "high",
                 "cvss_score": 7.8,
@@ -261,7 +261,7 @@ async def _seed_default_data() -> None:
             },
             {
                 "cve_id": "CVE-2015-3864",
-                "title": "Stagefright — MMS media processing RCE",
+                "title": "Stagefright -- MMS media processing RCE",
                 "description": "Stagefright MMS media processing remote code execution.",
                 "severity": "critical",
                 "cvss_score": 10.0,

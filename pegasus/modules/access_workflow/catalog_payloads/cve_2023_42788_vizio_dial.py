@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-42788 — Vizio DIAL. Unauthenticated DIAL request to :9000 with a
+"""CVE-2023-42788 -- Vizio DIAL. Unauthenticated DIAL request to :9000 with a
 crafted app name that escapes the app registry lookup."""
 import sys, urllib.request
 

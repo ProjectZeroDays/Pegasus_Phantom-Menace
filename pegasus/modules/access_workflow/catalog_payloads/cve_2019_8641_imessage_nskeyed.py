@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2019-8641 — iMessage NSKeyedArchiver unarchiving UAF. Zero-click:
+"""CVE-2019-8641 -- iMessage NSKeyedArchiver unarchiving UAF. Zero-click:
 a crafted archived object graph in an iMessage attachment. Public (Project
 Zero). Confidence: HIGH."""
 import plistlib, sys

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2026-87588 — Chrome/Chromecast UaF (fixed 153.0.8010.36). HTML page
+"""CVE-2026-87588 -- Chrome/Chromecast UaF (fixed 153.0.8010.36). HTML page
 that grooms the JS heap then frees/reuses a Chromecast receiver object."""
 import sys
 from pathlib import Path

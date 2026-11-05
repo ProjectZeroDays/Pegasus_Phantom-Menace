@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2021-21224 — Chrome V8 type confusion (Integer overflow in
+"""CVE-2021-21224 -- Chrome V8 type confusion (Integer overflow in
 ChangeInt32ToInt64). Zero-click via web page. Public PoC. Confidence: HIGH."""
 import sys
 from pathlib import Path

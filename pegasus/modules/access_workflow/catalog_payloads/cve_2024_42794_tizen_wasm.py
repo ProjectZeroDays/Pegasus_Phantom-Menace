@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2024-42794 — Tizen Wasm Runtime. Wasm module with a section whose
+"""CVE-2024-42794 -- Tizen Wasm Runtime. Wasm module with a section whose
 declared size exceeds the buffer -> OOB in the validator."""
 import struct, sys
 from pathlib import Path

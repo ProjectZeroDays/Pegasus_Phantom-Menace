@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ChevronDown, ChevronRight, Shield, Smartphone, RefreshCw } from "lucide-react";
+import { ChevronDown, ChevronRight, Shield, Smartphone, RefreshCw, X } from "lucide-react";
 import { NAV_GROUPS } from "@/nav";
 import { PEGASUS_VECTOR } from "@/lib/brand";
 import { useApp } from "@/state/AppContext";
@@ -19,10 +19,58 @@ export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: 
       return {};
     }
   });
+  const sidebarRef = useRef<HTMLElement>(null);
+  const touchStartX = useRef<number>(0);
 
   useEffect(() => {
     window.localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed));
   }, [collapsed]);
+
+  // Swipe gesture handling for mobile
+  useEffect(() => {
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (touchStartX.current === 0) return;
+      const deltaX = e.touches[0].clientX - touchStartX.current;
+      // Only handle swipes from left edge (opening) or when sidebar is open (closing)
+      const isOpen = sidebar.classList.contains("open");
+      if ((!isOpen && deltaX > 0 && touchStartX.current < 30) || (isOpen && deltaX < 0)) {
+        e.preventDefault();
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (touchStartX.current === 0) return;
+      const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+      const isOpen = sidebar.classList.contains("open");
+      const threshold = 80;
+      
+      if (!isOpen && deltaX > threshold && touchStartX.current < 30) {
+        // Swipe from left edge to open
+        onNavigate?.(); // This will set open to true via the parent
+      } else if (isOpen && deltaX < -threshold) {
+        // Swipe left to close
+        onNavigate?.(); // This will toggle/close
+      }
+      touchStartX.current = 0;
+    };
+
+    sidebar.addEventListener("touchstart", handleTouchStart, { passive: true });
+    sidebar.addEventListener("touchmove", handleTouchMove, { passive: false });
+    sidebar.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      sidebar.removeEventListener("touchstart", handleTouchStart);
+      sidebar.removeEventListener("touchmove", handleTouchMove);
+      sidebar.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [onNavigate]);
 
   const toggle = (id: string) =>
     setCollapsed((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -32,33 +80,48 @@ export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: 
   return (
     <aside className={cn("sidebar", open && "open")}>
       <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid var(--line-soft)" }}>
-        <Link href="/" className="row" style={{ gap: 10 }} onClick={onNavigate}>
-          <div
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 9,
-              background: "linear-gradient(135deg,#0d2237,#06101c)",
-              display: "grid",
-              placeItems: "center",
-              boxShadow: "0 4px 14px rgba(88,166,255,.35)",
-              overflow: "hidden",
-            }}
-          >
-            <img src={PEGASUS_VECTOR} alt="Pegasus" width={34} height={34} />
-          </div>
-          <div>
+        <div className="row" style={{ gap: 10, alignItems: "center", justifyContent: "space-between" }}>
+          <Link href="/" className="row" style={{ gap: 10, flex: 1 }} onClick={onNavigate}>
             <div
-              className="mono"
-              style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: ".16em", color: "#fff" }}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 9,
+                background: "linear-gradient(135deg,#0d2237,#06101c)",
+                display: "grid",
+                placeItems: "center",
+                boxShadow: "0 4px 14px rgba(88,166,255,.35)",
+                overflow: "hidden",
+              }}
             >
-              PEGASUS
+              <img src={PEGASUS_VECTOR} alt="Pegasus" width={34} height={34} />
             </div>
-            <div className="tiny mute" style={{ letterSpacing: ".1em" }}>
-              PHANTOM MENACE v{system?.workspace.version ?? "2.0.0"}
+            <div>
+              <div
+                className="mono"
+                style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: ".16em", color: "#fff" }}
+              >
+                PEGASUS
+              </div>
+              <div className="tiny mute" style={{ letterSpacing: ".1em" }}>
+                PHANTOM MENACE v{system?.workspace.version ?? "2.0.0"}
+              </div>
             </div>
-          </div>
-        </Link>
+          </Link>
+          {/* Mobile close button */}
+          {open && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="sidebar-close-btn"
+              onClick={onNavigate}
+              aria-label="Close sidebar"
+              style={{ padding: 4 }}
+            >
+              <X size={16} />
+            </Button>
+          )}
+        </div>
 
         <div style={{ marginTop: 14 }}>
           <div className="field-label" style={{ marginBottom: 6 }}>
@@ -152,6 +215,13 @@ export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: 
         <div className="row" style={{ gap: 6 }}>
           <span className="dot idle" />
           <span>{system?.plugins ?? 0} plugins · {system?.commands ?? 0} commands</span>
+          <div style={{display:'flex',gap:6,fontSize:10,color:'#a3e635'}}>
+            <span title="VPN (default on)">🔒VPN</span>
+            <span title="DNSCrypt (default on)">🔑DNS</span>
+            <span title="Tor (default on)">🧅Tor</span>
+            <span title="Proxy (default on)">🌐Proxy</span>
+            <span title="Logs dashboard">📋Logs</span>
+          </div>
         </div>
       </div>
     </aside>

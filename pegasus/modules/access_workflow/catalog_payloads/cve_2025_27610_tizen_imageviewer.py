@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2025-27610 — Tizen Image Viewer. JPEG with an oversized declared
+"""CVE-2025-27610 -- Tizen Image Viewer. JPEG with an oversized declared
 segment length (SOF0) vs actual data -> OOB read in the decoder."""
 import struct, sys
 from pathlib import Path

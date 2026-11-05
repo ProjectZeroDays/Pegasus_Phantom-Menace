@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-41064 — BLASTPASS. WebP/VP8L heap overflow in Apple ImageIO.
+"""CVE-2023-41064 -- BLASTPASS. WebP/VP8L heap overflow in Apple ImageIO.
 Zero-click via iMessage image preview. Carrier: a minimal lossless WebP."""
 import struct, sys
 from pathlib import Path

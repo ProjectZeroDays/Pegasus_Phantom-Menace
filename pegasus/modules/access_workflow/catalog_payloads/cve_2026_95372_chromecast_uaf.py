@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2026-95372 — Chrome/Chromecast UaF (fixed 154.0.8037.57). HTML page
+"""CVE-2026-95372 -- Chrome/Chromecast UaF (fixed 154.0.8037.57). HTML page
 using a media-element teardown race to free a receiver object mid-callback."""
 import sys
 from pathlib import Path

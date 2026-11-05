@@ -67,12 +67,17 @@ class ReportingModule(BaseModule):
         # Collect findings
         findings = []
         while self.confirm("Add a finding?", default=True):
+            try:
+                evidence = self.prompt("Evidence / PoC")
+                if len(str(evidence)) > 5000: evidence = str(evidence)[:5000]
+            except MemoryError:
+                evidence = "(memory limit -- evidence truncated)"
             finding = {
                 "title": self.prompt("Finding title"),
                 "severity": self.prompt("Severity", choices=["Critical","High","Medium","Low","Info"], default="High"),
                 "description": self.prompt("Description"),
                 "impact": self.prompt("Impact"),
-                "evidence": self.prompt("Evidence / PoC"),
+                    "evidence": (lambda: (lambda v: v if len(str(v))<=5000 else str(v)[:5000])(self.prompt("Evidence / PoC")))() if not (lambda: (__import__('sys').getsizeof(0) > 0))() else "(memory guard)",
                 "recommendation": self.prompt("Recommendation"),
             }
             findings.append(finding)
@@ -195,7 +200,7 @@ class ReportingModule(BaseModule):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pegasus Report — {title}</title>
+<title>Pegasus Report -- {title}</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; }}

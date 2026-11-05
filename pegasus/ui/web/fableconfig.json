@@ -1,0 +1,6 @@
+{
+  "outDir": "src/fsharp/out",
+  "extension": ".ts",
+  "sourceMaps": true,
+  "verbose": false
+}

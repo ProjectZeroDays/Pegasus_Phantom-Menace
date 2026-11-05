@@ -25,18 +25,18 @@ from pegasus.core.config import get_settings
 
 # Curated high-impact Android CVEs
 BUILTIN_CVES = [
-    {"id": "CVE-2024-31317", "description": "ZygoteProcess command injection — system-level code execution", "severity": "Critical", "cvss": 9.8, "affected_api_min": 30, "affected_api_max": 34, "patch_level": "2024-07-01"},
+    {"id": "CVE-2024-31317", "description": "ZygoteProcess command injection -- system-level code execution", "severity": "Critical", "cvss": 9.8, "affected_api_min": 30, "affected_api_max": 34, "patch_level": "2024-07-01"},
     {"id": "CVE-2024-0044", "description": "run-as privilege escalation via PackageManager race condition", "severity": "High", "cvss": 7.7, "affected_api_min": 31, "affected_api_max": 34, "patch_level": "2024-06-01"},
     {"id": "CVE-2023-21492", "description": "Kernel information disclosure via race condition", "severity": "High", "cvss": 7.4, "affected_api_min": 28, "affected_api_max": 33, "patch_level": "2023-05-01"},
-    {"id": "CVE-2023-20963", "description": "WorkSource privilege escalation — allows app to run as system", "severity": "High", "cvss": 7.8, "affected_api_min": 30, "affected_api_max": 33, "patch_level": "2023-03-01"},
-    {"id": "CVE-2022-20465", "description": "Lockscreen bypass — access device without PIN", "severity": "Critical", "cvss": 9.1, "affected_api_min": 30, "affected_api_max": 32, "patch_level": "2022-11-01"},
+    {"id": "CVE-2023-20963", "description": "WorkSource privilege escalation -- allows app to run as system", "severity": "High", "cvss": 7.8, "affected_api_min": 30, "affected_api_max": 33, "patch_level": "2023-03-01"},
+    {"id": "CVE-2022-20465", "description": "Lockscreen bypass -- access device without PIN", "severity": "Critical", "cvss": 9.1, "affected_api_min": 30, "affected_api_max": 32, "patch_level": "2022-11-01"},
     {"id": "CVE-2022-20452", "description": "Permission bypass in NotificationManager leads to privilege escalation", "severity": "High", "cvss": 8.4, "affected_api_min": 30, "affected_api_max": 33, "patch_level": "2022-12-01"},
-    {"id": "CVE-2021-39793", "description": "GPU driver heap OOB write — local privilege escalation", "severity": "Critical", "cvss": 8.8, "affected_api_min": 26, "affected_api_max": 32, "patch_level": "2022-03-05"},
+    {"id": "CVE-2021-39793", "description": "GPU driver heap OOB write -- local privilege escalation", "severity": "Critical", "cvss": 8.8, "affected_api_min": 26, "affected_api_max": 32, "patch_level": "2022-03-05"},
     {"id": "CVE-2021-0954", "description": "Intent redirection in Android framework", "severity": "High", "cvss": 7.3, "affected_api_min": 26, "affected_api_max": 31, "patch_level": "2021-12-01"},
-    {"id": "CVE-2020-0041", "description": "Binder OOB write — full root exploit chain available", "severity": "Critical", "cvss": 9.8, "affected_api_min": 26, "affected_api_max": 29, "patch_level": "2020-03-01"},
-    {"id": "CVE-2019-2215", "description": "Use-after-free in Binder IPC driver — used in in-the-wild exploits", "severity": "Critical", "cvss": 9.3, "affected_api_min": 21, "affected_api_max": 28, "patch_level": "2019-10-06"},
-    {"id": "CVE-2017-13156", "description": "Janus vulnerability — APK signature bypass allows code injection", "severity": "High", "cvss": 7.8, "affected_api_min": 21, "affected_api_max": 26, "patch_level": "2017-12-01"},
-    {"id": "CVE-2015-3864", "description": "Stagefright — MMS media processing RCE", "severity": "Critical", "cvss": 10.0, "affected_api_min": 16, "affected_api_max": 22, "patch_level": "2015-09-01"},
+    {"id": "CVE-2020-0041", "description": "Binder OOB write -- full root exploit chain available", "severity": "Critical", "cvss": 9.8, "affected_api_min": 26, "affected_api_max": 29, "patch_level": "2020-03-01"},
+    {"id": "CVE-2019-2215", "description": "Use-after-free in Binder IPC driver -- used in in-the-wild exploits", "severity": "Critical", "cvss": 9.3, "affected_api_min": 21, "affected_api_max": 28, "patch_level": "2019-10-06"},
+    {"id": "CVE-2017-13156", "description": "Janus vulnerability -- APK signature bypass allows code injection", "severity": "High", "cvss": 7.8, "affected_api_min": 21, "affected_api_max": 26, "patch_level": "2017-12-01"},
+    {"id": "CVE-2015-3864", "description": "Stagefright -- MMS media processing RCE", "severity": "Critical", "cvss": 10.0, "affected_api_min": 16, "affected_api_max": 22, "patch_level": "2015-09-01"},
 ]
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-24587 — FragAttacks: mixed-key fragment reassembly. Frames
+"""CVE-2020-24587 -- FragAttacks: mixed-key fragment reassembly. Frames
 encrypted under different keys get reassembled together. Zero-click.
 Public (Vanhoef). HIGH."""
 import struct, sys

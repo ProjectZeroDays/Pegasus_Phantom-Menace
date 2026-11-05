@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-21268 — Android MediaCodec stsc OOB read.
+"""CVE-2023-21268 -- Android MediaCodec stsc OOB read.
 Carrier: MP4 declaring zero stsc entries but referencing chunk indices."""
 import struct, sys
 from pathlib import Path

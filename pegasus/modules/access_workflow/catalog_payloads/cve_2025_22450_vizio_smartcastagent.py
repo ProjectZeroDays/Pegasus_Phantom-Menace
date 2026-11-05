@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2025-22450 — Vizio SmartCast Agent. JSON-RPC command with a type
+"""CVE-2025-22450 -- Vizio SmartCast Agent. JSON-RPC command with a type
 confusion in an argument array. POST to the cast API."""
 import json, sys, urllib.request
 

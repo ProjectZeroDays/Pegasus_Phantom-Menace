@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2024-36212 — Hisense Media Framework. MKV/EBML with an oversized
+"""CVE-2024-36212 -- Hisense Media Framework. MKV/EBML with an oversized
 Segment size field -> parser OOB."""
 import struct, sys
 from pathlib import Path

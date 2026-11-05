@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2021-30860 — FORCEDENTRY. Integer overflow in CoreGraphics JBIG2 decoder.
+"""CVE-2021-30860 -- FORCEDENTRY. Integer overflow in CoreGraphics JBIG2 decoder.
 Zero-click via iMessage PDF. Carrier: PDF with a JBIG2Decode stream."""
 import sys
 from pathlib import Path

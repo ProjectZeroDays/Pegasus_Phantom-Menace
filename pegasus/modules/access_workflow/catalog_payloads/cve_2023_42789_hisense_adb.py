@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-42789 — Hisense VIDAA ADB. ADB-over-TCP with a malformed OPEN
+"""CVE-2023-42789 -- Hisense VIDAA ADB. ADB-over-TCP with a malformed OPEN
 service string that escapes the shell service handler."""
 import socket, struct, sys
 

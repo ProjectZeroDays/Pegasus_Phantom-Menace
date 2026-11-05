@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2026-106382 — Chrome/Chromecast UaF, CRITICAL (fixed 155.0.8059.39).
+"""CVE-2026-106382 -- Chrome/Chromecast UaF, CRITICAL (fixed 155.0.8059.39).
 HTML page that drives the cast receiver into a free-then-use across a
 message-port callback (sandbox escape)."""
 import sys

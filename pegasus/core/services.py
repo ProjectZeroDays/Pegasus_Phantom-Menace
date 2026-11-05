@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Service launcher — starts the Pegasus support services at app launch.
+"""Service launcher -- starts the Pegasus support services at app launch.
 
 Services:
   * adb server (implicit on first use, but start explicitly)
@@ -128,7 +128,7 @@ def start_http_proxy() -> dict:
 
 
 def start_https_proxy() -> dict:
-    """TLS wrapper on 8443 — self-signed cert generated on first use."""
+    """TLS wrapper on 8443 -- self-signed cert generated on first use."""
     if _port_open(8443):
         return {"service": "https-proxy", "status": "running", "port": 8443}
     try:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-35964 — Schema modification. Descriptor whose declared column
+"""CVE-2023-35964 -- Schema modification. Descriptor whose declared column
 count contradicts the record width."""
 import struct, sys
 from pathlib import Path

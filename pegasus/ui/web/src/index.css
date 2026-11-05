@@ -134,6 +134,25 @@ a:hover {
   flex: 1;
   overflow-y: auto;
   padding: 8px 10px 20px;
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+}
+.sidebar-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+.sidebar-scroll:active::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .main-col {
@@ -1136,10 +1155,18 @@ table.tbl tbody tr:last-child td {
   .menu-toggle {
     display: inline-flex;
   }
+  .sidebar-close-btn {
+    display: inline-flex;
+  }
   .content {
     padding: 16px 16px 90px;
   }
   .topbar {
     padding: 0 14px;
   }
+}
+
+/* Desktop: hide close button */
+.sidebar-close-btn {
+  display: none;
 }

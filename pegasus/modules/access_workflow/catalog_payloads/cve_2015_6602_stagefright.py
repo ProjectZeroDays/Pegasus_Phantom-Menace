@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2015-6602 — Stagefright (libstagefright). Integer overflow in
+"""CVE-2015-6602 -- Stagefright (libstagefright). Integer overflow in
 SampleTable::setTimeToSampleParams on a crafted MP4. Zero-click via MMS.
 Public PoC. Confidence: HIGH (classic, widely reproduced)."""
 import struct, sys

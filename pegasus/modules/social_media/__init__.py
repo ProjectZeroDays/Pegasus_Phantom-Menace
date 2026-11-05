@@ -22,3 +22,6 @@ __all__ = [
     "ThreatIntelligence",
     "SocialMediaCampaign",
 ]
+
+class SocialMediaAnalyzer:
+    pass

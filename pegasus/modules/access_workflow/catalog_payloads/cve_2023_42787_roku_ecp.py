@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-42787 — Roku ECP. Malformed ECP request to :8060; unauthenticated.
+"""CVE-2023-42787 -- Roku ECP. Malformed ECP request to :8060; unauthenticated.
 Oversized/odd XML body triggers the ECP parser bug."""
 import sys, urllib.request
 

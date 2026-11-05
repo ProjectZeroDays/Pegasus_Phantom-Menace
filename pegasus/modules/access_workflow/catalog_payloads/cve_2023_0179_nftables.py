@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-0179 — nf_tables stack overflow (nft_payload_copy_vlan).
+"""CVE-2023-0179 -- nf_tables stack overflow (nft_payload_copy_vlan).
 Zero-click for a box with nftables. Public PoC. HIGH."""
 import sys
 from pathlib import Path

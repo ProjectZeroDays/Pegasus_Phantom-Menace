@@ -1,5 +1,5 @@
 """
-Merged Workflow Registry — Q-ANDROID INFEROR + Pegasus Phantom Menace
+Merged Workflow Registry -- Q-ANDROID INFEROR + Pegasus Phantom Menace
 /finish /swarm /all /auto /never-ask /improve
 """
 from pathlib import Path

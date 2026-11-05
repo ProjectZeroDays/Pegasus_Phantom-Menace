@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-41991 — iMessage BlastDoor attachment parsing.
+"""CVE-2023-41991 -- iMessage BlastDoor attachment parsing.
 Carrier: GIF89a with a truncated LZW stream that trips the sandbox parser."""
 import struct, sys
 from pathlib import Path

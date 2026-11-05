@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2021-3573 — Bluetooth hci_sock use-after-free. Zero-click on Linux
+"""CVE-2021-3573 -- Bluetooth hci_sock use-after-free. Zero-click on Linux
 with an HCI socket holder. Public PoC. HIGH."""
 import sys
 from pathlib import Path

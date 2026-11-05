@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2020-15999 — FreeType heap buffer overflow in Load_SBit_Png.
+"""CVE-2020-15999 -- FreeType heap buffer overflow in Load_SBit_Png.
 Zero-click: any PNG-in-font (sbix/EBLC) rendered by Chrome/Android.
 Public PoC. Confidence: HIGH."""
 import struct, sys

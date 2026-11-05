@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CVE-2023-28412 — Tizen Privilege Manager. Crafted privilege manifest that
+"""CVE-2023-28412 -- Tizen Privilege Manager. Crafted privilege manifest that
 grants beyond the app's declared scope. Deploy with sdb/tizen push."""
 import sys
 from pathlib import Path
