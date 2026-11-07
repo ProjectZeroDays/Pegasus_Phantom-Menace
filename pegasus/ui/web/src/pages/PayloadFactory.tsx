@@ -103,7 +103,7 @@ export default function PayloadFactory() {
           <Card>
             <div className="card-header">Available Vectors</div>
             <div className="card-content" style={{ marginTop: "8px" }}>
-              {vectors.length === 0 ? (
+              {filterVectors(vectors).length === 0 ? (
                 <Empty title="No vectors match filter" />
               ) : (
                 <table className="tbl">
@@ -117,7 +117,7 @@ export default function PayloadFactory() {
                     </tr>
                   </thead>
                   <tbody>
-                    {vectors.map((v) => (
+                    {filterVectors(vectors).map((v) => (
                       <tr key={v.key}>
                         <td className="mono">{v.cve}</td>
                         <td>{v.title}</td>

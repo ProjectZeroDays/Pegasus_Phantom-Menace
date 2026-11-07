@@ -104,7 +104,7 @@ testpaths = ["pegasus/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --strict-markers --strict-config --tb=short"
+addopts = "-v --strict-markers --strict-config --tb=short --import-mode=importlib"
 markers = [
     "unit: Unit tests",
     "integration: Integration tests",

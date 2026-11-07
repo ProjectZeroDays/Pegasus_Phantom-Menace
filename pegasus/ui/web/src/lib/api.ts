@@ -38,6 +38,32 @@ function csrf(): string | null {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+const TOKEN_KEY = "pegasus_api_token";
+
+/** API token for the opt-in PEGASUS_REQUIRE_AUTH gate.
+ *  Priority: localStorage (set via setApiToken, e.g. from Settings)
+ *  > build-time VITE_PEGASUS_API_TOKEN. Empty = no header (gate off). */
+export function getApiToken(): string | null {
+  try {
+    return (
+      window.localStorage.getItem(TOKEN_KEY) ||
+      (import.meta.env?.VITE_PEGASUS_API_TOKEN as string | undefined) ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}
+
+export function setApiToken(token: string | null): void {
+  try {
+    if (token) window.localStorage.setItem(TOKEN_KEY, token);
+    else window.localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* storage blocked */
+  }
+}
+
 interface RequestOptions {
   timeout?: number;
   signal?: AbortSignal;
@@ -54,6 +80,8 @@ async function request<T>(method: string, path: string, body?: unknown, options:
   if (body !== undefined) headers["Content-Type"] = "application/json";
   const token = csrf();
   if (token) headers["X-CSRF-Token"] = token;
+  const apiToken = getApiToken();
+  if (apiToken) headers["X-Pegasus-Token"] = apiToken;
 
   try {
     const response = await fetch(resolveUrl(path), {

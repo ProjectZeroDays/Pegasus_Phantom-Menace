@@ -339,3 +339,7 @@ def _int(value: str, default: Any) -> int:
             return int(default)
         except (TypeError, ValueError):
             return 0
+
+
+# --- job_manager alias (fix_jobs3.py) ---
+job_manager = jobs  # module-level singleton (same object)

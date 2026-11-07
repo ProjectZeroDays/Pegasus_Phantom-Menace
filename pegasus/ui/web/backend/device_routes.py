@@ -14,12 +14,18 @@ import socket
 import time
 from pathlib import Path
 
-from flask import Response, request
+from flask import Response, request, session
 
 from pegasus.core.config import get_settings
 from pegasus.ui.web.backend import telemetry
 from pegasus.ui.web.backend.jobs import jobs as job_manager
 from pegasus.ui.web.backend.tools import run
+import pathlib
+import os
+import platform
+import shutil
+import subprocess
+import sys
 
 KNOWN_PORTS = {
     4444: "meterpreter handler",
@@ -73,13 +79,48 @@ def _catalog_module():
         return None
 
 
+AUTH_FLAG = "PEGASUS_REQUIRE_AUTH"
+AUTH_TOKEN = "PEGASUS_API_TOKEN"
+
+
+def _auth_enabled() -> bool:
+    """Enforcement is opt-in: without the flag every route stays open."""
+    return os.environ.get(AUTH_FLAG, "").strip().lower() in ("1", "true", "yes", "on")
+
+
+def _require_token(view):
+    """Token header/query, or a logged-in session, when AUTH_FLAG is on."""
+    import functools
+
+    @functools.wraps(view)
+    def wrapper(*a, **k):
+        if not _auth_enabled():
+            return view(*a, **k)
+        expected = os.environ.get(AUTH_TOKEN, "").strip()
+        supplied = (
+            request.headers.get("X-Pegasus-Token")
+            or request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
+            or request.args.get("token")
+            or ""
+        ).strip()
+        if expected and supplied == expected:
+            return view(*a, **k)
+        if session.get("pegasus_user") or session.get("user"):
+            return view(*a, **k)
+        return {"ok": False, "error": "unauthorized"}, 401
+
+    return wrapper
+
+
 def register(app, ok, fail) -> None:  # noqa: ANN001
     # -- devices ---------------------------------------------------------
     @app.get("/api/devices")
+    @_require_token
     def dr_devices_list():
         return ok({"devices": _adb_devices()})
 
     @app.get("/api/devices/<string:serial>")
+    @_require_token
     def dr_device_detail(serial):
         props = {
             "model": _prop(serial, "ro.product.model"),
@@ -98,10 +139,12 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
         return ok(props)
 
     @app.get("/api/devices/<string:serial>/notes")
+    @_require_token
     def dr_device_notes(serial):
         return ok(telemetry.device_notes(serial))
 
     @app.post("/api/devices/<string:serial>/notes")
+    @_require_token
     def dr_device_notes_set(serial):
         body = request.get_json(silent=True) or {}
         return ok(telemetry.set_device_notes(
@@ -109,21 +152,25 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
         ))
 
     @app.get("/api/devices/<string:serial>/summary")
+    @_require_token
     def dr_device_summary(serial):
         return ok(telemetry.summary(serial))
 
     # -- telemetry -------------------------------------------------------
     @app.get("/api/devices/<string:serial>/telemetry/<kind>")
+    @_require_token
     def dr_telemetry_latest(serial, kind):
         sample = telemetry.latest_sample(serial, kind)
         return ok(sample or {"rows": [], "collectedAt": None})
 
     @app.get("/api/devices/<string:serial>/telemetry/<kind>/history")
+    @_require_token
     def dr_telemetry_history(serial, kind):
         limit = min(int(request.args.get("limit", 10)), 50)
         return ok({"samples": telemetry.sample_history(serial, kind, limit)})
 
     @app.post("/api/devices/<string:serial>/telemetry/<kind>/collect")
+    @_require_token
     def dr_telemetry_collect(serial, kind):
         if kind == "media":
             rows = telemetry.collect_media(serial)
@@ -135,6 +182,7 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
 
     # -- media -----------------------------------------------------------
     @app.get("/api/devices/<string:serial>/media/<int:media_id>/raw")
+    @_require_token
     def dr_media_raw(serial, media_id):
         import subprocess
         # exec-out keeps stdout byte-exact; `shell` mangles anything above 0x7F.
@@ -158,11 +206,13 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
         return fail("media unavailable", 404)
 
     @app.get("/api/devices/<string:serial>/media/<int:media_id>/thumb")
+    @_require_token
     def dr_media_thumb(serial, media_id):
         return dr_media_raw(serial, media_id)
 
     # -- system aliases the pages use ------------------------------------
     @app.get("/api/listeners")
+    @_require_token
     def dr_listeners():
         rows = []
         for port, service in KNOWN_PORTS.items():
@@ -176,6 +226,7 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
         return ok({"listeners": rows})
 
     @app.get("/api/system/info")
+    @_require_token
     def dr_system_info():
         import platform
         import shutil
@@ -189,11 +240,13 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
 
     # -- jobs ------------------------------------------------------------
     @app.delete("/api/jobs/<string:job_id>")
+    @_require_token
     def dr_job_cancel(job_id):
         return ok({"cancelled": job_manager.cancel(job_id)})
 
     # -- dispatch --------------------------------------------------------
     @app.post("/api/tools/<tool>/run")
+    @_require_token
     def dr_tool_run(tool):
         body = request.get_json(silent=True) or {}
         args = [str(a) for a in (body.get("args") or [])]
@@ -208,6 +261,7 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
         )
 
     @app.post("/api/network/scan")
+    @_require_token
     def dr_network_scan():
         body = request.get_json(silent=True) or {}
         target = body.get("target") or "192.168.1.0/24"
@@ -235,6 +289,7 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
 
     # -- catalog ---------------------------------------------------------
     @app.get("/api/catalog")
+    @_require_token
     def dr_catalog_list():
         module = _catalog_module()
         for attr in ("list_vectors", "vectors", "list_entries"):
@@ -244,6 +299,7 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
         return ok([])
 
     @app.post("/api/catalog/build")
+    @_require_token
     def dr_catalog_build():
         body = request.get_json(silent=True) or {}
         key = body.get("key")
@@ -256,6 +312,7 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
 
     # -- delivery receipts -----------------------------------------------
     @app.get("/api/delivery/receipts")
+    @_require_token
     def dr_delivery_receipts():
         try:
             from pegasus.modules.delivery import receipts
@@ -267,11 +324,13 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
 
     # -- setup aliases ---------------------------------------------------
     @app.get("/api/setup/state")
+    @_require_token
     def dr_setup_state():
         from pegasus.modules.ai import providers
         return ok({"needsSetup": providers.needs_setup()})
 
     @app.post("/api/setup/skip")
+    @_require_token
     def dr_setup_skip():
         marker = Path(get_settings().get_workspace_path()) / ".setup-skip"
         marker.parent.mkdir(parents=True, exist_ok=True)

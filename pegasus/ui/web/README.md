@@ -254,3 +254,20 @@ Unicode-safe output capture and telemetry store round-trips. No device required.
 ## License
 
 MIT — see the repository `LICENSE`.
+
+## Frontend environment
+
+The web client reads two build-time variables. Both are optional.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `VITE_API_BASE` | `/api` | Base path or absolute origin for every API call. Set it when the UI is served from a different host than the backend, e.g. `VITE_API_BASE=https://10.1.10.27:5001/api`. |
+| `VITE_PEGASUS_API_TOKEN` | unset | Baked-in bearer token, sent as `X-Pegasus-Token`. Only useful with `PEGASUS_REQUIRE_AUTH=1`; otherwise omit it and set the token at runtime with `setApiToken()`. |
+
+`VITE_API_BASE` is read once at module load in `src/lib/api.ts` and again in `src/pages/Media.tsx`, so changing it needs a rebuild.
+
+### Auth
+
+The backend gate is opt-in. With `PEGASUS_REQUIRE_AUTH` unset every route is public, which is the default for local use. To lock it down, set `PEGASUS_REQUIRE_AUTH=1` and `PEGASUS_API_TOKEN=<long random string>`, then either rebuild with `VITE_PEGASUS_API_TOKEN` or call `setApiToken("<token>")` in the browser console. `localStorage` wins over the build-time value and `setApiToken("")` clears it.
+
+Exempt from the gate: `/api/health`, `/api/auth`, `/api/setup`, `/api/beacon`, `/api/ai/status`, and all non-API paths so the SPA still loads.
