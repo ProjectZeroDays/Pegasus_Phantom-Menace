@@ -467,3 +467,18 @@ Push blocked: none
 Next: device smoke run of both new pages; accessibility sweep; clean-VM Electron build; iOS provisioning
 Author: Trey A. Smith | Authenticated, Inc. | @projectzerodays
 Notes: physical_routes.py (vibrate/torch/brightness/volume/ringer/media/tts/beep/radios/input/power/sensors/capture) and fastboot_routes.py (unlock ladder, flash, vbmeta, verity, slots, carrier unlock, erase, FRP chain, Play Protect, Magisk/KernelSU/APatch detect, Samsung/heimdall) with fb_/phys_ prefixes and opt-in token gate; werkzeug logging routed around colorama; adb pair probe timeout raised to 20s; _check_adb parses per-device state; PhysicalOps.tsx and FastbootOps.tsx pages with nav entries.
+
+
+=== HANDOFF SECTION ===
+
+## 63. HANDOFF
+
+Project: Pegasus Phantom Menace v2 / physical + bootloader surfaces
+Status: 101 tests green, tsc clean, build ok; root scripts restored
+Features: physical-effect engine (30 routes) and fastboot/FRP/root/Odin engine (33 routes), both with UI pages
+Log: log/events.jsonl
+Release: unreleased since v2.1.0
+Push blocked: none
+Next: device smoke run of both new pages; accessibility sweep; clean-VM Electron build; iOS provisioning
+Author: Trey A. Smith | Authenticated, Inc. | @projectzerodays
+Notes: the scratch sweep over-reached and removed ten root scripts (requirements.txt, bootstrap.py, run_server.py, start_server.py, god_mode.py, persistence_checker.py, tier1_gate.py, traffic_analysis.py, update_check.py, advanced_config_aggregator.py); all restored from 28afc186. Only fix*/diag*/make*/recon*/check*/verify*/amend*/drop*/final*/find*/decide*/vuln*/fix-sweep/fix2/fix3 and the stray 'python apply_repair4.py' stay deleted.
