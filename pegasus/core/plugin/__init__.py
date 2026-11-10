@@ -615,6 +615,8 @@ class PluginManager:
         "ml_engine",
         "blockchain",
         "quantum",
+        "cve",
+        "osint",
     )
 
     def load_builtin_plugins(self) -> List[Plugin]:

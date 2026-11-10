@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ChevronDown, ChevronRight, Shield, Smartphone, RefreshCw, X } from "lucide-react";
+import { ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Shield, Smartphone, RefreshCw, X } from "lucide-react";
 import { NAV_GROUPS } from "@/nav";
 import { PEGASUS_VECTOR } from "@/lib/brand";
 import { useApp } from "@/state/AppContext";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Badge, Button } from "@/components/ui";
 
 const COLLAPSE_KEY = "pegasus.nav.collapsed";
+const RAIL_KEY = "pegasus.nav.rail";
 
 export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: boolean }) {
   const [location] = useLocation();
@@ -19,12 +20,27 @@ export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: 
       return {};
     }
   });
+  const [rail, setRail] = useState<boolean>(() => {
+    try {
+      return window.localStorage.getItem(RAIL_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
   const sidebarRef = useRef<HTMLElement>(null);
   const touchStartX = useRef<number>(0);
 
   useEffect(() => {
     window.localStorage.setItem(COLLAPSE_KEY, JSON.stringify(collapsed));
   }, [collapsed]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(RAIL_KEY, rail ? "1" : "0");
+    } catch {
+      /* storage unavailable - the rail still works for this session */
+    }
+  }, [rail]);
 
   // Swipe gesture handling for mobile
   useEffect(() => {
@@ -78,10 +94,10 @@ export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: 
   const activeDevice = devices.find((d) => d.serial === activeSerial);
 
   return (
-    <aside className={cn("sidebar", open && "open")}>
+    <aside className={cn("sidebar", open && "open", rail && "rail")}>
       <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid var(--line-soft)" }}>
         <div className="row" style={{ gap: 10, alignItems: "center", justifyContent: "space-between" }}>
-          <Link href="/" className="row" style={{ gap: 10, flex: 1 }} onClick={onNavigate}>
+          <Link href="/" className="row sidebar-brand" style={{ gap: 10, flex: 1 }} onClick={onNavigate}>
             <div
               style={{
                 width: 34,
@@ -108,6 +124,17 @@ export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: 
               </div>
             </div>
           </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="sidebar-rail-toggle"
+            onClick={() => setRail((v) => !v)}
+            aria-label={rail ? "Expand sidebar" : "Collapse sidebar"}
+            title={rail ? "Expand sidebar" : "Collapse sidebar"}
+            style={{ padding: 4 }}
+          >
+            {rail ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
+          </Button>
           {/* Mobile close button */}
           {open && (
             <Button
@@ -123,7 +150,7 @@ export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: 
           )}
         </div>
 
-        <div style={{ marginTop: 14 }}>
+        <div className="sidebar-device" style={{ marginTop: 14 }}>
           <div className="field-label" style={{ marginBottom: 6 }}>
             Active device
           </div>
@@ -196,6 +223,7 @@ export function Sidebar({ onNavigate, open }: { onNavigate?: () => void; open?: 
       </nav>
 
       <div
+        className="sidebar-foot"
         style={{
           padding: "10px 14px 14px",
           borderTop: "1px solid var(--line-soft)",

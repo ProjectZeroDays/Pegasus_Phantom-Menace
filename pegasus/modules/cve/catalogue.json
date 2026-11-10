@@ -1,0 +1,180 @@
+[
+  {
+    "id": "CVE-2021-44228",
+    "title": "Apache Log4j2 JNDI lookup remote code execution",
+    "severity": "critical",
+    "cvss": 10.0,
+    "products": [
+      "Apache Log4j2"
+    ],
+    "keywords": [
+      "log4j",
+      "log4j2",
+      "apache log4j",
+      "apache logging"
+    ],
+    "affected_versions": [
+      "2.0-beta9",
+      "2.14.1"
+    ],
+    "fixed_in": "2.17.1",
+    "reference": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+    "remediation": "Upgrade to 2.17.1 or later, or remove JndiLookup.class."
+  },
+  {
+    "id": "CVE-2021-34527",
+    "title": "Windows Print Spooler remote code execution (PrintNightmare)",
+    "severity": "critical",
+    "cvss": 8.8,
+    "products": [
+      "Microsoft Windows"
+    ],
+    "keywords": [
+      "windows print spooler",
+      "print spooler",
+      "spoolsv",
+      "printnightmare"
+    ],
+    "affected_versions": [
+      "7",
+      "8",
+      "10"
+    ],
+    "fixed_in": "KB5005565 / KB5005566",
+    "reference": "https://nvd.nist.gov/vuln/detail/CVE-2021-34527",
+    "remediation": "Apply the July 2021 updates or disable the Print Spooler service."
+  },
+  {
+    "id": "CVE-2020-1472",
+    "title": "Netlogon elevation of privilege (Zerologon)",
+    "severity": "critical",
+    "cvss": 10.0,
+    "products": [
+      "Microsoft Windows Server"
+    ],
+    "keywords": [
+      "netlogon",
+      "zerologon",
+      "active directory",
+      "domain controller"
+    ],
+    "affected_versions": [],
+    "fixed_in": "August 2020 update",
+    "reference": "https://nvd.nist.gov/vuln/detail/CVE-2020-1472",
+    "remediation": "Apply the August 2020 update and enforce secure RPC."
+  },
+  {
+    "id": "CVE-2017-0144",
+    "title": "SMBv1 remote code execution (EternalBlue / WannaCry)",
+    "severity": "critical",
+    "cvss": 8.1,
+    "products": [
+      "Microsoft Windows"
+    ],
+    "keywords": [
+      "smbv1",
+      "eternalblue",
+      "smb",
+      "wannacry",
+      "ms17-010"
+    ],
+    "affected_versions": [
+      "7",
+      "8",
+      "10"
+    ],
+    "fixed_in": "MS17-010",
+    "reference": "https://nvd.nist.gov/vuln/detail/CVE-2017-0144",
+    "remediation": "Apply MS17-010 and disable SMBv1."
+  },
+  {
+    "id": "CVE-2022-22965",
+    "title": "Spring Framework RCE (Spring4Shell)",
+    "severity": "critical",
+    "cvss": 9.8,
+    "products": [
+      "Spring Framework"
+    ],
+    "keywords": [
+      "spring framework",
+      "spring4shell",
+      "spring",
+      "tomcat"
+    ],
+    "affected_versions": [
+      "5.3.0",
+      "5.3.17"
+    ],
+    "fixed_in": "5.3.18",
+    "reference": "https://nvd.nist.gov/vuln/detail/CVE-2022-22965",
+    "remediation": "Upgrade Spring Framework to 5.3.18 or later."
+  },
+  {
+    "id": "CVE-2014-0160",
+    "title": "OpenSSL heartbeat information disclosure (Heartbleed)",
+    "severity": "high",
+    "cvss": 7.5,
+    "products": [
+      "OpenSSL"
+    ],
+    "keywords": [
+      "openssl",
+      "heartbleed",
+      "heartbeat",
+      "tls"
+    ],
+    "affected_versions": [
+      "1.0.1",
+      "1.0.1f"
+    ],
+    "fixed_in": "1.0.1g",
+    "reference": "https://nvd.nist.gov/vuln/detail/CVE-2014-0160",
+    "remediation": "Upgrade OpenSSL and rotate every key that lived on the host."
+  },
+  {
+    "id": "CVE-2019-0708",
+    "title": "Remote Desktop Services remote code execution (BlueKeep)",
+    "severity": "critical",
+    "cvss": 9.8,
+    "products": [
+      "Microsoft Windows"
+    ],
+    "keywords": [
+      "bluekeep",
+      "rdp",
+      "remote desktop",
+      "term service"
+    ],
+    "affected_versions": [
+      "7",
+      "8",
+      "10",
+      "2003"
+    ],
+    "fixed_in": "KB4499175",
+    "reference": "https://nvd.nist.gov/vuln/detail/CVE-2019-0708",
+    "remediation": "Apply the May 2019 update and require Network Level Authentication."
+  },
+  {
+    "id": "CVE-2018-13379",
+    "title": "Fortinet path traversal in the SSL VPN web interface",
+    "severity": "critical",
+    "cvss": 9.8,
+    "products": [
+      "Fortinet FortiOS"
+    ],
+    "keywords": [
+      "fortinet",
+      "fortios",
+      "fortigate",
+      "ssl vpn"
+    ],
+    "affected_versions": [
+      "5.6",
+      "6.0"
+    ],
+    "fixed_in": "5.6.8 / 6.0.5",
+    "reference": "https://nvd.nist.gov/vuln/detail/CVE-2018-13379",
+    "remediation": "Upgrade FortiOS and restrict the SSL VPN portal to management IPs."
+  }
+]

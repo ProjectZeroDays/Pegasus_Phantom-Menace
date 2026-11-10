@@ -50,6 +50,19 @@ import Logs from "@/pages/Logs";
 import LogsDashboard from "@/pages/LogsDashboard";
 import AdminUsers from "@/pages/AdminUsers";
 import NotFound from "@/pages/NotFound";
+import Login from "@/pages/Login";
+import AdminLogin from "@/pages/AdminLogin";
+import Wallets from "@/pages/Wallets";
+import Vault from "@/pages/Vault";
+import Wiki from "@/pages/Wiki";
+import Help from "@/pages/Help";
+import HowTo from "@/pages/HowTo";
+import BugReport from "@/pages/BugReport";
+import Privacy from "@/pages/Privacy";
+import Tunnels from "@/pages/Tunnels";
+import CveFramework from "@/pages/CveFramework";
+import Kyc from "@/pages/Kyc";
+import Osint from "@/pages/Osint";
 
 export default function App() {
   return (
@@ -104,6 +117,19 @@ export default function App() {
           <Route path="/tenants" component={Tenant} />
           <Route path="/webhooks" component={Webhooks} />
           <Route path="/social-engineering" component={SocialEngineering} />
+          <Route path="/login" component={Login} />
+          <Route path="/admin-login" component={AdminLogin} />
+          <Route path="/wallets" component={Wallets} />
+          <Route path="/vault" component={Vault} />
+          <Route path="/wiki" component={Wiki} />
+          <Route path="/help" component={Help} />
+          <Route path="/howto" component={HowTo} />
+          <Route path="/bug-report" component={BugReport} />
+          <Route path="/privacy" component={Privacy} />
+          <Route path="/tunnels" component={Tunnels} />
+          <Route path="/cve-framework" component={CveFramework} />
+          <Route path="/kyc" component={Kyc} />
+          <Route path="/osint" component={Osint} />
           <Route component={NotFound} />
         </Switch>
       </AppShell>

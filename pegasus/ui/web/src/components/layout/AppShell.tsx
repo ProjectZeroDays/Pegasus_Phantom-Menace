@@ -10,6 +10,7 @@ import { useApi, ApiError } from "@/lib/api";
 import type { Job } from "@/lib/types";
 
 import { ChatPopup } from "@/components/ChatPopup";
+import { ChatDock } from "@/components/ChatDock";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -86,7 +87,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <main className="content">{children}</main>
 
-        <footer style={{padding:8,fontSize:11,color:"#aaa",display:"flex",justifyContent:"space-between"}}><div>External IP: 10.1.10.27 • Settings: VPN/DNSCrypt/Tor/Proxy (defaults on / configurable)</div><div>📋Logs | 🔒VPN | 🔑DNS | 🧅Tor | 🌐Proxy</div></footer>
       <footer className="bottombar">
           <div className="row" style={{ gap: 16 }}>
             <span className="row" style={{ gap: 6 }}>
@@ -113,6 +113,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <JobDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <ChatPopup />
+      <ChatDock />
     </div>
   );
 }

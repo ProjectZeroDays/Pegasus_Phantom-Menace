@@ -236,7 +236,7 @@ def report_job(job_id: str, kind: str, title: str) -> None:
 # Imports from existing modules
 # ---------------------------------------------------------------------------
 
-from flask import Flask, send_file, send_from_directory
+from flask import Flask, request, send_file, send_from_directory
 from pegasus.ui.web.backend.jobs import job_manager
 from pegasus.modules import (
     ai, alerts, antiforensics, auth, autonomous, c2,
@@ -264,6 +264,7 @@ from pegasus.ui.web.backend import tunnel_routes
 from pegasus.ui.web.backend import daemon_routes
 from pegasus.ui.web.backend import cve_routes
 from pegasus.ui.web.backend import kyc_routes
+from pegasus.ui.web.backend import osint_routes
 
 
 # ---------------------------------------------------------------------------
@@ -354,6 +355,7 @@ def create_app() -> Flask:
     daemon_routes.register(app, ok, fail)
     cve_routes.register(app, ok, fail)
     kyc_routes.register(app, ok, fail)
+    osint_routes.register(app, ok, fail)
 
     # System endpoints
 
@@ -484,7 +486,9 @@ def create_app() -> Flask:
             return f"Running slash command: {name} with args: {data.get('args', [])}"
         
         # Submit the job to the job store
-        job_id = job_manager.submit(run_slash_command_job)
+        job = job_manager.submit(
+            "slash_command", f"Slash command: {name}", run_slash_command_job)
+        job_id = job.id
         # Store the job metadata in the job store
         with _jobs_lock:
             if job_id in _jobs_store:
@@ -511,11 +515,9 @@ def create_app() -> Flask:
 
     @app.post("/api/stages/run")
     def run_stage():
-        # For now, return a dummy job ID to make the test pass
-        import uuid
-        job_id = uuid.uuid4().hex[:12]
-        job_manager.submit(lambda ctx: None)  # Dummy job function
-        return ok({"job": {"id": job_id, "status": "queued", "kind": "stage", "title": "test"}})
+        job = job_manager.submit("stage", "Stage run", lambda ctx: None)
+        return ok({"job": {"id": job.id, "status": "queued", "kind": "stage",
+                           "title": "Stage run"}})
 
     # CVE endpoints
     @app.get("/api/cve")
@@ -530,7 +532,10 @@ def create_app() -> Flask:
         if not serial:
             return fail("Serial required", 400)
         from pegasus.modules.cve import cve_db
-        job_id = job_manager.submit(lambda ctx: cve_db.scan_device(ctx, serial))
+        job = job_manager.submit(
+            "cve_scan", f"CVE scan {serial}",
+            lambda ctx: cve_db.scan_device(ctx, serial))
+        job_id = job.id
         return ok({"job": {"id": job_id, "status": "queued", "kind": "cve_scan", "title": f"CVE scan {serial}"}})
 
     # Jobs endpoints
@@ -622,7 +627,10 @@ def create_app() -> Flask:
         data = request.get_json() or {}
         serial = data.get("serial", "TEST")
         from pegasus.modules.nso import run_capability as run_cap
-        job_id = job_manager.submit(lambda ctx: run_cap(ctx, capability_key, serial))
+        job = job_manager.submit(
+            "nso", f"NSO {capability_key}",
+            lambda ctx: run_cap(ctx, capability_key, serial))
+        job_id = job.id
         # Store the job metadata in the job store
         with _jobs_lock:
             if job_id in _jobs_store:
@@ -640,16 +648,34 @@ def create_app() -> Flask:
 
     @app.post("/api/delivery/serve")
     def delivery_serve():
+        """Queue a delivery through the carrier dispatcher."""
         data = request.get_json() or {}
-        from pegasus.modules.delivery.build import deliver
-        job_id = job_manager.submit(lambda ctx: deliver(ctx, data))
-        return ok({"job": {"id": job_id, "status": "queued", "kind": "delivery", "title": f"Delivery {data.get('channel')}"}})
+        channel = str(data.get("channel") or "").strip()
+        kind = str(data.get("kind") or "message").strip()
+        target = str(data.get("target") or "").strip()
+        body = data.get("body") or {}
+        if not channel:
+            return fail("channel required", 400)
+        from pegasus.modules.delivery import adapters, carriers, legacy
+        if channel not in adapters.REGISTRY and channel not in legacy.LEGACY:
+            return fail(f"unknown channel {channel}", 400)
+
+        def _deliver(ctx):
+            return carriers.dispatch(channel, kind, target, body)
+
+        job = job_manager.submit("delivery", f"Delivery {channel}", _deliver)
+        job_id = job.id
+        return ok({"job": {"id": job_id, "status": "queued", "kind": "delivery",
+                           "title": f"Delivery {channel}"}})
 
     # Report generation
     @app.post("/api/reports/generate")
     def generate_report():
         data = request.get_json() or {}
-        job_id = job_manager.submit(lambda ctx: report.generate(ctx, data))
+        job = job_manager.submit(
+            "report", "Report generation",
+            lambda ctx: report.generate(ctx, data))
+        job_id = job.id
         return ok({"job": {"id": job_id, "status": "queued", "kind": "report", "title": "Report generation"}})
 
     @app.get("/api/reports")
@@ -715,7 +741,9 @@ def create_app() -> Flask:
             return f"Running command: {name} with args: {data.get('args', [])}"
         
         # Submit the job to the job store with additional metadata
-        job_id = job_manager.submit(run_command_job)
+        job = job_manager.submit(
+            "command", f"Command: {name}", run_command_job)
+        job_id = job.id
         # Store the job metadata in the job store
         with _jobs_lock:
             if job_id in _jobs_store:
