@@ -108,10 +108,26 @@ def start_meterpreter() -> dict:
 
 
 def start_msfrpcd() -> dict:
+    """Start msfrpcd on the configured RPC port.
+
+    The password must match MetasploitSettings.rpc_password - previously this
+    hardcoded "-P pegasus" while the configured default was "msf123", so a
+    running daemon failed every RPC login and always looked offline.
+    """
     if not (shutil.which("msfrpcd") or shutil.which("msfrpcd.exe")):
         return {"service": "msfrpcd", "status": "unavailable", "detail": "msfrpcd not on PATH", "port": 55553}
-    out = _spawn(["msfrpcd", "-P", "pegasus", "-S"], "msfrpcd")
-    out["port"] = 55553
+    try:
+        from pegasus.core.config import get_settings
+
+        cfg = get_settings().metasploit
+        host = cfg.rpc_host or "127.0.0.1"
+        port = int(cfg.rpc_port or 55553)
+        password = cfg.rpc_password or "msf123"
+    except Exception:
+        host, port, password = "127.0.0.1", 55553, "msf123"
+    out = _spawn(["msfrpcd", "-a", host, "-p", str(port), "-P", password, "-S"], "msfrpcd")
+    out["port"] = port
+    out["host"] = host
     return out
 
 

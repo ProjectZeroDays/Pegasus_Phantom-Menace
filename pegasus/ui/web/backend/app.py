@@ -251,6 +251,8 @@ from pegasus.modules.social_engineering import se_routes
 from pegasus.modules.webhook import webhook_routes
 from pegasus.modules.relay import relay_routes
 from pegasus.ui.web.backend import log_routes
+from pegasus.ui.web.backend import agent_routes
+from pegasus.ui.web.backend import metasploit_routes
 
 
 # ---------------------------------------------------------------------------
@@ -373,6 +375,10 @@ def create_app() -> Flask:
 
     # Log routes (log_routes): /api/logs, /api/logs/dashboard, /api/logs/<id> (+download/delete)
     log_routes.register(app, ok, fail)
+    # AI agent config (agent_routes): /api/agents/* — opencode provider discovery + auto-config
+    agent_routes.register(app, ok, fail)
+    # Metasploit RPC (metasploit_routes): /api/metasploit/status + /start
+    metasploit_routes.register(app, ok, fail)
 
     # Plugins endpoints
     @app.get("/api/plugins")
