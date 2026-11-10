@@ -148,6 +148,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { path: "/commands", label: "Command Center", icon: Command },
       { path: "/logs", label: "Logs", icon: FileText },
       { path: "/settings", label: "Settings", icon: Settings },
+      { path: "/admin-users", label: "Admin Users", icon: Shield },
     ],
   },
 ];

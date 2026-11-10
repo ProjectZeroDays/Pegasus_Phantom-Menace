@@ -39,6 +39,64 @@ def bootstrap(user: str, password: str) -> None:
     con.commit()
 
 
+def create_user(user: str, password: str, role: str = "operator") -> int:
+    """Create operator (admin use). Returns new row id."""
+    if role not in ("admin", "operator", "viewer"):
+        raise ValueError("role must be admin|operator|viewer")
+    salt = os.urandom(16).hex()
+    con = _db()
+    cur = con.execute(
+        "INSERT INTO operators(user, pw, salt, role, created) VALUES(?,?,?,?,?)",
+        (user, hash_pw(password, salt), salt, role, time.time()))
+    con.commit()
+    return cur.lastrowid
+
+
+def list_users() -> list[dict]:
+    rows = _db().execute(
+        "SELECT id, user, role, created FROM operators ORDER BY created DESC").fetchall()
+    return [{"id": r[0], "user": r[1], "role": r[2], "created": r[3]} for r in rows]
+
+
+def update_user(op_id: int, role: str | None = None) -> bool:
+    if role is not None:
+        if role not in ("admin", "operator", "viewer"):
+            raise ValueError("invalid role")
+        con = _db()
+        con.execute("UPDATE operators SET role=? WHERE id=?", (role, op_id))
+        # role changed → drop that operator's sessions so they must re-login
+        con.execute("DELETE FROM sessions WHERE operator_id=?", (op_id,))
+        con.commit()
+        return con.total_changes > 0
+    return True
+
+
+def delete_user(op_id: int) -> bool:
+    con = _db()
+    op = current()
+    # cannot delete bootstrap admin (id=1) or self
+    row = con.execute("SELECT user FROM operators WHERE id=?", (op_id,)).fetchone()
+    if not row:
+        return False
+    if op and op["user"] == row[0]:
+        raise ValueError("refusing to delete current session user")
+    con.execute("DELETE FROM sessions WHERE operator_id=?", (op_id,))
+    con.execute("DELETE FROM operators WHERE id=?", (op_id,))
+    con.commit()
+    return con.total_changes > 0
+
+
+def change_password(op_id: int, new_password: str) -> bool:
+    salt = os.urandom(16).hex()
+    con = _db()
+    cur = con.execute(
+        "UPDATE operators SET pw=?, salt=? WHERE id=?",
+        (hash_pw(new_password, salt), salt, op_id))
+    con.execute("DELETE FROM sessions WHERE operator_id=?", (op_id,))  # force re-login
+    con.commit()
+    return cur.rowcount > 0
+
+
 def login(user: str, password: str) -> str | None:
     row = _db().execute("SELECT id, pw, salt FROM operators WHERE user=?",
                         (user,)).fetchone()
@@ -75,7 +133,7 @@ def require(role: str = "operator"):
             if role == "admin" and op["role"] != "admin":
                 return jsonify({"ok": False, "error": "admin required"}), 403
             if request.method in ("POST", "PATCH", "DELETE"):
-                sent = request.headers.get("X-CSRF") or \
+                sent = request.headers.get("X-CSRF") or request.headers.get("X-CSRF-Token") or \
                     (request.get_json(silent=True) or {}).get("csrf")
                 if not hmac.compare_digest(sent or "", op["csrf"]):
                     return jsonify({"ok": False, "error": "csrf"}), 403
