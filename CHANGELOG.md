@@ -4,6 +4,33 @@ All notable changes to Pegasus Phantom Menace. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] — 2026-11-10
+
+Enterprise build completed on top of the 2.1.0 production baseline. Web console gained full enterprise surfaces and defensive ML/blockchain/quantum modules; release tooling moved to a single 2.2.0 version across all packaging surfaces.
+
+### Added
+
+- **Phases 15-21 enterprise glue** — web console pages and REST endpoints for social-media OSINT collection (catalog, campaigns, intel store), cloud relay tunnel management, PWA offline support, multi-tenant RBAC (owner/admin/editor/viewer), HMAC-SHA256-signed webhooks with in-memory registry + JSONL event log, and authorized simulated-phishing awareness campaigns (draft-only launch).
+- **Phase 22 Machine Learning** — EWMA z-score anomaly gate, order-2 n-gram behaviour predictor, severity-tiered dry-run response planner, JSONL operator-feedback store (threshold tuning).
+- **Phase 23 Blockchain** — read-only JSON-RPC ERC-20 helpers (eth_call), SHA-256 Merkle trees with inclusion proofs, content-addressed store with optional IPFS pinning, local token ledger (balances, quotas, audit).
+- **Phase 24 Quantum** — BB84 QKD simulation with intercept-resend detection, hybrid HKDF-SHA256 key derivation, PQC migration audit mapping RSA/DSA/ECC/DH/MD5/SHA-1 to NIST FIPS 203/204/205, quantum-resistant baseline check, experimental single-use Lamport OTS.
+- **GUI redesign visual spec** — `gui-demo.html` (48 pages, single token system).
+
+### Fixed
+
+- `commands.py:300` — unterminated string literal in `cmd_payload_mass` argument parsing (SyntaxError).
+- `relay/__init__.py` — stub `relay_routes` class in `loadbalancer.py` shadowed the real Flask adapter; `/api/relay/*` routes now register.
+- `social_engineering/social_server.py` — six corrupted string literals repaired.
+- Adopted `pegasus/VERSION` as canonical version source (2.2.0); aligned pyproject, web package.json, electron package.json and pyinstaller version resources.
+
+### Removed
+
+- `pymetasploit3` (unused; 2 known vulnerabilities).
+
+### Notes
+
+- BB84 is a simulation over classical RNG; Lamport signatures are single-message; the local ledger is not a blockchain; PQC audit does not ship liboqs; social-engineering campaigns are draft-only. Integration tests cover route registration (127 rules) — quantum/blockchain/ML modules are import-verified, pending functional test coverage.
+
 ## [2.1.0] — 2026-10-30
 
 Accounts, daemonisation, delivery tooling, full NSO-class parity and the

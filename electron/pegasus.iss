@@ -1,7 +1,7 @@
 ; Pegasus Phantom Menace - Inno Setup script (alternative to NSIS).
 ; Build with: iscc electron\pegasus.iss
 #define MyAppName "Pegasus Phantom Menace"
-#define MyAppVersion "2.1.1"
+#define MyAppVersion "2.2.0"
 #define MyAppPublisher "ProjectZeroDays"
 #define MyAppURL "https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace"
 #define MyAppExeName "Pegasus Phantom Menace.exe"
