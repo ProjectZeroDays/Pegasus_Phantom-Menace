@@ -1,0 +1,56 @@
+{
+  "name": "@ProjectZeroDays/pegasus-desktop",
+  "version": "2.2.1",
+  "description": "Pegasus Phantom Menace desktop shell - Electron wrapper, Python backend launcher and Inno Setup installer scripts for Windows",
+  "keywords": [
+    "pegasus",
+    "phantom-menace",
+    "security",
+    "android",
+    "electron",
+    "desktop",
+    "pentest",
+    "authorization"
+  ],
+  "homepage": "https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace#readme",
+  "bugs": {
+    "url": "https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace.git"
+  },
+  "license": "MIT",
+  "author": "Trey A. Smith | Authenticated, Inc. | @projectzerodays",
+  "type": "commonjs",
+  "main": "main.js",
+  "bin": {
+    "pegasus-desktop": "bin/pegasus-desktop.js"
+  },
+  "files": [
+    "main.js",
+    "preload.js",
+    "renderer/",
+    "installer.nsh",
+    "pegasus.iss",
+    "bin/",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "node -e \"console.log('Pegasus desktop shell installed. The Windows installer is published on the GitHub release: https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace/releases')\"",
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  }
+}
