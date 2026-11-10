@@ -103,7 +103,7 @@ export default function PayloadFactory() {
           <Card>
             <div className="card-header">Available Vectors</div>
             <div className="card-content" style={{ marginTop: "8px" }}>
-              {filterVectors(vectors).length === 0 ? (
+              {vectors.length === 0 ? (
                 <Empty title="No vectors match filter" />
               ) : (
                 <table className="tbl">

@@ -297,7 +297,7 @@ async def cmd_payload_mass(*args: str) -> Dict[str, Any]:
     index = 0
     while index < len(args):
         token = args[index]
-        if token.startswith("--") and index + 1 < len(args):
+        if token.startswith("--) and index + 1 < len(args):
             options[token[2:]] = args[index + 1]
             index += 2
             continue

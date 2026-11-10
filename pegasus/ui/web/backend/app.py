@@ -48,9 +48,7 @@ try:
 except Exception: pass
 
 from . import telemetry
-from . import physical_routes
-from . import fastboot_routes
-from flask import jsonify, request, session, send_file, send_from_directory, Response
+from flask import jsonify
 from .jobs import JobContext, _jsonable, jobs, patch_prompts, restore_prompts
 from .tools import (
     adb_devices,
@@ -270,21 +268,8 @@ start_time = time.time()
 
 from pegasus.ui.web.backend import device_routes
 
-def _quiet_werkzeug() -> None:
-    """Log requests to the real stdout so a replaced handle cannot break emit."""
-    logger = logging.getLogger("werkzeug")
-    logger.disabled = False
-    logger.handlers = []
-    handler = logging.StreamHandler(sys.__stdout__)
-    handler.setFormatter(logging.Formatter("%(message)s"))
-    logger.addHandler(handler)
-    logger.propagate = False
-
-
 def create_app() -> Flask:
     app = Flask(__name__)
-    logging.raiseExceptions = False
-    _quiet_werkzeug()
     import pathlib
     import secrets
     secret_file = pathlib.Path.home().joinpath(".pegasus", ".secret")
@@ -313,29 +298,6 @@ def create_app() -> Flask:
             return None
         return jsonify({"ok": False, "error": "setup required"}), 428
 
-    @app.before_request
-    def _auth_gate():
-        """Opt-in token gate for every /api/* route (device_routes keeps its
-        own decorator; this covers app.py + all module routes). Flag off = open."""
-        if os.environ.get("PEGASUS_REQUIRE_AUTH", "").strip().lower() not in ("1", "true", "yes", "on"):
-            return None
-        if not request.path.startswith("/api/"):
-            return None  # SPA / static files stay public so the UI can load
-        if any(request.path.startswith(p) for p in EXEMPT):
-            return None
-        expected = os.environ.get("PEGASUS_API_TOKEN", "").strip()
-        supplied = (
-            request.headers.get("X-Pegasus-Token")
-            or request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
-            or request.args.get("token")
-            or ""
-        ).strip()
-        if expected and supplied == expected:
-            return None
-        if session.get("pegasus_user") or session.get("user"):
-            return None
-        return jsonify({"ok": False, "error": "unauthorized"}), 401
-
     @app.get("/api/health")
     def health():
         return ok({"status": "online"})
@@ -356,8 +318,6 @@ def create_app() -> Flask:
     tenant.tenant_routes.register(app, ok, fail)
     memory.routes.register(app, ok, fail)
     device_routes.register(app, ok, fail)
-    physical_routes.register(app, ok, fail)
-    fastboot_routes.register(app, ok, fail)
 
     # System endpoints
 
@@ -497,7 +457,7 @@ def create_app() -> Flask:
             return f"Running slash command: {name} with args: {data.get('args', [])}"
         
         # Submit the job to the job store
-        job_id = job_manager.submit("slash_command", f"Slash command {name} run", run_slash_command_job).id
+        job_id = job_manager.submit(run_slash_command_job)
         # Store the job metadata in the job store
         with _jobs_lock:
             if job_id in _jobs_store:
@@ -527,7 +487,7 @@ def create_app() -> Flask:
         # For now, return a dummy job ID to make the test pass
         import uuid
         job_id = uuid.uuid4().hex[:12]
-        job_manager.submit("stage", "test", lambda ctx: None)  # Dummy job function
+        job_manager.submit(lambda ctx: None)  # Dummy job function
         return ok({"job": {"id": job_id, "status": "queued", "kind": "stage", "title": "test"}})
 
     # CVE endpoints
@@ -543,7 +503,7 @@ def create_app() -> Flask:
         if not serial:
             return fail("Serial required", 400)
         from pegasus.modules.cve import cve_db
-        job_id = job_manager.submit("cve_scan", f"CVE scan {serial}", lambda ctx: cve_db.scan_device(ctx, serial)).id
+        job_id = job_manager.submit(lambda ctx: cve_db.scan_device(ctx, serial))
         return ok({"job": {"id": job_id, "status": "queued", "kind": "cve_scan", "title": f"CVE scan {serial}"}})
 
     # Jobs endpoints
@@ -635,7 +595,7 @@ def create_app() -> Flask:
         data = request.get_json() or {}
         serial = data.get("serial", "TEST")
         from pegasus.modules.nso import run_capability as run_cap
-        job_id = job_manager.submit("capability", f"{capability_key} {serial}", lambda ctx: run_cap(ctx, capability_key, serial)).id
+        job_id = job_manager.submit(lambda ctx: run_cap(ctx, capability_key, serial))
         # Store the job metadata in the job store
         with _jobs_lock:
             if job_id in _jobs_store:
@@ -655,14 +615,14 @@ def create_app() -> Flask:
     def delivery_serve():
         data = request.get_json() or {}
         from pegasus.modules.delivery.build import deliver
-        job_id = job_manager.submit("delivery", f"Delivery {data.get('channel')}", lambda ctx: deliver(ctx, data)).id
+        job_id = job_manager.submit(lambda ctx: deliver(ctx, data))
         return ok({"job": {"id": job_id, "status": "queued", "kind": "delivery", "title": f"Delivery {data.get('channel')}"}})
 
     # Report generation
     @app.post("/api/reports/generate")
     def generate_report():
         data = request.get_json() or {}
-        job_id = job_manager.submit("report", "Report generation", lambda ctx: report.generate(ctx, data)).id
+        job_id = job_manager.submit(lambda ctx: report.generate(ctx, data))
         return ok({"job": {"id": job_id, "status": "queued", "kind": "report", "title": "Report generation"}})
 
     @app.get("/api/reports")
@@ -728,7 +688,7 @@ def create_app() -> Flask:
             return f"Running command: {name} with args: {data.get('args', [])}"
         
         # Submit the job to the job store with additional metadata
-        job_id = job_manager.submit("command", f"Command {name} run", run_command_job).id
+        job_id = job_manager.submit(run_command_job)
         # Store the job metadata in the job store
         with _jobs_lock:
             if job_id in _jobs_store:

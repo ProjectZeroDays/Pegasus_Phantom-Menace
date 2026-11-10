@@ -198,6 +198,157 @@ def _persist_path() -> None:
         pass
 
 
+PLATFORM_TOOLS_URLS = {
+    "windows": "https://dl.google.com/android/repository/platform-tools-latest-windows.zip",
+    "linux": "https://dl.google.com/android/repository/platform-tools-latest-linux.zip",
+    "darwin": "https://dl.google.com/android/repository/platform-tools-latest-darwin.zip",
+}
+
+
+def _install_adb() -> tuple[str, str]:
+    """Android Debug Bridge + fastboot (ship together in platform-tools)."""
+    for cand in ("adb", "adb.exe"):
+        if shutil.which(cand):
+            return ("present", f"{cand} already on PATH")
+    key = "windows" if _win() else ("darwin" if platform.system() == "Darwin" else "linux")
+    url = PLATFORM_TOOLS_URLS[key]
+    ext = "zip"
+    archive = TOOLS_DIR / f"platform-tools.{ext}"
+    try:
+        _download(url, archive)
+    except Exception as exc:  # noqa: BLE001
+        return ("error", f"platform-tools download failed: {exc}")
+    with zipfile.ZipFile(archive) as zf:
+        zf.extractall(TOOLS_DIR)
+    archive.unlink()
+    pt_dir = TOOLS_DIR / "platform-tools"
+    adb_bin = pt_dir / ("adb.exe" if _win() else "adb")
+    if not adb_bin.exists():
+        return ("error", "adb not found inside platform-tools archive")
+    if not _win():
+        _mark_executable(adb_bin)
+        fb_bin = pt_dir / "fastboot"
+        if fb_bin.exists():
+            _mark_executable(fb_bin)
+    return ("installed", str(adb_bin))
+
+
+def _install_fastboot() -> tuple[str, str]:
+    """fastboot ships alongside adb in platform-tools."""
+    for cand in ("fastboot", "fastboot.exe"):
+        if shutil.which(cand):
+            return ("present", f"{cand} already on PATH")
+    # fastboot comes with adb; trigger the adb installer which installs both.
+    return _install_adb()
+
+
+SCRCPY_URLS = {
+    "windows": "https://github.com/Genymobile/scrcpy/releases/download/v2.2/scrcpy-win64-v2.2.zip",
+    "linux": "https://github.com/Genymobile/scrcpy/releases/download/v2.2/scrcpy-linux-v2.2.tar.xz",
+    "darwin": "https://github.com/Genymobile/scrcpy/releases/download/v2.2/scrcpy-macos-v2.2.tar.gz",
+}
+
+
+def _install_scrcpy() -> tuple[str, str]:
+    """scrcpy screen mirroring from Genymobile releases."""
+    if shutil.which("scrcpy") or shutil.which("scrcpy.exe"):
+        return ("present", "scrcpy already on PATH")
+    key = "windows" if _win() else ("darwin" if platform.system() == "Darwin" else "linux")
+    url = SCRCPY_URLS[key]
+    if _win():
+        archive = TOOLS_DIR / "scrcpy.zip"
+        try:
+            _download(url, archive)
+        except Exception as exc:  # noqa: BLE001
+            return ("error", f"scrcpy download failed: {exc}")
+        with zipfile.ZipFile(archive) as zf:
+            zf.extractall(TOOLS_DIR / "scrcpy")
+        archive.unlink()
+        exe = TOOLS_DIR / "scrcpy" / "scrcpy.exe"
+        return ("installed", str(exe)) if exe.exists() else ("error", "scrcpy.exe not found in archive")
+    # Linux / macOS tarball
+    archive = TOOLS_DIR / ("scrcpy.tar.xz" if not _win() else "scrcpy.tar.gz")
+    try:
+        _download(url, archive)
+    except Exception as exc:  # noqa: BLE001
+        return ("error", f"scrcpy download failed: {exc}")
+    if archive.suffix == ".xz":
+        import lzma
+        with tarfile.open(archive, "r:xz") as tf:
+            tf.extractall(TOOLS_DIR / "scrcpy")
+    else:
+        with tarfile.open(archive, "r:gz") as tf:
+            tf.extractall(TOOLS_DIR / "scrcpy")
+    archive.unlink()
+    exe = TOOLS_DIR / "scrcpy" / "scrcpy"
+    if exe.exists():
+        _mark_executable(exe)
+        return ("installed", str(exe))
+    return ("error", "scrcpy binary not found in archive")
+
+
+def _install_nmap() -> tuple[str, str]:
+    """nmap network scanner."""
+    if shutil.which("nmap") or shutil.which("nmap.exe"):
+        return ("present", "nmap already on PATH")
+    if _win():
+        if _winget_available():
+            rc, out = _run(["winget", "install", "--id=Insecure.Nmap", "-e",
+                            "--accept-source-agreements", "--accept-package-agreements"], timeout=300)
+            if rc == 0:
+                _persist_path()
+                ensure_path()
+                return ("installed", "winget: nmap")
+            return ("error", out[-300:])
+        return ("error", "winget unavailable -- install nmap manually")
+    if shutil.which("apt-get"):
+        rc, out = _run(["sudo", "apt-get", "update"], timeout=300)
+        if rc == 0:
+            rc, out = _run(["sudo", "apt-get", "install", "-y", "nmap"], timeout=300)
+            if rc == 0:
+                ensure_path()
+                return ("installed", "apt: nmap")
+        return ("error", out[-300:])
+    if shutil.which("brew"):
+        rc, out = _run(["brew", "install", "nmap"], timeout=300)
+        if rc == 0:
+            ensure_path()
+            return ("installed", "brew: nmap")
+        return ("error", out[-300:])
+    return ("error", "no package manager available -- install nmap manually")
+
+
+def _install_msfvenom() -> tuple[str, str]:
+    """msfvenom ships with the Metasploit Framework."""
+    if shutil.which("msfvenom") or shutil.which("msfvenom.bat"):
+        return ("present", "msfvenom already on PATH")
+    if _win():
+        if _winget_available():
+            rc, out = _run(["winget", "install", "--id=Rapid7.Metasploit", "-e",
+                            "--accept-source-agreements", "--accept-package-agreements"], timeout=600)
+            if rc == 0:
+                _persist_path()
+                ensure_path()
+                return ("installed", "winget: metasploit-framework")
+            return ("error", out[-300:])
+        return ("error", "winget unavailable -- install metasploit-framework manually")
+    if shutil.which("apt-get"):
+        rc, out = _run(["sudo", "apt-get", "update"], timeout=300)
+        if rc == 0:
+            rc, out = _run(["sudo", "apt-get", "install", "-y", "metasploit-framework"], timeout=600)
+            if rc == 0:
+                ensure_path()
+                return ("installed", "apt: metasploit-framework")
+        return ("error", out[-300:])
+    if shutil.which("brew"):
+        rc, out = _run(["brew", "install", "metasploit"], timeout=600)
+        if rc == 0:
+            ensure_path()
+            return ("installed", "brew: metasploit")
+        return ("error", out[-300:])
+    return ("error", "no package manager available -- install metasploit-framework manually")
+
+
 def _install_ngrok() -> tuple[str, str]:
     if shutil.which("ngrok") or shutil.which("ngrok.exe"):
         return ("present", "ngrok already on PATH")
@@ -295,6 +446,11 @@ INSTALLERS: dict[str, Callable[[], tuple[str, str]]] = {
     "ngrok": _install_ngrok,
     "ssh": _install_ssh,
     "socat": _install_socat,
+    "adb": _install_adb,
+    "fastboot": _install_fastboot,
+    "scrcpy": _install_scrcpy,
+    "nmap": _install_nmap,
+    "msfvenom": _install_msfvenom,
 }
 
 
