@@ -47,6 +47,7 @@ import Settings from "@/pages/Settings";
 import Autonomous from "@/pages/Autonomous";
 import Setup from "@/pages/Setup";
 import Logs from "@/pages/Logs";
+import LogsDashboard from "@/pages/LogsDashboard";
 import AdminUsers from "@/pages/AdminUsers";
 import NotFound from "@/pages/NotFound";
 
@@ -95,6 +96,7 @@ export default function App() {
           <Route path="/autonomous" component={Autonomous} />
           <Route path="/setup" component={Setup} />
           <Route path="/logs" component={Logs} />
+          <Route path="/logs-dashboard" component={LogsDashboard} />
           <Route path="/admin-users" component={AdminUsers} />
           <Route path="/social" component={SocialMedia} />
           <Route path="/relay" component={RelayDashboard} />

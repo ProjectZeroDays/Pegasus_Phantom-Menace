@@ -250,6 +250,7 @@ from pegasus.modules.social_media import social_routes as social_media_routes
 from pegasus.modules.social_engineering import se_routes
 from pegasus.modules.webhook import webhook_routes
 from pegasus.modules.relay import relay_routes
+from pegasus.ui.web.backend import log_routes
 
 
 # ---------------------------------------------------------------------------
@@ -370,21 +371,8 @@ def create_app() -> Flask:
     def system_listeners():
         return ok({"listeners": listener_status()})
 
-    @app.route("/api/logs", methods=["GET"])
-    def api_logs():
-        import json, time
-        from pathlib import Path
-        log_path = Path("C:/Projects/Pegasus_Phantom-Menace/log/events.jsonl")
-        logs = []
-        if log_path.exists():
-            for line in log_path.read_text(encoding="utf-8", errors="ignore").splitlines():
-                if line.strip():
-                    try: logs.append(json.loads(line))
-                    except: pass
-        by_cat = {}
-        for entry in logs: by_cat.setdefault(entry.get("event","unknown"),[]).append(entry.get("ts",""))
-        from flask import jsonify
-        return jsonify({"main":len(logs),"categories":{k:len(v) for k,v in by_cat.items()},"dashboard":by_cat})
+    # Log routes (log_routes): /api/logs, /api/logs/dashboard, /api/logs/<id> (+download/delete)
+    log_routes.register(app, ok, fail)
 
     # Plugins endpoints
     @app.get("/api/plugins")

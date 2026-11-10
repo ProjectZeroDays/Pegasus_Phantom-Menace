@@ -8,7 +8,10 @@
  */
 !macro customInstall
   ; Register auto-start for the current user (HKCU Run key).
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "PegasusPhantomMenace" "$INSTDIR\${APP_FILENAME_EXE}"
+  ; electron-builder 24.x exposes the executable name as
+  ; ${APP_EXECUTABLE_FILENAME}; ${APP_FILENAME_EXE} does not exist and
+  ; makensis treats the unknown variable as a fatal warning.
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "PegasusPhantomMenace" "$INSTDIR\${APP_EXECUTABLE_FILENAME}"
   ; Record for uninstall.
   WriteRegStr HKCU "Software\${APP_FILENAME}" "InstallDir" "$INSTDIR"
 !macroend
@@ -20,7 +23,11 @@
   nsExec::ExecToLog 'schtasks /delete /tn "PegasusPhantomMenace" /f'
 !macroend
 
-!macro customInstallMode
-  ; Ask the user whether to install for all users or just this one.
-  StrCpy $INSTALL_MODE_PER_ALL_USERS "0"
-!macroend
+; NOTE: do NOT define customInstallMode here. electron-builder's assisted
+; installer (used when oneClick=false) defines that macro itself and expects it
+; to set "$(user_var: output)"; overriding it with a no-argument macro makes
+; makensis abort with:
+;   Error in macro customInstallMode on macroline 2
+;   Usage: StrCpy $(user_var: output) str [maxlen] [startoffset]
+; Install mode is already controlled from package.json
+; ("oneClick": false, "perMachine": false).

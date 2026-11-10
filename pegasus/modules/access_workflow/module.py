@@ -33,6 +33,15 @@ from pegasus.modules.base import BaseModule
 from pegasus.core.plugin import CommandInfo, HookType, PluginMetadata
 from pegasus.core.config import get_settings
 
+# Windows consoles (and redirected/piped stdio) can hand colorama a dead
+# handle, which makes every subsequent log record raise
+# "OSError: [WinError 6] The handle is invalid" from the logging emit path.
+# The shared guard patches colorama's AnsiToWin32.write and logging's
+# StreamHandler.emit so logging never takes the process down.
+from pegasus.core.console_guard import install as _install_console_guard
+
+_install_console_guard()
+
 
 @dataclass
 class AccessVector:
@@ -448,36 +457,84 @@ class AccessWorkflowModule(BaseModule):
         return WorkflowResult(step=vector.name, success=False, output="Unknown vector")
 
     async def _exploit_adb(self, vector: AccessVector) -> WorkflowResult:
-        result = subprocess.run(["adb", "devices"], capture_output=True, text=True, timeout=15)
+        if not shutil.which("adb"):
+            return WorkflowResult(step="ADB", success=False, output="adb not found on PATH")
+        try:
+            result = subprocess.run(["adb", "devices"], capture_output=True, text=True, timeout=15)
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as exc:
+            return WorkflowResult(step="ADB", success=False, output=f"adb devices unavailable: {exc}")
         if "device" in result.stdout and "offline" not in result.stdout:
             vector.exploited = True
             vector.root_access = False
             # Try to get device info
-            serial_result = subprocess.run(["adb", "get-serialno"], capture_output=True, text=True)
-            vector.device_serial = serial_result.stdout.strip()
-            api_result = subprocess.run(["adb", "shell", "getprop", "ro.build.version.sdk"], capture_output=True, text=True)
-            if api_result.stdout.strip().isdigit():
-                vector.api_level = int(api_result.stdout.strip())
+            try:
+                serial_result = subprocess.run(
+                    ["adb", "get-serialno"], capture_output=True, text=True, timeout=10
+                )
+                vector.device_serial = serial_result.stdout.strip()
+            except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+                vector.device_serial = ""
+            try:
+                api_result = subprocess.run(
+                    ["adb", "shell", "getprop", "ro.build.version.sdk"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if api_result.stdout.strip().isdigit():
+                    vector.api_level = int(api_result.stdout.strip())
+            except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+                pass
             return WorkflowResult(step="ADB", success=True, output=result.stdout, metadata={"serial": vector.device_serial})
         return WorkflowResult(step="ADB", success=False, output="No ADB devices found")
 
     async def _exploit_fastboot(self, vector: AccessVector) -> WorkflowResult:
-        result = subprocess.run(["fastboot", "devices"], capture_output=True, text=True, timeout=15)
+        if not shutil.which("fastboot"):
+            return WorkflowResult(step="Fastboot", success=False, output="fastboot not found on PATH")
+        try:
+            result = subprocess.run(["fastboot", "devices"], capture_output=True, text=True, timeout=15)
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as exc:
+            return WorkflowResult(step="Fastboot", success=False, output=f"fastboot devices unavailable: {exc}")
         if len(result.stdout.strip()) > 0:
             vector.exploited = True
             return WorkflowResult(step="Fastboot", success=True, output=result.stdout)
         return WorkflowResult(step="Fastboot", success=False, output="No fastboot devices found")
 
     async def _exploit_qr(self, vector: AccessVector) -> WorkflowResult:
-        # QR pairing requires user interaction - just check if pairing service is available
-        result = subprocess.run(["adb", "pair", "--help"], capture_output=True, text=True, timeout=5)
+        # QR pairing requires user interaction - just check if pairing service is available.
+        # `adb pair --help` blocks on some adb builds (and raises TimeoutExpired) and the
+        # binary may be missing entirely, so probe defensively instead of letting the
+        # exception escape and abort the whole workflow.
+        if not shutil.which("adb"):
+            return WorkflowResult(step="QR Pairing", success=False, output="adb not found on PATH")
+        try:
+            result = subprocess.run(
+                ["adb", "pair", "--help"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+                stdin=subprocess.DEVNULL,
+            )
+        except subprocess.TimeoutExpired:
+            return WorkflowResult(
+                step="QR Pairing",
+                success=False,
+                output="adb pair did not respond within 5s (pairing service unavailable)",
+            )
+        except (FileNotFoundError, OSError) as exc:
+            return WorkflowResult(step="QR Pairing", success=False, output=f"adb pair unavailable: {exc}")
         if result.returncode == 0:
             vector.exploited = True
             return WorkflowResult(step="QR Pairing", success=True, output="Pairing service available")
         return WorkflowResult(step="QR Pairing", success=False, output="QR pairing not available")
 
     async def _exploit_usb(self, vector: AccessVector) -> WorkflowResult:
-        result = subprocess.run(["adb", "devices", "-l"], capture_output=True, text=True, timeout=15)
+        if not shutil.which("adb"):
+            return WorkflowResult(step="USB", success=False, output="adb not found on PATH")
+        try:
+            result = subprocess.run(["adb", "devices", "-l"], capture_output=True, text=True, timeout=15)
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as exc:
+            return WorkflowResult(step="USB", success=False, output=f"adb devices unavailable: {exc}")
         if len(result.stdout.strip().splitlines()) > 1:
             vector.exploited = True
             return WorkflowResult(step="USB", success=True, output=result.stdout)

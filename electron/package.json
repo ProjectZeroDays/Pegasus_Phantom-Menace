@@ -44,7 +44,21 @@
       {
         "from": "../pegasus",
         "to": "pegasus",
-        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"]
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/*.pyc",
+          "!**/.pytest_cache",
+          "!**/.pytest_cache/**",
+          "!**/.ruff_cache",
+          "!**/.ruff_cache/**",
+          "!**/.mypy_cache",
+          "!**/.mypy_cache/**",
+          "!**/node_modules",
+          "!**/node_modules/**",
+          "!**/.git",
+          "!**/.git/**"
+        ]
       },
       {
         "from": "../requirements.txt",

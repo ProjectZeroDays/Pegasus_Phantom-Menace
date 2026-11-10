@@ -24,20 +24,9 @@ from pegasus.modules.base import BaseModule
 from pegasus.core.plugin import HookType
 from pegasus.core.config import get_settings
 
-try:
-    import logging, colorama.ansitowin32 as _cw
-    _orig = _cw.write
-    def _safe(s, *a, **k):
-        try: return _orig(s, *a, **k)
-        except OSError: return len(s)
-    _cw.write = _safe
-    _oe = logging.StreamHandler.emit
-    def _se(self, record):
-        try: return _oe(self, record)
-        except OSError: pass
-    logging.StreamHandler.emit = _se
-except Exception:
-    pass
+from pegasus.core.console_guard import install as _install_console_guard
+
+_install_console_guard()
 
 
 class AnonymityModule(BaseModule):
