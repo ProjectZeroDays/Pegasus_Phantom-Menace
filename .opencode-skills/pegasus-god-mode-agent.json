@@ -5,7 +5,7 @@
   "author": "ProjectZeroDays (All-Knowing Deity)",
   "category": "system",
   "trigger": "god-mode",
-  "entry_point": "pegasus-god-mode-agent.json",
+  "entry_point": ".opencode-skills/pegasus-god-mode-agent.json",
   "commands": 1,
   "workflows": [
     ".opencode-skills/workflows/god-mode-activate.json",

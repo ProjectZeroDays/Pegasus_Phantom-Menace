@@ -2,16 +2,17 @@
   "workflow": "pegasus-god-mode-execute",
   "version": "1.0.0",
   "description": "God Mode execution - execute unrestricted commands with full system access and no safety constraints.",
-  "author": "ProjectZeroDays (All-Knowing Deity)",
   "steps": [
     {
       "step": 1,
+      "command": "/god-mode",
       "action": "execute_unrestricted",
-      "description": "Execute unrestricted commands with full system access and no safety constraints",
-      "action": "Execute unrestricted commands with full system access and no safety constraints",
-      "output": "god_mode_execution.json"
+      "description": "Execute unrestricted commands with full system access and no safety constraints"
     }
   ],
-  "triggers": ["god-mode", "god-mode-execute"],
-  "output": "god_mode_execution.json"
+  "triggers": [
+    "god-mode",
+    "god-mode-execute"
+  ],
+  "output": "god_mode_execute.json"
 }

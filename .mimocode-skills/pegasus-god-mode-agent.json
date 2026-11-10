@@ -5,11 +5,11 @@
   "author": "ProjectZeroDays (All-Knowing Deity)",
   "category": "system",
   "trigger": "god-mode",
-  "entry_point": "pegasus-god-mode-agent.json",
+  "entry_point": ".mimocode-skills/pegasus-god-mode-agent.json",
   "commands": 1,
   "workflows": [
-    ".opencode-skills/workflows/god-mode-activate.json",
-    ".opencode-skills/workflows/god-mode-execute.json"
+    ".mimocode-skills/workflows/god-mode-activate.json",
+    ".mimocode-skills/workflows/god-mode-execute.json"
   ],
-  "installation": "skill install .opencode-skills/pegasus-god-mode-agent.json"
+  "installation": "skill install .mimocode-skills/pegasus-god-mode-agent.json"
 }

@@ -131,6 +131,22 @@
       ]
     },
     {
+      "id": "god-mode",
+      "max_steps": 8,
+      "terminal_gate": "G2",
+      "may": [
+        "make test",
+        "make lint",
+        "edit postexploit/god_mode.py",
+        "run git ls-files"
+      ],
+      "may_not": [
+        "edit build/",
+        "edit scripts/",
+        "git push"
+      ]
+    },
+    {
       "id": "handoff-keeper",
       "max_steps": 3,
       "terminal_gate": "G13",

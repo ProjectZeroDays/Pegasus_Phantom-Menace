@@ -5,8 +5,10 @@ then the real pass. It pauses between them for a keypress unless CONFIRM=1.
 DRY=1 stops after the preview and touches nothing.
 
 Deletion is tracked-aware: files git already knows are removed with git rm so the
-deletion is staged, untracked ones are unlinked. Anything matching .keep_scratch
-(one name or glob per line) survives and is reported.
+deletion is staged, untracked ones are unlinked. Three things survive and are
+reported: the PROTECTED set, anything matching .keep_scratch, and any tracked
+file whose name carries no scratch prefix. AUDIT=1 prints a verdict per file
+and stops without touching anything.
 
 The handoff block goes into PLAN.md first so scripts/handoff.py can regenerate
 docs/HANDOFF.md from it, and every gate runs before a commit is created. Any gate
@@ -37,6 +39,30 @@ MARK = "## 61. HANDOFF"
 KEEP_FILE = pathlib.Path(".keep_scratch")
 ALWAYS_KEEP = {"push_all.py", "seal.py", "Q9.py"}
 
+# Real root files. Tracked files are already covered by the prefix test
+# below, but this set is the hard floor and the place to register anything
+# new that must never go. A pattern alone is not enough: p*.txt and
+# verify*.py look harmless right up until requirements.txt and verify.py
+# are gone.
+PROTECTED = {
+    "push_all.py", "seal.py", "Q9.py", "setup.py", "bootstrap.py",
+    "requirements.txt", "start_server.py", "version.txt", "Makefile",
+    "LICENSE", "README.md", ".gitignore", ".env.example", "pyproject.toml",
+    "pytest.ini", "tox.ini", "conftest.py",
+}
+
+# A tracked file only goes if its name starts with one of these. Untracked
+# files are still judged by pattern, which is the safe asymmetry: scratch is
+# always untracked, and a real file is normally tracked by the time a sweep
+# reaches it.
+SCRATCH_PREFIXES = ("fix_", "diag_", "apply_", "patch_", "inspect_", "loop",
+                    "verify_", "q11_", "regions", "publish", "amend_",
+                    "cleanup_")
+
+
+def has_scratch_prefix(name):
+    return name.startswith(SCRATCH_PREFIXES)
+
 PATTERNS = ("fix_*.py", "fix_*.py.txt", "diag_*.py", "diag_*.py.txt",
             "apply_*.py", "apply_*.py.txt", "patch_*.py", "patch_*.py.txt",
             "inspect_*.py", "publish.py", "loop*.py", "loop*.log",
@@ -44,6 +70,7 @@ PATTERNS = ("fix_*.py", "fix_*.py.txt", "diag_*.py", "diag_*.py.txt",
 
 DRY = os.environ.get("DRY") == "1"
 CONFIRM = os.environ.get("CONFIRM") == "1"
+AUDIT = os.environ.get("AUDIT") == "1"
 
 
 def run(cmd):
@@ -73,6 +100,17 @@ def matches(name, keep):
                if any(ch in k for ch in "*?["))
 
 
+def classify(name, rel, keep, tracked):
+    """Keep reason, or None when the file may be deleted."""
+    if name in PROTECTED or rel in PROTECTED:
+        return "protected"
+    if matches(name, keep) or rel in keep:
+        return "listed"
+    if tracked and not has_scratch_prefix(name):
+        return "tracked-real"
+    return None
+
+
 def collect():
     seen, out = set(), []
     for pattern in PATTERNS:
@@ -95,11 +133,12 @@ def cleanup(dry):
 
     for p in collect():
         rel = p.as_posix()
-        if matches(p.name, keep) or rel in keep:
-            print("  keep        %-28s (listed)" % p.name)
+        is_tracked = rel in tracked
+        reason = classify(p.name, rel, keep, is_tracked)
+        if reason:
+            print("  keep        %-28s (%s)" % (p.name, reason))
             bump("kept")
             continue
-        is_tracked = rel in tracked
         if dry:
             print("  %-11s %-28s %s" % ("would-git-rm" if is_tracked else "would-rm",
                                         p.name, "TRACKED" if is_tracked else "new"))
@@ -147,6 +186,15 @@ def cleanup(dry):
 
 
 # ---------------- 0. cleanup: preview then apply ----------------
+if AUDIT:
+    _t, _k = tracked_set(), keep_set()
+    print("=== victim audit ===")
+    for _p in collect():
+        _r = classify(_p.name, _p.as_posix(), _k, _p.as_posix() in _t)
+        print("  %-14s %s" % (_r or "DELETE", _p.name))
+    print("keep list: %d   protected: %d" % (len(_k), len(PROTECTED)))
+    sys.exit(0)
+
 print("=== cleanup preview ===")
 cleanup(dry=True)
 
