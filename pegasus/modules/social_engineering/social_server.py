@@ -169,12 +169,12 @@ class SocialEngineeringServer:
             campaign_id = f"campaign_{datetime.now().timestamp()}"
             campaign = PhishingCampaign(
                 campaign_id=campaign_id,
-                name=campaign_data.get("name", ""New Campaign"),
+                name=campaign_data.get("name", "New Campaign"),
                 target_audience=campaign_data.get("target_audience", "general"),
                 attack_vector=campaign_data.get("attack_vector", "email"),
-                subject_template=campaign_data.get("subject_template", """"),
-                body_template=campaign_data.get("body_template", """"),
-                landing_url=campaign_data.get("landing_url", """),
+                subject_template=campaign_data.get("subject_template", ""),
+                body_template=campaign_data.get("body_template", ""),
+                landing_url=campaign_data.get("landing_url", ""),
                 success_criteria=campaign_data.get("success_criteria", {}),
                 duration=campaign_data.get("duration", 24),
                 targets=campaign_data.get("targets", []),
@@ -374,7 +374,7 @@ class SocialEngineeringServer:
             deception_id = f"deception_{datetime.now().timestamp()}"
             deception = DeceptionFramework(
                 framework_id=deception_id,
-                name=deception_data.get("name", ""New Deception Framework"),
+                name=deception_data.get("name", "New Deception Framework"),
                 description=deception_data.get("description", ""),
                 scenario_type=deception_data.get("scenario_type", "scenario_based"),
                 target_profile=deception_data.get("target_profile", {}),
@@ -460,7 +460,7 @@ class SocialEngineeringServer:
             module_id = f"module_{datetime.now().timestamp()}"
             training_module = SecurityTrainingModule(
                 module_id=module_id,
-                title=training_data.get("title", ""New Training Module"),
+                title=training_data.get("title", "New Training Module"),
                 description=training_data.get("description", ""),
                 content=training_data.get("content", ""),
                 interactive=training_data.get("interactive", False),

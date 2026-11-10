@@ -612,6 +612,9 @@ class PluginManager:
         "c2_server",
         "anonymity",
         "export",
+        "ml_engine",
+        "blockchain",
+        "quantum",
     )
 
     def load_builtin_plugins(self) -> List[Plugin]:

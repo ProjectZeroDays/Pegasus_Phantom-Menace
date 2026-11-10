@@ -13,7 +13,7 @@
 from .relay_server import RelayServer, RelayConfig
 from .security import SecurityGateway
 from .monitoring import MonitoringSystem
-from .loadbalancer import LoadBalancer, relay_routes
+from .loadbalancer import LoadBalancer
 
 __all__ = [
     "RelayServer",

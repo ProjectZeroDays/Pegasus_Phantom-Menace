@@ -17,6 +17,13 @@ def register(app, ok, fail):
         _ACTIVE["current"] = t
         return ok({"url": url})
 
+    @app.get("/api/relay/status")
+    def relay_status():
+        t = _ACTIVE.get("current")
+        if t is None:
+            return ok({"active": False, "tunnel": None})
+        return ok({"active": True, "tunnel": getattr(t, "url", None), "port": getattr(t, "port", None)})
+
     @app.delete("/api/relay")
     def relay_stop():
         t = _ACTIVE.pop("current", None)

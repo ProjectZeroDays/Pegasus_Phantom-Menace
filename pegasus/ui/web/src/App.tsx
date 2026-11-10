@@ -4,6 +4,12 @@ import { AppShell } from "@/components/layout/AppShell";
 
 import MissionControl from "@/pages/MissionControl";
 import Devices from "@/pages/Devices";
+import SocialMedia from "@/pages/SocialMedia";
+import RelayDashboard from "@/pages/RelayDashboard";
+import Pwa from "@/pages/Pwa";
+import Tenant from "@/pages/Tenant";
+import Webhooks from "@/pages/Webhooks";
+import SocialEngineering from "@/pages/SocialEngineering";
 import Monitoring from "@/pages/Monitoring";
 import AccessWorkflow from "@/pages/AccessWorkflow";
 import WorkflowEngine from "@/pages/WorkflowEngine";
@@ -88,6 +94,12 @@ export default function App() {
           <Route path="/autonomous" component={Autonomous} />
           <Route path="/setup" component={Setup} />
           <Route path="/logs" component={Logs} />
+          <Route path="/social" component={SocialMedia} />
+          <Route path="/relay" component={RelayDashboard} />
+          <Route path="/pwa" component={Pwa} />
+          <Route path="/tenants" component={Tenant} />
+          <Route path="/webhooks" component={Webhooks} />
+          <Route path="/social-engineering" component={SocialEngineering} />
           <Route component={NotFound} />
         </Switch>
       </AppShell>

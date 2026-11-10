@@ -241,11 +241,15 @@ from pegasus.ui.web.backend.jobs import job_manager
 from pegasus.modules import (
     ai, alerts, antiforensics, auth, autonomous, c2,
     crypto, delivery, exploits, memory, oauth, ota, parity,
-    relay, report, setup_routes, tenant,
+    report, setup_routes, tenant,
 )
 
 # Social media intelligence module
 from pegasus.modules.social_media import SocialMediaAnalyzer
+from pegasus.modules.social_media import social_routes as social_media_routes
+from pegasus.modules.social_engineering import se_routes
+from pegasus.modules.webhook import webhook_routes
+from pegasus.modules.relay import relay_routes
 
 
 # ---------------------------------------------------------------------------
@@ -307,12 +311,14 @@ def create_app() -> Flask:
     ai.routes.register(app, ok, fail, job_manager)
     ai.model_routes.register(app, ok, fail, job_manager)
     autonomous.routes.register(app, ok, fail)
-    # alerts.webhooks doesn't have a register method
+    webhook_routes.register(app, ok, fail)
+    social_media_routes.register(app, ok, fail)
+    se_routes.register(app, ok, fail)
     oauth.oauth_routes.register(app, ok, fail)
     delivery.landing.register(app, ok, fail)
     delivery.carrier_routes.register(app, ok, fail)
     c2.beacon_routes.register(app, ok, fail)
-    relay.relay_routes.register(app, ok, fail)
+    relay_routes.register(app, ok, fail)
     report.report_routes.register(app, ok, fail)
     parity.parity_routes.register(app, ok, fail)
     tenant.tenant_routes.register(app, ok, fail)

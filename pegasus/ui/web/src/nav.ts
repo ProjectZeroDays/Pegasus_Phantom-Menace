@@ -12,6 +12,7 @@ import {
   Crosshair,
   Database,
   FileText,
+  Fish,
   Gauge,
   Globe,
   HardDrive,
@@ -19,6 +20,7 @@ import {
   KeyRound,
   Layers,
   ListChecks,
+  MonitorSmartphone,
   Lock,
   MapPin,
   MessageSquare,
@@ -32,6 +34,7 @@ import {
   Search,
   Server,
   Settings,
+  Share2,
   Shield,
   ShieldAlert,
   Smartphone,
@@ -40,6 +43,7 @@ import {
   Users,
   Wifi,
   Wrench,
+  Webhook,
   Zap,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
@@ -122,6 +126,18 @@ export const NAV_GROUPS: NavGroup[] = [
       { path: "/network-dashboard", label: "Network Dashboard", icon: Globe },
       { path: "/tools", label: "Toolbox", icon: Wrench },
       { path: "/skills", label: "Skills Catalog", icon: Sparkles },
+    ],
+  },
+  {
+    id: "enterprise",
+    label: "Enterprise",
+    items: [
+      { path: "/social", label: "Social Media Intel", icon: Share2 },
+      { path: "/relay", label: "Cloud Relay", icon: Server },
+      { path: "/pwa", label: "App / PWA", icon: MonitorSmartphone },
+      { path: "/tenants", label: "Multi-Tenant", icon: Users },
+      { path: "/webhooks", label: "Webhooks", icon: Webhook },
+      { path: "/social-engineering", label: "Awareness Training", icon: Fish },
     ],
   },
   {
