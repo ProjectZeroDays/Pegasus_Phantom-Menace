@@ -236,7 +236,7 @@ def report_job(job_id: str, kind: str, title: str) -> None:
 # Imports from existing modules
 # ---------------------------------------------------------------------------
 
-from flask import Flask
+from flask import Flask, send_file, send_from_directory
 from pegasus.ui.web.backend.jobs import job_manager
 from pegasus.modules import (
     ai, alerts, antiforensics, auth, autonomous, c2,
