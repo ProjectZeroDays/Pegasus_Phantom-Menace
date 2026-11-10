@@ -1,5 +1,5 @@
 """Auth routes."""
-from flask import request
+from flask import jsonify, request
 
 from . import operator
 

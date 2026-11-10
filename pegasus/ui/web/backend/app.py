@@ -253,6 +253,17 @@ from pegasus.modules.relay import relay_routes
 from pegasus.ui.web.backend import log_routes
 from pegasus.ui.web.backend import agent_routes
 from pegasus.ui.web.backend import metasploit_routes
+from pegasus.ui.web.backend import session_routes
+from pegasus.ui.web.backend import profile_routes
+from pegasus.ui.web.backend import wallet_routes
+from pegasus.ui.web.backend import vault_routes
+from pegasus.ui.web.backend import knowledge_routes
+from pegasus.ui.web.backend import chat_routes
+from pegasus.ui.web.backend import privacy_routes
+from pegasus.ui.web.backend import tunnel_routes
+from pegasus.ui.web.backend import daemon_routes
+from pegasus.ui.web.backend import cve_routes
+from pegasus.ui.web.backend import kyc_routes
 
 
 # ---------------------------------------------------------------------------
@@ -291,8 +302,13 @@ def create_app() -> Flask:
         os.environ.get("PEGASUS_SECRET") or secret_file.read_text(encoding="utf-8").strip()
     )
 
-    ok = lambda data, code=200: (jsonify({"ok": True, "data": data}), code)
-    fail = lambda err, code=400: (jsonify({"ok": False, "error": err}), code)
+    # These shadow the module-level helpers so every route module receives the
+    # same contract: an optional payload, an optional status code and any
+    # number of extra top-level fields (e.g. a plan for a confirm-gated call).
+    ok = lambda data=None, code=200, **extra: (
+        jsonify({"ok": True, "data": data, **extra}), code)
+    fail = lambda err, code=400, **extra: (
+        jsonify({"ok": False, "error": err, **extra}), code)
 
     ai.load_schemas()
 
@@ -327,6 +343,17 @@ def create_app() -> Flask:
     tenant.tenant_routes.register(app, ok, fail)
     memory.routes.register(app, ok, fail)
     device_routes.register(app, ok, fail)
+    session_routes.register(app, ok, fail)
+    profile_routes.register(app, ok, fail)
+    wallet_routes.register(app, ok, fail)
+    vault_routes.register(app, ok, fail)
+    knowledge_routes.register(app, ok, fail)
+    chat_routes.register(app, ok, fail)
+    privacy_routes.register(app, ok, fail)
+    tunnel_routes.register(app, ok, fail)
+    daemon_routes.register(app, ok, fail)
+    cve_routes.register(app, ok, fail)
+    kyc_routes.register(app, ok, fail)
 
     # System endpoints
 
