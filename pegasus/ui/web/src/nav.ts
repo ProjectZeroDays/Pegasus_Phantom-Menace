@@ -66,6 +66,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { path: "/autonomous", label: "Autonomous", icon: Bot },
       { path: "/devices", label: "Devices", icon: Smartphone },
       { path: "/monitoring", label: "Monitoring", icon: Activity },
+      { path: "/physical", label: "Physical Ops", icon: Monitor },
+      { path: "/fastboot", label: "Fastboot & FRP", icon: Wrench },
     ],
   },
   {

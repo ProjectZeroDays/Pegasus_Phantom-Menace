@@ -381,19 +381,43 @@ class AccessWorkflowModule(BaseModule):
 
         return vectors
 
+    def _adb_state(self) -> str:
+        """Return 'device', 'unauthorized', 'offline' or 'none'."""
+        try:
+            result = subprocess.run(["adb", "devices"], capture_output=True,
+                                    text=True, timeout=15)
+        except subprocess.TimeoutExpired:
+            return "none"
+        states = []
+        for line in result.stdout.strip().splitlines()[1:]:
+            parts = line.split()
+            if len(parts) >= 2 and not parts[0].startswith("*"):
+                states.append(parts[1])
+        if "device" in states:
+            return "device"
+        if "unauthorized" in states:
+            return "unauthorized"
+        return "offline" if states else "none"
+
     def _check_adb(self) -> bool:
-        result = subprocess.run(["adb", "devices"], capture_output=True, text=True, timeout=10)
-        lines = result.stdout.strip().splitlines()
-        return len(lines) > 1 and "device" in lines[-1]
+        return self._adb_state() == "device"
 
     def _check_fastboot(self) -> bool:
-        result = subprocess.run(["fastboot", "devices"], capture_output=True, text=True, timeout=10)
-        return len(result.stdout.strip()) > 0
+        try:
+            result = subprocess.run(["fastboot", "devices"], capture_output=True,
+                                    text=True, timeout=15)
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return False
+        return any(line.strip() for line in result.stdout.splitlines())
 
     def _check_qr_pairing(self) -> bool:
         # QR pairing requires the device to be in pairing mode
         # Check if adb can pair (indicates wireless debugging is available)
-        result = subprocess.run(["adb", "pair", "--help"], capture_output=True, text=True, timeout=5)
+        try:
+            result = subprocess.run(["adb", "pair", "--help"], capture_output=True,
+                                    text=True, timeout=20)
+        except subprocess.TimeoutExpired:
+            result = subprocess.CompletedProcess([], 1, "", "")
         return result.returncode == 0
 
     def _check_usb(self) -> bool:

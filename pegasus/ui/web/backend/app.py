@@ -48,6 +48,8 @@ try:
 except Exception: pass
 
 from . import telemetry
+from . import physical_routes
+from . import fastboot_routes
 from flask import jsonify, request, session, send_file, send_from_directory, Response
 from .jobs import JobContext, _jsonable, jobs, patch_prompts, restore_prompts
 from .tools import (
@@ -268,8 +270,21 @@ start_time = time.time()
 
 from pegasus.ui.web.backend import device_routes
 
+def _quiet_werkzeug() -> None:
+    """Log requests to the real stdout so a replaced handle cannot break emit."""
+    logger = logging.getLogger("werkzeug")
+    logger.disabled = False
+    logger.handlers = []
+    handler = logging.StreamHandler(sys.__stdout__)
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    logger.addHandler(handler)
+    logger.propagate = False
+
+
 def create_app() -> Flask:
     app = Flask(__name__)
+    logging.raiseExceptions = False
+    _quiet_werkzeug()
     import pathlib
     import secrets
     secret_file = pathlib.Path.home().joinpath(".pegasus", ".secret")
@@ -341,6 +356,8 @@ def create_app() -> Flask:
     tenant.tenant_routes.register(app, ok, fail)
     memory.routes.register(app, ok, fail)
     device_routes.register(app, ok, fail)
+    physical_routes.register(app, ok, fail)
+    fastboot_routes.register(app, ok, fail)
 
     # System endpoints
 
