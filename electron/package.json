@@ -61,6 +61,14 @@
         ]
       },
       {
+        "from": "../start_server.py",
+        "to": "start_server.py"
+      },
+      {
+        "from": "../run_server.py",
+        "to": "run_server.py"
+      },
+      {
         "from": "../requirements.txt",
         "to": "requirements.txt"
       }

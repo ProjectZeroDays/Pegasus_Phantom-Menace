@@ -28,14 +28,42 @@ export default function Settings() {
   const [downloading, setDownloading] = useState(false);
   const [mimicodeEnabled, setMimicodeEnabled] = useState(false);
 
-  const agentAvail = useApi<{ opencode: boolean; mimicode: boolean }>("/agents/available").data;
+  const agentAvail = useApi<{
+    opencode: boolean;
+    mimicode: boolean;
+    configPath: string;
+    providers: { id: string; name: string; baseUrl: string; hasKey: boolean; models: { id: string; name: string }[] }[];
+    providerCount: number;
+    providersWithKey: number;
+  }>("/agents/available", { interval: 30000 }).data;
   const [agentCfg, setAgentCfg] = useState<{ agent: string | null; provider: string | null; model: string | null; skills: string }>({ agent: null, provider: null, model: null, skills: ".openfable-skills" });
+  const [autoMsg, setAutoMsg] = useState<string | null>(null);
+  const [autoBusy, setAutoBusy] = useState(false);
   useEffect(() => {
     api.get<{ agent: string | null; provider: string | null; model: string | null; skills: string }>("/agents/config")
       .then((d) => setAgentCfg({ agent: d.agent, provider: d.provider, model: d.model, skills: d.skills ?? ".openfable-skills" }))
       .catch(() => undefined);
   }, []);
   const saveAgentCfg = () => api.post("/agents/config", agentCfg);
+  const autoConfigure = async () => {
+    setAutoBusy(true);
+    setAutoMsg(null);
+    try {
+      const r = await api.post<{ provider: string; providerName: string; model: string; envFile: string }>("/agents/autoconfigure");
+      setAutoMsg(`configured ${r.providerName} · ${r.model} → ${r.envFile}`);
+      setAgentCfg((c) => ({ ...c, provider: r.provider, model: r.model }));
+    } catch (e: any) {
+      setAutoMsg(e?.message ?? "auto-configure failed");
+    } finally {
+      setAutoBusy(false);
+    }
+  };
+
+  // Metasploit RPC - online only when the RPC login actually succeeds
+  const msf = useApi<{ configured: boolean; connected: boolean; host: string; port: number; detail: string; passwordSet: boolean }>(
+    "/metasploit/status",
+    { interval: 15000 },
+  );
 
   // Telegram remote control
   const tg = useApi<{ configured: boolean; running: boolean; bot: string | null; chatId: string | null }>("/telegram/status", { interval: 20000 });
@@ -166,22 +194,61 @@ export default function Settings() {
               <option value="opencode">OpenCode</option>
               <option value="mimocode">Mimicode (OpenFable jailbreak)</option>
             </select>
-            <label className="mono tiny">Provider override</label>
-            <select className="mono tiny" value={agentCfg.provider ?? ""} onChange={e => setAgentCfg({ ...agentCfg, provider: e.target.value })} style={{ padding: 6, width: "100%" }}>
+            <label className="mono tiny">Provider ({agentAvail?.providerCount ?? 0} from {agentAvail?.configPath ? "opencode.json" : "no opencode config"})</label>
+            <select className="mono tiny" value={agentCfg.provider ?? ""} onChange={e => setAgentCfg({ ...agentCfg, provider: e.target.value, model: "" })} style={{ padding: 6, width: "100%" }}>
               <option value="">—</option>
-              <option value="openrouter">OpenRouter</option>
-              <option value="openai">OpenAI</option>
-              <option value="anthropic">Anthropic</option>
-              <option value="venice">Venice</option>
-              <option value="local">Local model</option>
+              {(agentAvail?.providers ?? []).map((prov) => (
+                <option key={prov.id} value={prov.id}>
+                  {prov.name}{prov.hasKey ? "  ·key set" : "  ·no key"}
+                </option>
+              ))}
             </select>
-            <label className="mono tiny">Model override</label>
-            <input className="mono tiny" value={agentCfg.model ?? ""} onChange={e => setAgentCfg({ ...agentCfg, model: e.target.value })} placeholder="claude-sonnet-4-6" style={{ padding: 6, width: "100%" }} />
+            <label className="mono tiny">Model</label>
+            <select className="mono tiny" value={agentCfg.model ?? ""} onChange={e => setAgentCfg({ ...agentCfg, model: e.target.value })} style={{ padding: 6, width: "100%" }}>
+              <option value="">—</option>
+              {(agentAvail?.providers ?? [])
+                .filter((prov) => prov.id === agentCfg.provider)
+                .flatMap((prov) => prov.models)
+                .map((m) => <option key={m.id} value={m.id}>{m.name} ({m.id})</option>)}
+            </select>
           </div>
           <div className="col">
             <label className="mono tiny">Skills directory (.openfable-skills)</label>
             <input className="mono tiny" value={agentCfg.skills ?? ""} onChange={e => setAgentCfg({ ...agentCfg, skills: e.target.value })} placeholder=".openfable-skills" style={{ padding: 6, width: "100%" }} />
-            <Button size="sm" onClick={() => void saveAgentCfg()} style={{ marginTop: 8 }}>Save agent config</Button>
+            <div className="row" style={{ gap: 8, marginTop: 8 }}>
+
+      <Panel
+        title="Metasploit RPC"
+        id="metasploit"
+        actions={<Badge tone={msf.data?.connected ? "ok" : msf.data?.configured ? "warn" : "dim"}>{msf.data?.connected ? "online" : msf.data?.configured ? "configured · offline" : "not configured"}</Badge>}
+      >
+        <div className="grid-2" style={{ gap: 10 }}>
+          <div className="col">
+            <div className="mono tiny">endpoint</div>
+            <div className="mono">{msf.data?.host ?? "127.0.0.1"}:{msf.data?.port ?? 55553}</div>
+            <div className="mono tiny" style={{ marginTop: 6, opacity: 0.8 }}>{msf.data?.detail ?? "probing…"}</div>
+          </div>
+          <div className="col">
+            <div className="row" style={{ gap: 8 }}>
+              <Button size="sm" onClick={() => void msf.refresh()}>Re-probe</Button>
+              <Button size="sm" variant="primary" onClick={() => void api.post("/metasploit/start").then(() => msf.refresh())}>Start msfrpcd</Button>
+            </div>
+            <div className="mono tiny" style={{ marginTop: 6, opacity: 0.8 }}>
+              Online requires a successful RPC login with the configured password — an open port alone is not enough.
+            </div>
+          </div>
+        </div>
+      </Panel>
+
+              <Button size="sm" onClick={() => void saveAgentCfg()}>Save agent config</Button>
+              <Button size="sm" variant="primary" onClick={() => void autoConfigure()} disabled={autoBusy}>
+                {autoBusy ? "configuring…" : "Auto-configure from opencode"}
+              </Button>
+            </div>
+            {autoMsg && <div className="mono tiny" style={{ marginTop: 6 }}>{autoMsg}</div>}
+            <div className="mono tiny" style={{ marginTop: 6, opacity: 0.8 }}>
+              {agentAvail?.providersWithKey ?? 0} of {agentAvail?.providerCount ?? 0} providers carry a credential in the environment; keys are written to .env and never echoed back.
+            </div>
             <div className="mono tiny" style={{ marginTop: 6, opacity: 0.8 }}>
               Chat routes through the agent when configured; the NL translator handles everything else.
             </div>

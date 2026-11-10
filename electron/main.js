@@ -27,6 +27,10 @@ function findPython() {
     process.env.PEGASUS_PYTHON,
     'python',
     'python3',
+    // A venv shipped alongside the backend tree (packaged layout):
+    //   <install>/resources/pegasus/venv/Scripts/python.exe
+    path.join(process.resourcesPath || '', 'pegasus', 'venv', 'Scripts', 'python.exe'),
+    path.join(process.resourcesPath || '', 'pegasus', 'venv', 'bin', 'python'),
     path.join(app.getAppPath(), 'pegasus', 'venv', 'Scripts', 'python.exe'),
     path.join(app.getAppPath(), 'pegasus', 'venv', 'bin', 'python'),
   ].filter(Boolean);
@@ -46,11 +50,25 @@ function spawnSync(cmd, args) {
 
 function backendEntry() {
   // Prefer start_server.py (honours PEGASUS_PORT/HOST), fall back to run_server.py
-  const root = path.join(app.getAppPath(), '..');
-  const startServer = path.join(root, 'start_server.py');
-  const runServer = path.join(root, 'run_server.py');
-  if (fs.existsSync(startServer)) return startServer;
-  if (fs.existsSync(runServer)) return runServer;
+  //
+  // Layouts we must support:
+  //   dev      : <repo>/electron        -> app.getAppPath() = <repo>/electron
+  //   packaged : <install>/resources/app.asar, backend tree in <install>/resources/pegasus
+  //              and the launcher scripts in <install>/resources
+  const roots = [
+    path.join(app.getAppPath(), '..'),
+    process.resourcesPath,
+    app.getAppPath(),
+  ].filter(Boolean);
+  const seen = new Set();
+  for (const root of roots) {
+    if (seen.has(root)) continue;
+    seen.add(root);
+    for (const name of ['start_server.py', 'run_server.py']) {
+      const candidate = path.join(root, name);
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  }
   return null;
 }
 
@@ -59,7 +77,10 @@ function startBackend() {
   const entry = backendEntry();
   if (!entry) {
     dialog.showErrorBox('Backend not found',
-      'Could not locate start_server.py or run_server.py next to the Electron app.');
+      'Could not locate start_server.py or run_server.py.\n\n' +
+      'Looked in:\n  ' +
+      [path.join(app.getAppPath(), '..'), process.resourcesPath].join('\n  ') +
+      '\n\nReinstall the desktop build, or set PEGASUS_PYTHON and run the backend manually.');
     return;
   }
   const python = findPython();
