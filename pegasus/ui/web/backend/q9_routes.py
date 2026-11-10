@@ -1,7 +1,7 @@
 """
 Q9 capability routes for the Pegasus web app.
 
-Every capability from C:\Projects\Q9\Q9.py (84 menu options + self-test/doctor)
+Every capability from C:\\Projects\\Q9\\Q9.py (84 menu options + self-test/doctor)
 is reimplemented here as a Flask endpoint. Q9.py is NOT imported — the logic is
 reimplemented using the app's existing ``run()`` helper and adb/fastboot
 binaries directly, so the app ships with the full Q9 capability surface.

@@ -1,0 +1,86 @@
+{
+  "name": "pegasus-phantom-menace",
+  "version": "2.1.1",
+  "description": "Pegasus Phantom Menace - Android Device Management & Security Audit Platform (Desktop)",
+  "main": "main.js",
+  "author": "ProjectZeroDays",
+  "license": "MIT",
+  "homepage": "https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ProjectZeroDays/Pegasus_Phantom-Menace.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "start:dev": "electron . --dev",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win nsis",
+    "dist:win:portable": "electron-builder --win portable",
+    "dist:mac": "electron-builder --mac dmg",
+    "dist:linux": "electron-builder --linux AppImage deb",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.projectzerodays.pegasusphantommenace",
+    "productName": "Pegasus Phantom Menace",
+    "copyright": "Copyright © 2026 ProjectZeroDays",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "backend-bridge.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../pegasus",
+        "to": "pegasus",
+        "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"]
+      },
+      {
+        "from": "../requirements.txt",
+        "to": "requirements.txt"
+      }
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "PegasusPhantomMenace-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Pegasus Phantom Menace",
+      "include": "installer.nsh",
+      "license": "../LICENSE"
+    },
+    "portable": {
+      "artifactName": "PegasusPhantomMenace-Portable-${version}.${ext}"
+    },
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.utilities"
+    },
+    "linux": {
+      "target": [{ "target": "AppImage" }, { "target": "deb" }],
+      "icon": "build/icon.png",
+      "category": "Utility"
+    }
+  }
+}

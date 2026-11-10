@@ -1,6 +1,6 @@
 flask>=3.0
 requests>=2.31
-cryptography>=44
+cryptography>=44,<51
 jsonschema>=4.22
 psutil>=5.9
 pyyaml>=6.0

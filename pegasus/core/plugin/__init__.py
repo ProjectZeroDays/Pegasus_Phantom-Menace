@@ -608,6 +608,10 @@ class PluginManager:
         "brutdroid",
         "access_workflow",
         "access_workflow.post_exploitation",
+        "mitm",
+        "c2_server",
+        "anonymity",
+        "export",
     )
 
     def load_builtin_plugins(self) -> List[Plugin]:
