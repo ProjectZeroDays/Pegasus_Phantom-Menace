@@ -221,6 +221,71 @@ def _install_ngrok() -> tuple[str, str]:
     return ("installed", str(exe))
 
 
+def _install_ssh() -> tuple[str, str]:
+    """OpenSSH client (ssh / ssh.exe). Usually part of the OS."""
+    for cand in ("ssh", "ssh.exe"):
+        if shutil.which(cand):
+            return ("present", f"{cand} already on PATH")
+    if _win():
+        if _winget_available():
+            rc, out = _run(["winget", "install", "--id=OpenSSH.OpenSSH", "-e",
+                            "--accept-source-agreements", "--accept-package-agreements"], timeout=300)
+            if rc == 0:
+                _persist_path()
+                ensure_path()
+                return ("installed", "winget: OpenSSH")
+            return ("error", out[-300:])
+        return ("error", "winget unavailable -- install OpenSSH manually")
+    # Linux / macOS
+    if shutil.which("apt-get"):
+        rc, out = _run(["sudo", "apt-get", "update"], timeout=300)
+        if rc == 0:
+            rc, out = _run(["sudo", "apt-get", "install", "-y", "openssh-client"], timeout=300)
+            if rc == 0:
+                ensure_path()
+                return ("installed", "apt: openssh-client")
+        return ("error", out[-300:])
+    if shutil.which("brew"):
+        rc, out = _run(["brew", "install", "openssh"], timeout=300)
+        if rc == 0:
+            ensure_path()
+            return ("installed", "brew: openssh")
+        return ("error", out[-300:])
+    return ("error", "no package manager available -- install OpenSSH manually")
+
+
+def _install_socat() -> tuple[str, str]:
+    """socat relay for TCP forwarding / MITM chaining."""
+    for cand in ("socat", "socat.exe"):
+        if shutil.which(cand):
+            return ("present", f"{cand} already on PATH")
+    if _win():
+        if _winget_available():
+            rc, out = _run(["winget", "install", "--id=AndrewY.Socat", "-e",
+                            "--accept-source-agreements", "--accept-package-agreements"], timeout=300)
+            if rc == 0:
+                _persist_path()
+                ensure_path()
+                return ("installed", "winget: socat")
+            return ("error", out[-300:])
+        return ("error", "winget unavailable -- install socat manually")
+    if shutil.which("apt-get"):
+        rc, out = _run(["sudo", "apt-get", "update"], timeout=300)
+        if rc == 0:
+            rc, out = _run(["sudo", "apt-get", "install", "-y", "socat"], timeout=300)
+            if rc == 0:
+                ensure_path()
+                return ("installed", "apt: socat")
+        return ("error", out[-300:])
+    if shutil.which("brew"):
+        rc, out = _run(["brew", "install", "socat"], timeout=300)
+        if rc == 0:
+            ensure_path()
+            return ("installed", "brew: socat")
+        return ("error", out[-300:])
+    return ("error", "no package manager available -- install socat manually")
+
+
 INSTALLERS: dict[str, Callable[[], tuple[str, str]]] = {
     "frida": _install_frida,
     "apktool": _install_apktool,
@@ -228,6 +293,8 @@ INSTALLERS: dict[str, Callable[[], tuple[str, str]]] = {
     "tshark": _install_tshark_wireshark,
     "wireshark": _install_tshark_wireshark,
     "ngrok": _install_ngrok,
+    "ssh": _install_ssh,
+    "socat": _install_socat,
 }
 
 
