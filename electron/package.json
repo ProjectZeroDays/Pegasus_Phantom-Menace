@@ -1,6 +1,6 @@
 {
   "name": "pegasus-phantom-menace",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Pegasus Phantom Menace - Android Device Management & Security Audit Platform (Desktop)",
   "main": "main.js",
   "author": "ProjectZeroDays",
@@ -28,7 +28,7 @@
   "build": {
     "appId": "com.projectzerodays.pegasusphantommenace",
     "productName": "Pegasus Phantom Menace",
-    "copyright": "Copyright © 2026 ProjectZeroDays",
+    "copyright": "Copyright \u00a9 2026 ProjectZeroDays",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -75,8 +75,18 @@
     ],
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.ico",
       "artifactName": "PegasusPhantomMenace-Setup-${version}.${ext}"
@@ -95,12 +105,27 @@
       "artifactName": "PegasusPhantomMenace-Portable-${version}.${ext}"
     },
     "mac": {
-      "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
       "icon": "build/icon.icns",
       "category": "public.app-category.utilities"
     },
     "linux": {
-      "target": [{ "target": "AppImage" }, { "target": "deb" }],
+      "target": [
+        {
+          "target": "AppImage"
+        },
+        {
+          "target": "deb"
+        }
+      ],
       "icon": "build/icon.png",
       "category": "Utility"
     }

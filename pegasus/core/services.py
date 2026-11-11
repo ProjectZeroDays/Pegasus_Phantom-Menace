@@ -37,17 +37,17 @@ def _port_open(port: int, host: str = "127.0.0.1", timeout: float = 0.4) -> bool
         return False
 
 
-def _spawn(cmd: list[str], name: str) -> dict:
+def _spawn(cmd: list[str], name: str, env=None) -> dict:
     """Start a detached process; never raises."""
     try:
-        binary = shutil.which(cmd[0]) or shutil.which(cmd[0] + ".exe")
-        if not binary:
-            return {"service": name, "status": "unavailable", "detail": f"{cmd[0]} not on PATH"}
+        binary = (shutil.which(cmd[0]) or shutil.which(cmd[0] + ".exe")
+                  or cmd[0])
         proc = subprocess.Popen(
             [binary, *cmd[1:]],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             stdin=subprocess.DEVNULL,
+            env=env,
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
         )
         with _lock:
@@ -55,7 +55,6 @@ def _spawn(cmd: list[str], name: str) -> dict:
         return {"service": name, "status": "started", "pid": proc.pid}
     except Exception as exc:  # noqa: BLE001
         return {"service": name, "status": "error", "detail": str(exc)}
-
 
 # ---------------------------------------------------------------------------
 # Individual services
@@ -107,15 +106,138 @@ def start_meterpreter() -> dict:
     return out
 
 
+def _metasploit_roots() -> list:
+    """Directories that may hold an installed Metasploit Framework.
+
+    Covers the hand-installed tree, the Scoop and Chocolatey layouts and the
+    per-user "current" junctions those package managers create.
+    """
+    import glob
+    import pathlib
+    home = pathlib.Path.home()
+    roots = []
+    for base in (
+        home / ".pegasus" / "tools" / "metasploit",
+        pathlib.Path("C:/metasploit"),
+        home / "metasploit",
+        pathlib.Path(os.environ.get("LOCALAPPDATA", str(home))) / "Programs" / "Metasploit",
+    ):
+        roots.append(base)
+        roots.append(base.parent)
+
+    scoop = os.environ.get("SCOOP") or str(home / "scoop")
+    apps = pathlib.Path(scoop) / "apps"
+    for pattern in ("metasploit-framework/current", "metasploit-framework/*"):
+        for match in glob.glob(str(apps / pattern)):
+            roots.append(pathlib.Path(match))
+            roots.append(pathlib.Path(match).parent)
+    chocolatey = pathlib.Path(os.environ.get("ChocolateyInstall", str(home / "chocolatey")))
+    roots.append(chocolatey / "lib" / "metasploit")
+    roots.append(chocolatey / "bin")
+
+    seen, unique = set(), []
+    for item in roots:
+        key = str(item).lower()
+        if key not in seen:
+            seen.add(key)
+            unique.append(item)
+    return unique
+
+def find_msfrpcd() -> str:
+    """Locate msfrpcd on PATH or inside an installed Metasploit tree."""
+    for name in ("msfrpcd.exe", "msfrpcd"):
+        which = shutil.which(name)
+        if which:
+            return which
+    import pathlib
+    for base in _metasploit_roots():
+        for rel in ("bin/msfrpcd.exe", "msfrpcd.exe"):
+            candidate = base / rel
+            if candidate.is_file():
+                return str(candidate)
+    return ""
+
+
+def msfrpcd_command() -> list:
+    r"""The argv that actually starts msfrpcd on this host.
+
+    The Scoop and Chocolatey Windows packages ship ``msfrpcd.BAT``, which
+    calls ``ruby %FRAMEWORK%\%CMD%`` **without quoting**.  On a path that
+    contains a space - ``C:\Users\Project Zero\...`` - the shell hands ruby
+    ``C:/Users/Project`` and it dies with "Is a directory".  So the embedded
+    interpreter and the script are invoked directly, fully quoted.
+    """
+    import pathlib
+    for base in _metasploit_roots():
+        for rel in ("bin/msfrpcd.BAT", "bin/msfrpcd.bat", "bin/msfrpcd"):
+            wrapper = base / rel
+            if not wrapper.is_file():
+                continue
+            root = wrapper.parent.parent
+            embedded = root / "embedded"
+            ruby = embedded / "bin" / "ruby.exe"
+            script = embedded / "framework" / "msfrpcd"
+            if not script.is_file():
+                script = embedded / "bin" / "msfrpcd"
+            if not ruby.is_file():
+                ruby = embedded / "bin" / "ruby.bat"
+            if ruby.is_file() and script.is_file():
+                return [str(ruby), str(script)]
+    return []
+
+
+def _msfrpcd_env() -> dict:
+    """The environment the embedded Metasploit runtime expects."""
+    env = dict(os.environ)
+    for base in _metasploit_roots():
+        embedded = base / "embedded"
+        if (embedded / "bin").is_dir():
+            env["PATH"] = str(embedded / "bin") + os.pathsep + env.get("PATH", "")
+            for key in ("GEM_HOME", "GEM_PATH", "GEM_ROOT", "RUBY_ENGINE", "RUBY_ROOT"):
+                env[key] = ""
+            return env
+    return env
+
+
+def _msfrpcd_rpc_ok(host: str, port: int, password: str) -> bool:
+    """A real msfrpcd login, so 'started' means usable."""
+    import base64
+    import json
+    import urllib.error
+    import urllib.request
+    url = f"http://{host}:{port}/login"
+    body = json.dumps({"username": "msf", "password": password}).encode()
+    token = base64.b64encode(f"msf:{password}".encode()).decode()
+    req = urllib.request.Request(
+        url, data=body, method="POST",
+        headers={"Content-Type": "application/json",
+                 "Authorization": f"Basic {token}"})
+    try:
+        with urllib.request.urlopen(req, timeout=4) as resp:
+            payload = json.loads(resp.read().decode("utf-8", "replace"))
+            return bool(payload.get("success") or payload.get("token"))
+    except Exception:
+        return False
+
+
 def start_msfrpcd() -> dict:
     """Start msfrpcd on the configured RPC port.
 
     The password must match MetasploitSettings.rpc_password - previously this
     hardcoded "-P pegasus" while the configured default was "msf123", so a
     running daemon failed every RPC login and always looked offline.
+
+    The daemon is only reported as online once it actually answers an RPC
+    login on the configured port.
     """
-    if not (shutil.which("msfrpcd") or shutil.which("msfrpcd.exe")):
-        return {"service": "msfrpcd", "status": "unavailable", "detail": "msfrpcd not on PATH", "port": 55553}
+    command = msfrpcd_command()
+    if not command:
+        binary = find_msfrpcd()
+        if not binary:
+            return {"service": "msfrpcd", "status": "unavailable",
+                    "detail": "msfrpcd not found - install Metasploit from the "
+                              "Metasploit RPC panel", "port": 55553}
+        command = [binary]
     try:
         from pegasus.core.config import get_settings
 
@@ -125,11 +247,36 @@ def start_msfrpcd() -> dict:
         password = cfg.rpc_password or "msf123"
     except Exception:
         host, port, password = "127.0.0.1", 55553, "msf123"
-    out = _spawn(["msfrpcd", "-a", host, "-p", str(port), "-P", password, "-S"], "msfrpcd")
+
+    # msfrpcd's -S (background/daemonise) is not available on Windows - it
+    # logs "Background mode is not available on this platform" and exits
+    # instead of listening. The process is already detached here, so the flag
+    # is only used off Windows.
+    args = ["-a", host, "-p", str(port), "-P", password]
+    if os.name != "nt":
+        args.append("-S")
+    full = command + args
+    out = _spawn(full, "msfrpcd", env=_msfrpcd_env())
     out["port"] = port
     out["host"] = host
-    return out
+    out["command"] = full
 
+    # "started" is only true once the daemon answers a real RPC login.
+    connected = False
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        if _port_open(port) and _msfrpcd_rpc_ok(host, port, password):
+            connected = True
+            break
+        time.sleep(1)
+    out["connected"] = connected
+    if connected:
+        out["status"] = "online"
+        out["detail"] = "msfrpcd accepted an RPC login"
+    else:
+        out["detail"] = ("msfrpcd was launched but no RPC login was accepted on "
+                         f"{host}:{port} - check the configured password")
+    return out
 
 def start_http_proxy() -> dict:
     """Delivery/payload HTTP server on 8080."""

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pegasus Exit Strategy</title>
+<link rel="icon" href="/assets/favicon.svg" />
+<style>
+  :root {
+    --primary: #ff3d00;
+    --primary-soft: #bf3600;
+    --secondary: #58a6ff;
+    --background: #0a0b0e;
+    --surface: #10141b;
+    --surface-2: #161b22;
+    --line: #30363d;
+    --ink: #e6edf3;
+    --muted: #8b949e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--background); color: var(--ink);
+    font-family: "Segoe UI", Inter, system-ui, sans-serif; line-height: 1.55;
+  }
+  .mono { font-family: "JetBrains Mono", "Cascadia Mono", Consolas, monospace; }
+  header {
+    display: flex; align-items: center; gap: 14px; padding: 18px 24px;
+    border-bottom: 1px solid var(--line); background: var(--surface);
+  }
+  header img { width: 38px; height: 38px; }
+  header h1 { margin: 0; font-size: 17px; letter-spacing: .18em; font-weight: 700; }
+  header .sub { color: var(--muted); font-size: 11px; letter-spacing: .1em; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px; }
+  .bar { display: flex; gap: 14px; align-items: center; margin-bottom: 20px; }
+  .bar .track { flex: 1; height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .bar .fill { height: 100%; background: linear-gradient(90deg, var(--primary-soft), var(--primary)); }
+  .pill { border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; font-size: 11px; color: var(--muted); }
+  h2 { font-size: 12px; letter-spacing: .16em; color: var(--muted); margin: 26px 0 10px; }
+  .group { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+  .group > .head { background: var(--surface); padding: 9px 14px; font-size: 11px; letter-spacing: .14em; color: var(--secondary); }
+  .item { display: flex; gap: 12px; padding: 13px 14px; border-top: 1px solid var(--line); background: var(--surface-2); align-items: flex-start; }
+  .item:first-of-type { border-top: none; }
+  .item button {
+    width: 20px; height: 20px; border-radius: 6px; border: 1px solid var(--line);
+    background: transparent; color: var(--muted); cursor: pointer; margin-top: 2px;
+  }
+  .item.done button { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .item .t { font-weight: 600; font-size: 13px; }
+  .item .d { color: var(--muted); font-size: 12px; margin-top: 3px; }
+  .item.done .t { color: var(--muted); text-decoration: line-through; }
+  textarea {
+    width: 100%; min-height: 80px; background: var(--surface-2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-size: 13px;
+    font-family: inherit; resize: vertical;
+  }
+  button.action {
+    margin-top: 10px; background: var(--primary); border: none; color: #fff;
+    padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;
+  }
+  button.action:hover { background: var(--primary-soft); }
+  .note { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--surface-2); margin-top: 8px; font-size: 12px; }
+  footer { color: var(--muted); font-size: 11px; padding: 18px 24px; border-top: 1px solid var(--line); }
+  .tag { color: var(--secondary); }
+</style>
+</head>
+<body>
+<header>
+  <img src="/assets/favicon.svg" alt="Pegasus" />
+  <div>
+    <h1>PEGASUS EXIT STRATEGY</h1>
+    <div class="sub mono">ENGAGEMENT CLOSE-OUT &middot; AUTHORIZED TESTING ONLY</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="bar">
+    <span class="pill mono" id="count">0 / 0</span>
+    <div class="track"><div class="fill" id="fill" style="width:0%"></div></div>
+    <span class="pill mono" id="pct">0%</span>
+  </div>
+
+  <div id="groups"></div>
+
+  <h2>HANDOVER NOTES</h2>
+  <textarea id="note" placeholder="What was handed over, to whom, and when…"></textarea>
+  <button class="action" id="add">Add note</button>
+  <div id="notes"></div>
+
+  <h2>CLOSE-OUT REPORT SECTIONS</h2>
+  <div class="group">
+    <div class="head">REQUIRED</div>
+    <div class="item"><div class="t">The report must cover each of these sections.</div></div>
+  </div>
+  <div id="sections" class="pill mono" style="display:inline-block;margin:0 6px 6px 0"></div>
+</div>
+
+<footer>
+  Pegasus Exit Strategy &middot; the close-out fork of Pegasus Phantom Menace &middot;
+  <span class="tag">reuses the original logo and colour tokens</span>
+</footer>
+
+<script>
+const api = async (path, opts) => {
+  const r = await fetch(path, opts);
+  const j = await r.json();
+  return j.data || {};
+};
+let state = { items: [], notes: [], report_sections: [] };
+
+function render() {
+  const done = state.items.filter(i => i.done).length;
+  const total = state.items.length || 1;
+  document.getElementById('count').textContent = `${done} / ${state.items.length}`;
+  document.getElementById('fill').style.width = (done / total * 100) + '%';
+  document.getElementById('pct').textContent = Math.round(done / total * 100) + '%';
+
+  const groups = {};
+  for (const item of state.items) (groups[item.group] ||= []).push(item);
+  document.getElementById('groups').innerHTML = Object.entries(groups).map(([name, items]) => `
+    <div class="group">
+      <div class="head mono">${name.toUpperCase()}</div>
+      ${items.map(i => `
+        <div class="item ${i.done ? 'done' : ''}" data-id="${i.id}">
+          <button data-id="${i.id}" aria-label="toggle"></button>
+          <div><div class="t">${i.title}</div><div class="d">${i.detail}</div></div>
+        </div>`).join('')}
+    </div>`).join('');
+
+  document.getElementById('notes').innerHTML = (state.notes || [])
+    .map(n => `<div class="note mono">${n.text}</div>`).join('');
+
+  document.getElementById('sections').innerHTML =
+    (state.report_sections || []).map(s => `<span>${s}</span>`).join('');
+}
+
+document.addEventListener('click', async (e) => {
+  const btn = e.target.closest('button[data-id]');
+  if (!btn) return;
+  state = await api('/api/toggle', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: btn.dataset.id }),
+  });
+  render();
+});
+
+document.getElementById('add').addEventListener('click', async () => {
+  const el = document.getElementById('note');
+  if (!el.value.trim()) return;
+  state = await api('/api/notes', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: el.value.trim() }),
+  });
+  el.value = '';
+  render();
+});
+
+api('/api/state').then(s => { state = s; render(); });
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 [project]
 name = "pegasus-phantom-menace"
-version = "2.2.0"
+version = "2.2.3"
 description = "Android Device Management & Security Audit Platform"
 readme = "README.md"
 requires-python = ">=3.11"
