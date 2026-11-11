@@ -67,3 +67,15 @@ Push blocked: none
 Next: device smoke run on 10.1.10.25:5555; 343-route accessibility sweep; clean-VM Electron build; iOS provisioning; GUI redesign demo (gui-demo.html); no-IP/DNSCrypt/Tor/Onion/SOCKS5 tool integration
 Author: Trey A. Smith | Authenticated, Inc. | @projectzerodays
 Notes: honest caveats - BB84 is a classical-RNG simulation, not a physical quantum channel; Lamport OTS is single-message; the token ledger is local JSON accounting, not a chain; PQC audit maps weaknesses to NIST guidance and does not ship liboqs; social-engineering sends nothing without operator activation; SE/webhook/social-media stores are ~/.pegasus/*.jsonl; PWA parity relies on existing public/sw.js + manifest.webmanifest; ML continuous learning is feedback-tuned thresholds, not online gradient descent
+
+## 65. HANDOFF
+
+Project: Pegasus Phantom Menace v2.2.4 / released desktop build with a durable backend launcher
+Status: verified - release v2.2.4 published with four API-verified assets and marked latest, the packaged tree asserts the non-daemon launcher and the SPA import, and the install smoke passed end to end from a real installation
+Features: the launcher defect that made the desktop console die three seconds after launch is fixed - start_server.py no longer runs the server in a daemon thread and joins it instead, so the process stays up until the server stops, and run_server.py resolves the package relative to itself rather than a build-machine path; every version surface reads 2.2.4; the release carries the 78-route enterprise backend, the 24-source OSINT catalogue, the CVE framework and CLI, the Quantum C2 listener and CLI, the Metasploit installer and MSGRPC client, the Exit-Strategy fork and the thirteen-page console
+Log: log/events.jsonl
+Release: v2.2.0, v2.2.1, v2.2.2, v2.2.3 and v2.2.4 published - v2.2.4 is latest
+Push blocked: none
+Next: the twelve loop test and debug pass, the docs and .bootstrap-state refresh, the npm 2.2.4 publish, rotating the exposed GitHub token, and repointing the legacy PATH shim
+Author: Trey A. Smith | Authenticated, Inc. | @projectzerodays
+Notes: verified evidence - install smoke against the per-user root asserts 10/10 resources, a non-daemon start_server.py, a machine-path-free run_server.py and the SPA import; GET /api/health answers 200, GET / answers 200 with 1020 bytes of console shell, GET /manifest.webmanifest answers 200 and GET /api/osint/catalog answers 200 with 9266 bytes; the launcher is still alive after 6 seconds and after 18 seconds with /api/health still answering 200, which is the assertion that distinguishes this build from the self-killing one; the packaged tree assertion reports PACKAGED_224_OK; eleven defects were root-caused and fixed across the engagement, the launcher lifetime defect and the machine-specific import path being the last two
