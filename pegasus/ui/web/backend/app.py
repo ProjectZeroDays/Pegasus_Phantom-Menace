@@ -265,6 +265,7 @@ from pegasus.ui.web.backend import daemon_routes
 from pegasus.ui.web.backend import cve_routes
 from pegasus.ui.web.backend import kyc_routes
 from pegasus.ui.web.backend import osint_routes
+from pegasus.ui.web.backend import workflow_routes
 
 
 # ---------------------------------------------------------------------------
@@ -356,6 +357,8 @@ def create_app() -> Flask:
     cve_routes.register(app, ok, fail)
     kyc_routes.register(app, ok, fail)
     osint_routes.register(app, ok, fail)
+    # Workflow runs (workflow_routes): /api/workflows, /api/workflows/run
+    workflow_routes.register(app, ok, fail)
 
     # System endpoints
 

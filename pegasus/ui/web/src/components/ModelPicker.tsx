@@ -24,8 +24,8 @@ export function ModelPicker({ role, onPick }: { role: string; onPick: (id: strin
           </div>
           <div className="flex gap-1">
             <button onClick={() => api.post("/models/download", { id: m.id, quant: m.quant })}
-              className="rounded bg-sky-600 px-2 py-1">Get</button>
-            <button onClick={() => onPick(m.id)} className="rounded bg-emerald-600 px-2 py-1">Use</button>
+              className="rounded bg-primary px-2 py-1 text-accent-contrast">Get</button>
+            <button onClick={() => onPick(m.id)} className="rounded bg-success-strong px-2 py-1 text-white">Use</button>
           </div>
         </li>
       ))}

@@ -16,8 +16,10 @@ interface Message {
 }
 
 export function ChatDock() {
-  const providers = useApi<{ providers: ChatProvider[] }>("/chat/providers");
   const [open, setOpen] = useState(false);
+  // The provider list sits behind an operator session, so it is only
+  // requested once the dock is actually opened.
+  const providers = useApi<{ providers: ChatProvider[] }>(open ? "/chat/providers" : null);
   const [provider, setProvider] = useState("venice");
   const [model, setModel] = useState("");
   const [draft, setDraft] = useState("");

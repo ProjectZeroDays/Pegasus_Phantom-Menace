@@ -9,10 +9,14 @@
   --color-line: #30363d;
   --color-primary: #ff3d00;
   --color-primary-soft: #bf3600;
-  --color-secondary: #58a6ff;
+  --color-primary-bright: #ff8a4d;
+  --color-accent-contrast: #160800;
+  --color-info: #58a6ff;
   --color-success: #3fb950;
+  --color-success-strong: #238636;
   --color-warning: #d29922;
-  --color-danger: #d73a49;
+  --color-danger: #ff7b72;
+  --color-danger-strong: #b62330;
   --color-ink: #c9d1d9;
   --color-ink-dim: #8b949e;
   --color-ink-mute: #6e7681;
@@ -22,18 +26,22 @@
 }
 
 :root {
-  --bg: #060a11;
-  --surface: #0b1320;
-  --surface-2: #0f1a2b;
-  --surface-3: #142338;
+  --bg: #0a0b0e;
+  --surface: #10141b;
+  --surface-2: #161b22;
+  --surface-3: #1f2430;
   --line: #30363d;
   --line-soft: #21262d;
-  --primary: #58a6ff;
-  --primary-dim: #2f81f7;
-  --secondary: #58a6ff;
+  --primary: #ff3d00;
+  --primary-soft: #bf3600;
+  --primary-bright: #ff8a4d;
+  --accent-contrast: #160800;
+  --info: #58a6ff;
   --success: #3fb950;
+  --success-strong: #238636;
   --warning: #d29922;
-  --danger: #d73a49;
+  --danger: #ff7b72;
+  --danger-strong: #b62330;
   --ink: #c9d1d9;
   --ink-dim: #8b949e;
   --ink-mute: #6e7681;
@@ -80,7 +88,7 @@ button {
 }
 
 a {
-  color: var(--secondary);
+  color: var(--info);
   text-decoration: none;
 }
 
@@ -344,7 +352,7 @@ a:hover {
   background: var(--success);
 }
 .stat.info::before {
-  background: var(--secondary);
+  background: var(--info);
 }
 
 .stat-value {
@@ -435,7 +443,7 @@ a:hover {
 }
 
 .btn-danger:hover {
-  background: rgba(215, 58, 73, 0.2);
+  background: rgba(255, 123, 114, 0.2);
   border-color: var(--danger);
   color: #fff;
 }
@@ -485,7 +493,7 @@ a:hover {
   border-color: rgba(215, 58, 73, 0.32);
 }
 .badge-info {
-  color: var(--secondary);
+  color: var(--info);
   background: rgba(88, 166, 255, 0.12);
   border-color: rgba(88, 166, 255, 0.28);
 }
@@ -857,8 +865,8 @@ table.tbl tbody tr:last-child td {
 .orange {
   color: var(--primary);
 }
-.cyan {
-  color: var(--secondary);
+.info {
+  color: var(--info);
 }
 .green {
   color: var(--success);

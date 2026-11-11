@@ -32,11 +32,11 @@ export default function Autonomous() {
       <div className="flex justify-between">
         <h1 className="text-xl font-semibold">Autonomous</h1>
         <button onClick={start} disabled={busy || (!!run && !["done", "failed"].includes(run.phase))}
-          className="rounded bg-sky-600 px-4 py-2 text-sm disabled:opacity-40">Start</button>
+          className="rounded bg-primary px-4 py-2 text-sm text-accent-contrast disabled:opacity-40">Start</button>
       </div>
       <div className="mt-6 flex gap-1">
         {PHASES.map((p, i) => (
-          <div key={p} className={`h-1 flex-1 rounded ${i <= active ? "bg-sky-500" : "bg-white/10"}`} />
+          <div key={p} className={`h-1 flex-1 rounded ${i <= active ? "bg-primary" : "bg-white/10"}`} />
         ))}
       </div>
       {run && (
@@ -56,13 +56,13 @@ export default function Autonomous() {
       )}
       {run?.phase === "deciding" && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4">
-          <div className="w-full max-w-md rounded-lg border border-white/15 bg-neutral-900 p-6">
+          <div className="w-full max-w-md rounded-lg border border-line bg-surface p-6">
             <h2 className="text-lg font-semibold">Cycle complete</h2>
             <div className="mt-5 flex gap-3">
               <button onClick={() => decide("maintain")}
-                className="flex-1 rounded bg-emerald-600 px-4 py-2 text-sm">Maintain</button>
+                className="flex-1 rounded bg-success-strong px-4 py-2 text-sm text-white">Maintain</button>
               <button onClick={() => decide("wipe")}
-                className="flex-1 rounded bg-red-600 px-4 py-2 text-sm">Wipe</button>
+                className="flex-1 rounded bg-danger-strong px-4 py-2 text-sm text-white">Wipe</button>
             </div>
             <button onClick={() => decide("abort")} className="mt-3 text-xs underline opacity-60">Abort</button>
           </div>

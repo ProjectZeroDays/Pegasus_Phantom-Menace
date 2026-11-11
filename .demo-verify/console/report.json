@@ -1,0 +1,129 @@
+{
+  "url": "http://127.0.0.1:5301/",
+  "viewports": {
+    "desktop-1280": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "readyState": "complete",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "clientWidth": 1280,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 3227,
+      "hasPegasus": true,
+      "headings": [
+        "Mission Control"
+      ],
+      "links": 127,
+      "buttons": 23,
+      "panels": 6,
+      "images": 1,
+      "brokenImages": [],
+      "background": "rgb(10, 11, 14)",
+      "color": "rgb(201, 209, 217)",
+      "viewportOverflow": [],
+      "internalOverflow": [],
+      "signalColor": {
+        "signal": "",
+        "info": "#58a6ff",
+        "background": "#0a0b0e"
+      },
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\console\\desktop-1280.png",
+      "screenshotBytes": 172219
+    },
+    "mobile-375": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "readyState": "complete",
+      "innerWidth": 375,
+      "innerHeight": 812,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "scrollHeight": 812,
+      "horizontalOverflow": false,
+      "textLength": 3227,
+      "hasPegasus": true,
+      "headings": [
+        "Mission Control"
+      ],
+      "links": 127,
+      "buttons": 23,
+      "panels": 6,
+      "images": 1,
+      "brokenImages": [],
+      "background": "rgb(10, 11, 14)",
+      "color": "rgb(201, 209, 217)",
+      "viewportOverflow": [
+        {
+          "sel": "ASIDE.sidebar",
+          "left": -268,
+          "right": 0
+        },
+        {
+          "sel": "DIV.",
+          "left": -268,
+          "right": -1
+        },
+        {
+          "sel": "DIV.row",
+          "left": -252,
+          "right": -17
+        },
+        {
+          "sel": "A.row sidebar-brand",
+          "left": -252,
+          "right": -52
+        },
+        {
+          "sel": "DIV.",
+          "left": -252,
+          "right": -218
+        },
+        {
+          "sel": "IMG.",
+          "left": -252,
+          "right": -218
+        },
+        {
+          "sel": "DIV.",
+          "left": -208,
+          "right": -65
+        },
+        {
+          "sel": "DIV.mono",
+          "left": -208,
+          "right": -65
+        },
+        {
+          "sel": "DIV.tiny mute",
+          "left": -208,
+          "right": -65
+        },
+        {
+          "sel": "BUTTON.btn btn-ghost btn-sm sidebar-rail-toggle",
+          "left": -42,
+          "right": -17
+        }
+      ],
+      "internalOverflow": [
+        "DIV.app-shell",
+        "DIV.main-col",
+        "HEADER.topbar",
+        "DIV.page",
+        "DIV.grid-2",
+        "FOOTER.bottombar"
+      ],
+      "signalColor": {
+        "signal": "",
+        "info": "#58a6ff",
+        "background": "#0a0b0e"
+      },
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\console\\mobile-375.png",
+      "screenshotBytes": 88156
+    }
+  },
+  "console": [],
+  "exceptions": [],
+  "failedRequests": [],
+  "httpErrors": []
+}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { ChannelHealth, Receipt } from "@/lib/types";
 
-const TONE: Record<string, string> = { sent: "text-sky-400", link: "text-emerald-400", error: "text-red-400" };
+const TONE: Record<string, string> = { sent: "text-info", link: "text-success", error: "text-danger" };
 
 export default function Delivery() {
   const [rows, setRows] = useState<Receipt[]>([]);
@@ -19,8 +19,8 @@ export default function Delivery() {
       <div className="mt-4 grid grid-cols-2 gap-1 md:grid-cols-4">
         {Object.entries(health).map(([ch, h]) => (
           <div key={ch} className={`rounded border p-2 text-xs ${
-            h.state === "ok" ? "border-emerald-700" :
-            h.state === "link-only" ? "border-amber-700" : "border-white/10 opacity-50"}`}>
+            h.state === "ok" ? "border-success" :
+            h.state === "link-only" ? "border-warning" : "border-white/10 opacity-50"}`}>
             <p className="font-mono">{ch}</p>
             <p className="opacity-60">{h.reason || h.state}</p>
           </div>

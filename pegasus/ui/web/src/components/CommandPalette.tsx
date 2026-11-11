@@ -17,14 +17,14 @@ export function CommandPalette() {
   if (!open) {
     return (
       <button onClick={() => setOpen(true)} aria-label="Ask in plain English"
-        className="fixed bottom-5 right-5 z-40 grid h-12 w-12 place-items-center rounded-full bg-sky-600 shadow-lg">
+        className="fixed bottom-5 right-5 z-40 grid h-12 w-12 place-items-center rounded-full bg-primary text-accent-contrast shadow-lg">
         N
       </button>
     );
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 w-80 rounded-lg border border-white/15 bg-neutral-900 p-3 shadow-2xl">
+    <div className="fixed bottom-5 right-5 z-40 w-80 rounded-lg border border-line bg-surface p-3 shadow-2xl">
       <div className="flex justify-between text-xs opacity-60">
         <span>Ask in plain English</span>
         <button onClick={() => setOpen(false)}>x</button>
