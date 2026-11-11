@@ -1,0 +1,260 @@
+{
+  "loops": 12,
+  "passed": 12,
+  "failed": 0,
+  "total_s": 3244.1,
+  "results": [
+    {
+      "loop": 1,
+      "started": "22:05:14",
+      "typecheck": "PASS",
+      "typecheck_s": 112.4,
+      "pytest": "PASS",
+      "pytest_s": 87.2,
+      "pytest_tail": "======================= 45 passed, 2 warnings in 57.09s =======================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 22.2,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 239.3
+    },
+    {
+      "loop": 2,
+      "started": "22:09:13",
+      "typecheck": "PASS",
+      "typecheck_s": 119.1,
+      "pytest": "PASS",
+      "pytest_s": 73.8,
+      "pytest_tail": "======================= 45 passed, 2 warnings in 52.50s =======================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 21.9,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 475.5
+    },
+    {
+      "loop": 3,
+      "started": "22:13:10",
+      "typecheck": "PASS",
+      "typecheck_s": 128.0,
+      "pytest": "PASS",
+      "pytest_s": 84.8,
+      "pytest_tail": "======================= 45 passed, 2 warnings in 53.86s =======================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 31.0,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 745.5
+    },
+    {
+      "loop": 4,
+      "started": "22:17:40",
+      "typecheck": "PASS",
+      "typecheck_s": 135.3,
+      "pytest": "PASS",
+      "pytest_s": 79.2,
+      "pytest_tail": "======================= 45 passed, 2 warnings in 54.01s =======================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 31.7,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 1016.5
+    },
+    {
+      "loop": 5,
+      "started": "22:22:11",
+      "typecheck": "PASS",
+      "typecheck_s": 126.9,
+      "pytest": "PASS",
+      "pytest_s": 96.0,
+      "pytest_tail": "================== 45 passed, 2 warnings in 69.67s (0:01:09) ==================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 26.4,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 1291.7
+    },
+    {
+      "loop": 6,
+      "started": "22:26:46",
+      "typecheck": "PASS",
+      "typecheck_s": 152.5,
+      "pytest": "PASS",
+      "pytest_s": 82.9,
+      "pytest_tail": "======================= 45 passed, 2 warnings in 58.41s =======================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 35.4,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 1592.9
+    },
+    {
+      "loop": 7,
+      "started": "22:31:47",
+      "typecheck": "PASS",
+      "typecheck_s": 151.0,
+      "pytest": "PASS",
+      "pytest_s": 101.7,
+      "pytest_tail": "================== 45 passed, 2 warnings in 66.97s (0:01:06) ==================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 17.3,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 1875.6
+    },
+    {
+      "loop": 8,
+      "started": "22:36:30",
+      "typecheck": "PASS",
+      "typecheck_s": 187.7,
+      "pytest": "PASS",
+      "pytest_s": 201.9,
+      "pytest_tail": "================= 45 passed, 2 warnings in 124.33s (0:02:04) ==================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 17.2,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 2293.0
+    },
+    {
+      "loop": 9,
+      "started": "22:43:27",
+      "typecheck": "PASS",
+      "typecheck_s": 74.4,
+      "pytest": "PASS",
+      "pytest_s": 129.4,
+      "pytest_tail": "================= 45 passed, 2 warnings in 106.02s (0:01:46) ==================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 27.0,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 2553.6
+    },
+    {
+      "loop": 10,
+      "started": "22:47:48",
+      "typecheck": "PASS",
+      "typecheck_s": 101.7,
+      "pytest": "PASS",
+      "pytest_s": 99.7,
+      "pytest_tail": "================== 45 passed, 2 warnings in 67.63s (0:01:07) ==================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 26.9,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 2803.7
+    },
+    {
+      "loop": 11,
+      "started": "22:51:58",
+      "typecheck": "PASS",
+      "typecheck_s": 151.2,
+      "pytest": "PASS",
+      "pytest_s": 78.2,
+      "pytest_tail": "======================= 45 passed, 2 warnings in 53.95s =======================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 26.0,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 3084.7
+    },
+    {
+      "loop": 12,
+      "started": "22:56:39",
+      "typecheck": "PASS",
+      "typecheck_s": 68.6,
+      "pytest": "PASS",
+      "pytest_s": 59.1,
+      "pytest_tail": "======================= 45 passed, 2 warnings in 43.10s =======================",
+      "probes": {
+        "/api/health": 200,
+        "/": 200,
+        "/api/osint/catalog": 200,
+        "/api/metasploit/install/status": 200
+      },
+      "boot": "PASS",
+      "boot_s": 17.4,
+      "rules": 223,
+      "rules_ok": true,
+      "loop_ok": true,
+      "elapsed_s": 3244.0
+    }
+  ]
+}
