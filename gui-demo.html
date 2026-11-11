@@ -11,6 +11,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#07090d" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230c0f16'/%3E%3Cpath d='M18 3 7 18h6l-2 11 11-15h-6z' fill='%23ff5a1f'/%3E%3C/svg%3E" />
 <title>Pegasus Phantom Menace v2.2 — GUI Demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -47,7 +48,7 @@ code,pre,.mono{font-family:var(--font-mono)}
 a{color:var(--info);text-decoration:none} a:hover{text-decoration:underline}
 
 /* ============ APP SHELL ============ */
-.shell{display:grid;grid-template-columns:var(--sidebar-w) 1fr;grid-template-rows:var(--topbar-h) 1fr var(--bottombar-h);height:100vh}
+.shell{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);grid-template-rows:var(--topbar-h) 1fr var(--bottombar-h);height:100vh;min-width:0}
 
 /* ---- Sidebar ---- */
 .sidebar{grid-row:1/4;display:flex;flex-direction:column;background:var(--surface);border-right:1px solid var(--line);min-height:0}
@@ -83,20 +84,20 @@ a{color:var(--info);text-decoration:none} a:hover{text-decoration:underline}
 .op-menu:hover{color:var(--ink);border-color:var(--line2)}
 
 /* ---- Topbar ---- */
-.topbar{display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--surface);border-bottom:1px solid var(--line);position:relative}
+.topbar{display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--surface);border-bottom:1px solid var(--line);position:relative;min-width:0}
 .menu-toggle{display:none;background:none;border:1px solid var(--line);color:var(--ink);padding:6px 8px;border-radius:8px;cursor:pointer}
-.crumb{display:flex;align-items:center;gap:8px;min-width:0}
+.crumb{display:flex;align-items:center;gap:8px;min-width:0;flex:0 1 auto;overflow:hidden}
 .crumb .segment{font-family:var(--font-mono);font-size:11px;color:var(--ink-mute);letter-spacing:.1em;text-transform:uppercase}
-.crumb .current{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap}
+.crumb .current{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .breadcrumb-sep{color:var(--ink-mute)}
-.search{flex:1;max-width:520px;margin:0 auto;position:relative}
-.search input{width:100%;height:34px;background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:0 38px 0 34px;font-size:13px;font-family:var(--font-ui)}
+.search{flex:1 1 auto;max-width:520px;margin:0 auto;position:relative;min-width:0}
+.search input{width:100%;min-width:0;height:34px;background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:9px;padding:0 38px 0 34px;font-size:13px;font-family:var(--font-ui)}
 .search input::placeholder{color:var(--ink-mute)}
 .search input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 0 3px var(--signal-soft)}
 .search .kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:10px;color:var(--ink-mute);background:var(--surface3);border:1px solid var(--line2);border-radius:4px;padding:2px 6px}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-mute);pointer-events:none}
-.topbar-actions{display:flex;align-items:center;gap:10px}
-.device-pill{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--line);border-radius:9px;height:34px;padding:0 12px;cursor:pointer;color:var(--ink-dim);font-family:var(--font-mono);font-size:11.5px}
+.topbar-actions{display:flex;align-items:center;gap:10px;min-width:0;flex:0 1 auto}
+.device-pill{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--line);border-radius:9px;height:34px;padding:0 12px;cursor:pointer;color:var(--ink-dim);font-family:var(--font-mono);font-size:11.5px;min-width:0;flex:0 1 auto;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .device-pill:hover{color:var(--ink);border-color:var(--line2)}
 .device-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
 .icon-btn{position:relative;background:none;border:1px solid var(--line);color:var(--ink-dim);width:34px;height:34px;border-radius:9px;cursor:pointer;display:grid;place-items:center}
@@ -264,10 +265,11 @@ select.input{appearance:none}
 .palette-item .pr-cat{margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;color:var(--ink-mute);text-transform:uppercase}
 
 /* bottom bar */
-.bottombar{display:flex;align-items:center;gap:14px;padding:0 14px;background:#05070c;border-top:1px solid var(--line);font-family:var(--font-mono);font-size:10px;color:var(--ink-mute);overflow:hidden;white-space:nowrap}
+.bottombar{display:flex;align-items:center;gap:14px;padding:0 14px;background:#05070c;border-top:1px solid var(--line);font-family:var(--font-mono);font-size:10px;color:var(--ink-mute);overflow-x:auto;overflow-y:hidden;white-space:nowrap;min-width:0}
 .bottombar .b-item{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.bottombar::-webkit-scrollbar{height:0;display:none}
 .b-ok{color:var(--ok)} .b-warn{color:var(--warn)} .b-err{color:#ff8d97} .b-info{color:var(--info)}
-.auth-banner{margin-left:auto;color:#ffb59a;letter-spacing:.1em;display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.auth-banner{margin-left:auto;position:sticky;right:14px;background:#05070c;padding-left:14px;color:#ffb59a;letter-spacing:.1em;display:flex;align-items:center;gap:8px;flex:0 0 auto}
 
 /* footer badge strip */
 .badge-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -286,12 +288,19 @@ select.input{appearance:none}
 /* responsive */
 @media(max-width:1180px){.split{grid-template-columns:1fr}.kanban{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:900px){
-  .shell{grid-template-columns:1fr;grid-template-rows:var(--topbar-h) 1fr var(--bottombar-h)}
+  .shell{grid-template-columns:minmax(0,1fr);grid-template-rows:var(--topbar-h) 1fr var(--bottombar-h)}
   .sidebar{position:fixed;left:0;top:0;bottom:0;width:280px;z-index:60;transform:translateX(-105%);transition:transform .22s ease;box-shadow:var(--shadow)}
   .sidebar.open{transform:none}
   .menu-toggle{display:block}
-  .search{max-width:none;margin:0}
+  .search{max-width:none;margin:0;min-width:0}
   .search .kbd-hint,.health,.crumb .segment{display:none}
+  .topbar{gap:8px;padding:0 10px}
+  .topbar-actions{flex:0 0 auto}
+  .device-pill{padding:0 10px}
+  .device-pill .dev-label{display:none}
+  .bottombar{gap:10px;padding:0 10px}
+  .bottombar .b-item:nth-child(n+3){display:none}
+  .auth-banner{font-size:9px;letter-spacing:.06em}
   .stat-grid{grid-template-columns:repeat(2,1fr)}
   .content{padding:12px}
   .page-title{font-size:18px}
@@ -344,7 +353,7 @@ select.input{appearance:none}
       <span class="kbd-hint">/</span>
     </label>
     <div class="topbar-actions">
-      <button class="device-pill" id="devicePill" aria-label="Active device — tap to change"><span class="dot"></span>dev-emulator-01 · adb</button>
+      <button class="device-pill" id="devicePill" aria-label="Active device — tap to change"><span class="dot"></span><span class="dev-label">dev-emulator-01 · adb</span></button>
       <div class="health" title="Core services"><span class="pulse"></span>SYS 99.2</div>
       <button class="icon-btn" id="notifBtn" aria-label="Notifications (3)">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
