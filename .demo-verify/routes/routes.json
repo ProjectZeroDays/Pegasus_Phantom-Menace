@@ -8,7 +8,7 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 3227,
+      "textLength": 3231,
       "buttons": 23,
       "headings": [
         "Mission Control"
@@ -17,14 +17,12 @@
       "bodyStart": "PEGASUS PHANTOM MENACE v2.0.0 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
-      "failedRequests": 1,
-      "failedDetail": [
-        "net::ERR_ABORTED Document"
-      ],
+      "failedRequests": 0,
+      "failedDetail": [],
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_.png",
-      "screenshotBytes": 172219
+      "screenshotBytes": 172382
     },
     "/devices": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -47,7 +45,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_devices.png",
-      "screenshotBytes": 129548
+      "screenshotBytes": 129536
     },
     "/monitoring": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -56,7 +54,7 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 1485,
+      "textLength": 1487,
       "buttons": 21,
       "headings": [
         "Monitoring"
@@ -70,7 +68,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_monitoring.png",
-      "screenshotBytes": 140459
+      "screenshotBytes": 140581
     },
     "/access": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -79,7 +77,7 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 2033,
+      "textLength": 2035,
       "buttons": 19,
       "headings": [
         "Access Workflow"
@@ -93,7 +91,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_access.png",
-      "screenshotBytes": 177036
+      "screenshotBytes": 177146
     },
     "/workflows": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -102,7 +100,7 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 2460,
+      "textLength": 2462,
       "buttons": 17,
       "headings": [
         "Workflow Engine"
@@ -116,7 +114,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_workflows.png",
-      "screenshotBytes": 180477
+      "screenshotBytes": 180595
     },
     "/zero-click": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -125,7 +123,7 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 2164,
+      "textLength": 2166,
       "buttons": 31,
       "headings": [
         "Zero-Click & CVE"
@@ -139,7 +137,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_zero_click.png",
-      "screenshotBytes": 177461
+      "screenshotBytes": 177573
     },
     "/delivery": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -148,7 +146,7 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 1197,
+      "textLength": 1199,
       "buttons": 15,
       "headings": [
         "Delivery"
@@ -162,7 +160,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_delivery.png",
-      "screenshotBytes": 116503
+      "screenshotBytes": 116618
     },
     "/cve": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -171,7 +169,7 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 2165,
+      "textLength": 2167,
       "buttons": 31,
       "headings": [
         "Zero-Click & CVE"
@@ -185,7 +183,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_cve.png",
-      "screenshotBytes": 177340
+      "screenshotBytes": 177457
     },
     "/post-exploit": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -217,13 +215,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 3296,
+      "textLength": 3261,
       "buttons": 15,
       "headings": [
         "NSO Capability Parity"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.0.0 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -231,7 +229,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_capabilities.png",
-      "screenshotBytes": 206747
+      "screenshotBytes": 205604
     },
     "/physical": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -240,13 +238,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 1313,
+      "textLength": 1278,
       "buttons": 15,
       "headings": [
         "Physical Ops"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.0.0 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -254,7 +252,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_physical.png",
-      "screenshotBytes": 115683
+      "screenshotBytes": 114478
     },
     "/fastboot": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -263,13 +261,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 1302,
+      "textLength": 1267,
       "buttons": 15,
       "headings": [
         "Fastboot & FRP"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.0.0 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -277,7 +275,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_fastboot.png",
-      "screenshotBytes": 115278
+      "screenshotBytes": 114074
     },
     "/c2": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -286,13 +284,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 1913,
+      "textLength": 1878,
       "buttons": 23,
       "headings": [
         "C2 Infrastructure"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.0.0 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -300,446 +298,9 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_c2.png",
-      "screenshotBytes": 155468
+      "screenshotBytes": 154291
     },
     "/locations": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1415,
-      "buttons": 17,
-      "headings": [
-        "Locations"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_locations.png",
-      "screenshotBytes": 132806
-    },
-    "/geofences": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1391,
-      "buttons": 16,
-      "headings": [
-        "Geofences"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_geofences.png",
-      "screenshotBytes": 131828
-    },
-    "/calls": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1412,
-      "buttons": 21,
-      "headings": [
-        "Call Logs"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_calls.png",
-      "screenshotBytes": 132908
-    },
-    "/contacts": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1401,
-      "buttons": 17,
-      "headings": [
-        "Contacts"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_contacts.png",
-      "screenshotBytes": 130485
-    },
-    "/messages": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1394,
-      "buttons": 21,
-      "headings": [
-        "Messages"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_messages.png",
-      "screenshotBytes": 129868
-    },
-    "/browser": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1421,
-      "buttons": 17,
-      "headings": [
-        "Browser History"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_browser.png",
-      "screenshotBytes": 130457
-    },
-    "/apps": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1416,
-      "buttons": 18,
-      "headings": [
-        "Applications"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_apps.png",
-      "screenshotBytes": 130217
-    },
-    "/media": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1430,
-      "buttons": 19,
-      "headings": [
-        "Photos & Video"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_media.png",
-      "screenshotBytes": 130045
-    },
-    "/wifi": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1527,
-      "buttons": 17,
-      "headings": [
-        "Wi-Fi Networks"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_wifi.png",
-      "screenshotBytes": 139259
-    },
-    "/keylog": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1409,
-      "buttons": 17,
-      "headings": [
-        "Keystrokes"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_keylog.png",
-      "screenshotBytes": 132097
-    },
-    "/activity": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1449,
-      "buttons": 19,
-      "headings": [
-        "Activity Timeline"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_activity.png",
-      "screenshotBytes": 127495
-    },
-    "/keywords": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1470,
-      "buttons": 18,
-      "headings": [
-        "Keyword Tracking"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_keywords.png",
-      "screenshotBytes": 139954
-    },
-    "/payload-factory": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1395,
-      "buttons": 16,
-      "headings": [
-        "Payload Factory"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_payload_factory.png",
-      "screenshotBytes": 120001
-    },
-    "/payloads": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 2059,
-      "buttons": 24,
-      "headings": [
-        "Payloads"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_payloads.png",
-      "screenshotBytes": 173069
-    },
-    "/wordlists": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1609,
-      "buttons": 17,
-      "headings": [
-        "Wordlists"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_wordlists.png",
-      "screenshotBytes": 146688
-    },
-    "/sessions": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1945,
-      "buttons": 22,
-      "headings": [
-        "Sessions"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_sessions.png",
-      "screenshotBytes": 174783
-    },
-    "/campaigns": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1762,
-      "buttons": 19,
-      "headings": [
-        "Campaigns"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_campaigns.png",
-      "screenshotBytes": 151334
-    },
-    "/reports": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 1478,
-      "buttons": 18,
-      "headings": [
-        "Reports"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_reports.png",
-      "screenshotBytes": 143266
-    },
-    "/network-dashboard": {
-      "title": "Pegasus Phantom Menace v2 — Mission Control",
-      "innerWidth": 1280,
-      "innerHeight": 900,
-      "scrollWidth": 1280,
-      "scrollHeight": 900,
-      "horizontalOverflow": false,
-      "textLength": 2186,
-      "buttons": 30,
-      "headings": [
-        "Network Dashboard"
-      ],
-      "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
-      "consoleErrors": 0,
-      "consoleDetail": [],
-      "failedRequests": 0,
-      "failedDetail": [],
-      "httpErrors": 0,
-      "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_network_dashboard.png",
-      "screenshotBytes": 173450
-    },
-    "/tools": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
       "innerWidth": 1280,
       "innerHeight": 900,
@@ -757,8 +318,445 @@
       "failedDetail": [],
       "httpErrors": 0,
       "httpDetail": [],
-      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_tools.png",
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_locations.png",
       "screenshotBytes": 5292
+    },
+    "/geofences": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1393,
+      "buttons": 16,
+      "headings": [
+        "Geofences"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_geofences.png",
+      "screenshotBytes": 131991
+    },
+    "/calls": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1412,
+      "buttons": 21,
+      "headings": [
+        "Call Logs"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_calls.png",
+      "screenshotBytes": 132946
+    },
+    "/contacts": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1401,
+      "buttons": 17,
+      "headings": [
+        "Contacts"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_contacts.png",
+      "screenshotBytes": 130524
+    },
+    "/messages": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1394,
+      "buttons": 21,
+      "headings": [
+        "Messages"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_messages.png",
+      "screenshotBytes": 129895
+    },
+    "/browser": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1421,
+      "buttons": 17,
+      "headings": [
+        "Browser History"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_browser.png",
+      "screenshotBytes": 130507
+    },
+    "/apps": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1416,
+      "buttons": 18,
+      "headings": [
+        "Applications"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_apps.png",
+      "screenshotBytes": 130258
+    },
+    "/media": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1430,
+      "buttons": 19,
+      "headings": [
+        "Photos & Video"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_media.png",
+      "screenshotBytes": 130093
+    },
+    "/wifi": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1527,
+      "buttons": 17,
+      "headings": [
+        "Wi-Fi Networks"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_wifi.png",
+      "screenshotBytes": 139292
+    },
+    "/keylog": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1409,
+      "buttons": 17,
+      "headings": [
+        "Keystrokes"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_keylog.png",
+      "screenshotBytes": 132149
+    },
+    "/activity": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1449,
+      "buttons": 19,
+      "headings": [
+        "Activity Timeline"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_activity.png",
+      "screenshotBytes": 127538
+    },
+    "/keywords": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1470,
+      "buttons": 18,
+      "headings": [
+        "Keyword Tracking"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_keywords.png",
+      "screenshotBytes": 139994
+    },
+    "/payload-factory": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1395,
+      "buttons": 16,
+      "headings": [
+        "Payload Factory"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_payload_factory.png",
+      "screenshotBytes": 120042
+    },
+    "/payloads": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 2059,
+      "buttons": 24,
+      "headings": [
+        "Payloads"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_payloads.png",
+      "screenshotBytes": 173122
+    },
+    "/wordlists": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1609,
+      "buttons": 17,
+      "headings": [
+        "Wordlists"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_wordlists.png",
+      "screenshotBytes": 146735
+    },
+    "/sessions": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1945,
+      "buttons": 22,
+      "headings": [
+        "Sessions"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_sessions.png",
+      "screenshotBytes": 174824
+    },
+    "/campaigns": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1762,
+      "buttons": 19,
+      "headings": [
+        "Campaigns"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_campaigns.png",
+      "screenshotBytes": 151386
+    },
+    "/reports": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 1478,
+      "buttons": 18,
+      "headings": [
+        "Reports"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_reports.png",
+      "screenshotBytes": 143319
+    },
+    "/network-dashboard": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 2186,
+      "buttons": 30,
+      "headings": [
+        "Network Dashboard"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_network_dashboard.png",
+      "screenshotBytes": 173508
+    },
+    "/tools": {
+      "title": "Pegasus Phantom Menace v2 — Mission Control",
+      "innerWidth": 1280,
+      "innerHeight": 900,
+      "scrollWidth": 1280,
+      "scrollHeight": 900,
+      "horizontalOverflow": false,
+      "textLength": 5718,
+      "buttons": 107,
+      "headings": [
+        "Toolbox"
+      ],
+      "brokenImages": 0,
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "consoleErrors": 0,
+      "consoleDetail": [],
+      "failedRequests": 0,
+      "failedDetail": [],
+      "httpErrors": 0,
+      "httpDetail": [],
+      "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_tools.png",
+      "screenshotBytes": 173102
     },
     "/skills": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -767,13 +765,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 1462,
-      "buttons": 16,
+      "textLength": 7839,
+      "buttons": 51,
       "headings": [
         "Skills Catalog"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.0.0 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -781,7 +779,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_skills.png",
-      "screenshotBytes": 192559
+      "screenshotBytes": 192495
     },
     "/plugins": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -790,13 +788,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 3961,
+      "textLength": 3959,
       "buttons": 16,
       "headings": [
         "Plugins"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -804,7 +802,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_plugins.png",
-      "screenshotBytes": 203263
+      "screenshotBytes": 203193
     },
     "/commands": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -819,7 +817,7 @@
         "Command Center"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -827,7 +825,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_commands.png",
-      "screenshotBytes": 171621
+      "screenshotBytes": 171664
     },
     "/settings": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -836,13 +834,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 4207,
-      "buttons": 32,
+      "textLength": 4835,
+      "buttons": 34,
       "headings": [
         "Settings"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -850,7 +848,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_settings.png",
-      "screenshotBytes": 168875
+      "screenshotBytes": 173809
     },
     "/autonomous": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -865,7 +863,7 @@
         "Autonomous"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -873,7 +871,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_autonomous.png",
-      "screenshotBytes": 115988
+      "screenshotBytes": 116022
     },
     "/setup": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -890,7 +888,7 @@
         "Coder"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -898,7 +896,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_setup.png",
-      "screenshotBytes": 127175
+      "screenshotBytes": 127217
     },
     "/logs": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -907,13 +905,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 2560,
+      "textLength": 2562,
       "buttons": 36,
       "headings": [
         "Logs"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -921,7 +919,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_logs.png",
-      "screenshotBytes": 184796
+      "screenshotBytes": 184921
     },
     "/logs-dashboard": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -936,7 +934,7 @@
         "Logs Dashboard"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -944,7 +942,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_logs_dashboard.png",
-      "screenshotBytes": 168748
+      "screenshotBytes": 168776
     },
     "/admin-users": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -953,13 +951,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 1490,
-      "buttons": 19,
+      "textLength": 1674,
+      "buttons": 27,
       "headings": [
         "Admin Users"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -967,7 +965,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_admin_users.png",
-      "screenshotBytes": 138104
+      "screenshotBytes": 154773
     },
     "/social": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -982,7 +980,7 @@
         "Social Media Intelligence"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -990,7 +988,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_social.png",
-      "screenshotBytes": 182939
+      "screenshotBytes": 182863
     },
     "/relay": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1005,7 +1003,7 @@
         "Cloud Relay"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1013,7 +1011,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_relay.png",
-      "screenshotBytes": 164259
+      "screenshotBytes": 164289
     },
     "/pwa": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1028,7 +1026,7 @@
         "Progressive Web App"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1036,7 +1034,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_pwa.png",
-      "screenshotBytes": 169297
+      "screenshotBytes": 169335
     },
     "/tenants": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1051,7 +1049,7 @@
         "Multi-Tenant Architecture"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1059,7 +1057,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_tenants.png",
-      "screenshotBytes": 170035
+      "screenshotBytes": 170069
     },
     "/webhooks": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1074,7 +1072,7 @@
         "Webhooks"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1082,7 +1080,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_webhooks.png",
-      "screenshotBytes": 159427
+      "screenshotBytes": 159456
     },
     "/social-engineering": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1091,13 +1089,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 3056,
+      "textLength": 3054,
       "buttons": 17,
       "headings": [
         "Social Engineering Training"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1105,7 +1103,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_social_engineering.png",
-      "screenshotBytes": 184450
+      "screenshotBytes": 184386
     },
     "/login": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1118,7 +1116,7 @@
       "buttons": 16,
       "headings": [],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1126,7 +1124,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_login.png",
-      "screenshotBytes": 129279
+      "screenshotBytes": 129309
     },
     "/admin-login": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1139,7 +1137,7 @@
       "buttons": 16,
       "headings": [],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1147,7 +1145,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_admin_login.png",
-      "screenshotBytes": 132905
+      "screenshotBytes": 132943
     },
     "/wallets": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1162,7 +1160,7 @@
         "Wallet Profiles"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1170,7 +1168,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_wallets.png",
-      "screenshotBytes": 143125
+      "screenshotBytes": 143155
     },
     "/vault": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1185,7 +1183,7 @@
         "Encrypted Vault"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1193,7 +1191,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_vault.png",
-      "screenshotBytes": 141364
+      "screenshotBytes": 141408
     },
     "/wiki": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1208,7 +1206,7 @@
         "Wiki"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1216,7 +1214,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_wiki.png",
-      "screenshotBytes": 131058
+      "screenshotBytes": 131095
     },
     "/help": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1231,7 +1229,7 @@
         "Help"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1239,7 +1237,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_help.png",
-      "screenshotBytes": 138559
+      "screenshotBytes": 138590
     },
     "/howto": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1254,7 +1252,7 @@
         "How-To"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1262,7 +1260,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_howto.png",
-      "screenshotBytes": 140370
+      "screenshotBytes": 140420
     },
     "/bug-report": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1277,7 +1275,7 @@
         "Bug Reports"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1285,7 +1283,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_bug_report.png",
-      "screenshotBytes": 143766
+      "screenshotBytes": 143807
     },
     "/privacy": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1294,13 +1292,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 1500,
-      "buttons": 17,
+      "textLength": 1952,
+      "buttons": 22,
       "headings": [
         "Privacy Tooling"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1308,7 +1306,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_privacy.png",
-      "screenshotBytes": 133337
+      "screenshotBytes": 171942
     },
     "/tunnels": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1323,7 +1321,7 @@
         "Public Tunnels"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1331,7 +1329,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_tunnels.png",
-      "screenshotBytes": 129932
+      "screenshotBytes": 129979
     },
     "/cve-framework": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1346,7 +1344,7 @@
         "CVE Framework"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1354,7 +1352,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_cve_framework.png",
-      "screenshotBytes": 189190
+      "screenshotBytes": 189233
     },
     "/kyc": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1363,13 +1361,13 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 1801,
+      "textLength": 1799,
       "buttons": 18,
       "headings": [
         "KYC Onboarding"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1377,7 +1375,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_kyc.png",
-      "screenshotBytes": 163186
+      "screenshotBytes": 163246
     },
     "/osint": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -1392,7 +1390,7 @@
         "OSINT Search Engines"
       ],
       "brokenImages": 0,
-      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.1 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
+      "bodyStart": "PEGASUS PHANTOM MENACE v2.3.2 ACTIVE DEVICE no devices attached — COMMAND Mission Control Autonomous Devices Monitoring Physical Ops Fastboot & FRP ACCESS & EXP",
       "consoleErrors": 0,
       "consoleDetail": [],
       "failedRequests": 0,
@@ -1400,7 +1398,7 @@
       "httpErrors": 0,
       "httpDetail": [],
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\routes\\_osint.png",
-      "screenshotBytes": 170555
+      "screenshotBytes": 170603
     }
   }
 }

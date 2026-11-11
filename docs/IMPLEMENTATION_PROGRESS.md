@@ -2,6 +2,18 @@
 
 ## Current Status
 
+### ✅ RELEASE 2.3.2 (2026-11-11)
+
+- Release **v2.3.2** published with Setup, Portable, blockmap and latest.yml; `releases/latest -> v2.3.2`, `draft=false`, `prerelease=false`
+- npm `@ProjectZeroDays/pegasus-desktop@2.3.2` published to GitHub Packages
+- Twelve-loop test and debug pass **12/12** - typecheck, pytest (45 passed) and a live boot green on every iteration, route count asserted at 223
+- The console now matches its backend: the browser sweep over all **61** console routes reports `consoleErrors 0` and `httpErrors 0`; the backend boots at **299 routes** with no duplicate endpoint/method pair
+- The four route modules that were written but never registered are now wired in; the nine endpoint families the console always called now exist in `platform_routes.py`, built from the real sources
+- The operator gate is now uniformly opt-in via `PEGASUS_REQUIRE_AUTH` - the default local single-operator console behaves like every other route, and setting the flag restores the strict behaviour everywhere
+- The Metasploit RPC daemon can be registered to start at login - a scheduled task is tried first, the per-user Startup folder is the elevation-free fallback, and the generated launcher resolves the RPC password at run time
+- Packaged tree verified: `PACKAGED_232_OK` (23/23) and `INSTALL_SMOKE_OK` against the real installer - 13/13 resources, ten endpoints at 200, launcher alive at 18 s
+- The GUI demo renders at 375 px and the console carries one signal colour on graphite
+
 ### ✅ RELEASE 2.3.0 (2026-11-11)
 
 - Release **v2.3.0** published with Setup, Portable, blockmap and latest.yml; `releases/latest -> v2.3.0`, `draft=false`, `prerelease=false`

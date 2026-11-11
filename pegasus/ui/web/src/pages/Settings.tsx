@@ -106,6 +106,34 @@ export default function Settings() {
     }
   };
 
+  // Metasploit startup entry - the RPC daemon has to survive a reboot.
+  // The backend registers a Windows scheduled task that runs a launcher
+  // which resolves the RPC password at run time.
+  const msfAutostart = useApi<{
+    autostart: boolean;
+    task: string;
+    launcher: string;
+    detail?: string;
+  }>("/metasploit/autostart", { interval: 30000 });
+  const [msfAutostartBusy, setMsfAutostartBusy] = useState(false);
+  const [msfAutostartMsg, setMsfAutostartMsg] = useState<string | null>(null);
+  const toggleMsfAutostart = async () => {
+    setMsfAutostartBusy(true);
+    setMsfAutostartMsg(null);
+    const enabled = !msfAutostart.data?.autostart;
+    try {
+      const r = await api.post<{ autostart: boolean; task: string; detail?: string }>(
+        "/metasploit/autostart", { enabled, confirm: true },
+      );
+      setMsfAutostartMsg(r.autostart ? `registered ${r.task}` : `removed ${r.task}`);
+      void msfAutostart.refresh();
+    } catch (e: any) {
+      setMsfAutostartMsg(`error: ${e?.message ?? "autostart failed"}`);
+    } finally {
+      setMsfAutostartBusy(false);
+    }
+  };
+
   // Telegram remote control
   const tg = useApi<{ configured: boolean; running: boolean; bot: string | null; chatId: string | null }>("/telegram/status", { interval: 20000 });
   const [tgToken, setTgToken] = useState("");
@@ -294,6 +322,21 @@ export default function Settings() {
           </Button>
           <Button size="sm" onClick={() => void msfInstall.refresh()}>Re-detect</Button>
         </div>
+        <div className="row" style={{ gap: 8, marginTop: 8 }}>
+          <Button size="sm" disabled={msfAutostartBusy} onClick={() => void toggleMsfAutostart()}>
+            {msfAutostartBusy
+              ? "working…"
+              : msfAutostart.data?.autostart
+                ? "Remove startup entry"
+                : "Start at login"}
+          </Button>
+          <Button size="sm" onClick={() => void msfAutostart.refresh()}>Re-check</Button>
+        </div>
+        <div className="mono tiny" style={{ marginTop: 6, opacity: 0.7 }}>
+          Registers a Windows scheduled task so msfrpcd comes back after a reboot. The RPC password is
+          read at run time and never written into the task.
+        </div>
+        {msfAutostartMsg && <div className="mono tiny" style={{ marginTop: 6 }}>{msfAutostartMsg}</div>}
         <div className="mono tiny" style={{ marginTop: 6, opacity: 0.7 }}>
           Downloads the official Metasploit release and runs the silent MSI install into {" "}
           {msfInstall.data?.install.install_dir ?? "~/.pegasus/tools/metasploit"}. Installing may need elevation.

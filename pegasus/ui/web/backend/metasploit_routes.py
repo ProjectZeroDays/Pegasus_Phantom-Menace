@@ -212,6 +212,33 @@ def register(app, ok, fail):
         result = services.start_msfrpcd()
         return ok({"service": result, "status": _status()})
 
+    @app.get("/api/metasploit/autostart")
+    def metasploit_autostart_status():
+        """Whether the RPC daemon is registered to start at logon."""
+        from pegasus.core import services
+
+        return ok(services.msfrpcd_autostart_status())
+
+    @app.post("/api/metasploit/autostart")
+    def metasploit_autostart_set():
+        """Register or remove the msfrpcd startup entry.
+
+        Nothing is written without ``confirm`` - the console never takes a
+        silent system-changing action.  The RPC password is resolved by the
+        generated launcher at run time, so it never reaches the task
+        definition.
+        """
+        body = request.get_json(silent=True) or {}
+        if not body.get("confirm"):
+            return fail("startup registration requires confirm=true", 409)
+        from pegasus.core import services
+
+        enabled = bool(body.get("enabled", True))
+        result = services.msfrpcd_autostart(enabled)
+        if enabled and not result.get("autostart"):
+            return fail(result.get("detail") or "could not register the startup entry", 502)
+        return ok(result)
+
     @app.get("/api/metasploit/install/status")
     def metasploit_install_status():
         return ok({"install": _detect_install(),
