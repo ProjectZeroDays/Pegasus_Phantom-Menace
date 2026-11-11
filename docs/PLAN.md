@@ -575,3 +575,15 @@ Push blocked: none
 Next: cutting v2.3.1 so the installers carry the current console bundle, an autostart entry for msfrpcd, the browser verification of the Admin Users, OSINT, wallet, vault, KYC and PWA surfaces, and the 497 Dependabot advisories
 Author: Trey A. Smith | Authenticated, Inc. | @projectzerodays
 Notes: verified evidence - the console capture against the real backend reports consoleErrors 0, failedRequests 0 and httpErrors 0 with no horizontal overflow at 1280 px or 375 px; the live probes report GET /api/metasploit/status connected=true with detail "rpc login accepted" and GET /api/metasploit/install/status detecting the Scoop install with installed=true. Honest corrections - the earlier handoff claimed msfrpcd had no first-run install UX, which the live probes disprove: the backend install flow, the quoted embedded ruby invocation and the Windows-safe omission of -S were all already in place, and what genuinely remains is an autostart entry. Also outstanding - the released v2.3.0 installers carry the bundle from before the Metasploit install panel, so a follow-up release is needed for that panel to ship in an installer; the live GitHub PAT still has to be revoked on the GitHub side; and the legacy PATH shim needs an elevated shell to repair.
+
+## 68. HANDOFF
+
+Project: Pegasus Phantom Menace v2.3.1 / installers that carry the Metasploit install panel
+Status: verified - release v2.3.1 published with four API-verified assets and marked latest, the packaged tree asserts every fix, and the install smoke passes against the real installer
+Features: v2.3.0 shipped the graphite + single signal console, the /api/workflows endpoints and the deduplicated backend, but its installers were built before the Metasploit install panel reached the console, so that panel was in no published installer; v2.3.1 carries the current bundle - assets/index-BPYC7NJO.js and assets/index-6v_3llJR.css - and every version surface reads 2.3.1, including the desktop npm package
+Log: log/events.jsonl
+Release: v2.3.1 published - releases/latest -> v2.3.1; npm @ProjectZeroDays/pegasus-desktop@2.3.1 published to GitHub Packages
+Push blocked: none
+Next: an autostart entry for msfrpcd, the browser verification of the Admin Users, PWA, OSINT, wallet, vault and KYC surfaces, and the 497 Dependabot advisories
+Author: Trey A. Smith | Authenticated, Inc. | @projectzerodays
+Notes: verified evidence - PACKAGED_231_OK asserts the unpacked tree, and INSTALL_SMOKE_OK proves the installed per-user root answers /api/health, /, /manifest.webmanifest, /api/osint/catalog, /api/workflows and /api/metasploit/install/status with the launcher still alive at 18 seconds; the release API reports draft=false, prerelease=false, releases/latest -> v2.3.1 and all four assets uploaded; npm view reports versions 2.2.1, 2.2.4, 2.3.0 and 2.3.1. Honest caveats - msfrpcd still has no autostart entry, so the daemon has to be started by hand after a reboot; the 497 Dependabot advisories are untouched; the live GitHub PAT still has to be revoked on the GitHub side; and the legacy PATH shim needs an elevated shell to repair.
