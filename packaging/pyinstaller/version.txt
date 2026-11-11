@@ -1,7 +1,7 @@
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(2, 2, 4, 0),
-    prodvers=(2, 2, 4, 0),
+    filevers=(2, 3, 0, 0),
+    prodvers=(2, 3, 0, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -17,12 +17,12 @@ VSVersionInfo(
           StringStruct('Comments', 'Pegasus CLI v1.4'),
           StringStruct('CompanyName', 'ProjectZeroDays'),
           StringStruct('FileDescription', 'Pegasus Android Device Management & Security Tool'),
-          StringStruct('FileVersion', '2.2.4'),
+          StringStruct('FileVersion', '2.3.0'),
           StringStruct('InternalName', 'Pegasus'),
           StringStruct('LegalCopyright', 'MIT License - ProjectZeroDays'),
           StringStruct('OriginalFilename', 'Pegasus-v1.4.exe'),
           StringStruct('ProductName', 'Pegasus Pro'),
-          StringStruct('ProductVersion', '2.2.4')
+          StringStruct('ProductVersion', '2.3.0')
         ]
       )
     ]),
