@@ -69,3 +69,11 @@ electron/build/
 dist/PegasusPhantomMenace/
 Pegasus_Phantom-Menace-main.zip
 PegasusPhantomMenace-main.zip
+
+# Stray local scratch files (never committed)
+pr_body.md
+.pytest-tmp/
+gh
+
+# Generated source archive - published on the v2.1.0 release, not in git
+dist/pegasus-source-v2.1.0.zip

@@ -64,11 +64,25 @@ def public_url() -> str:
 # Structured settings
 # ---------------------------------------------------------------------------
 
+def _app_version() -> str:
+    """Read the single source of truth for the version: pegasus/VERSION."""
+    here = Path(__file__).resolve()
+    for parent in here.parents[:4]:
+        candidate = parent / "VERSION"
+        try:
+            value = candidate.read_text(encoding="utf-8").strip()
+            if value:
+                return value
+        except Exception:
+            continue
+    return "0.0.0"
+
+
 class AppSettings(BaseModel):
     """Application-level settings."""
 
     name: str = "Pegasus Phantom Menace"
-    version: str = "2.1.1"
+    version: str = _app_version()
     debug: bool = False
     workspace: Path = _HOME
     log_level: str = "INFO"

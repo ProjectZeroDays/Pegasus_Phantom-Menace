@@ -11,8 +11,6 @@ delivery_health, and Flask aborts on a repeated endpoint name.
 from __future__ import annotations
 
 import socket
-import time
-from pathlib import Path
 
 from flask import Response, request, session
 
@@ -310,29 +308,3 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
             return fail("catalog builder unavailable", 503)
         return ok(module.build(key, stage=bool(body.get("stage"))))
 
-    # -- delivery receipts -----------------------------------------------
-    @app.get("/api/delivery/receipts")
-    @_require_token
-    def dr_delivery_receipts():
-        try:
-            from pegasus.modules.delivery import receipts
-        except Exception:
-            return ok({"receipts": []})
-        if not hasattr(receipts, "recent"):
-            return ok({"receipts": []})
-        return ok({"receipts": receipts.recent(int(request.args.get("limit", 200)))})
-
-    # -- setup aliases ---------------------------------------------------
-    @app.get("/api/setup/state")
-    @_require_token
-    def dr_setup_state():
-        from pegasus.modules.ai import providers
-        return ok({"needsSetup": providers.needs_setup()})
-
-    @app.post("/api/setup/skip")
-    @_require_token
-    def dr_setup_skip():
-        marker = Path(get_settings().get_workspace_path()) / ".setup-skip"
-        marker.parent.mkdir(parents=True, exist_ok=True)
-        marker.write_text(str(time.time()), encoding="utf-8")
-        return ok({"skipped": True})
