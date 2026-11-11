@@ -433,6 +433,9 @@ running code, not against a plan.
 | CLI version honesty | `pegasus version` reads `pegasus/VERSION` instead of a hardcoded string | reports the real release version |
 | Release | **v2.3.0** published with Setup, Portable, blockmap and latest.yml | `draft=false`, `prerelease=false`, `releases/latest -> v2.3.0`; Setup 80,566,941 B, Portable 72,584,400 B, blockmap 84,761 B, latest.yml 368 B |
 | npm | `@ProjectZeroDays/pegasus-desktop@2.3.0` published to GitHub Packages | `npm view` -> `['2.2.1', '2.2.4', '2.3.0']`; tag latest, public access |
+| Install smoke | The 2.3.0 installer installs and the installed tree serves the console | `INSTALL_SMOKE_OK` - 12/12 resources in the per-user root, `GET /api/health` 200, `GET /` 200, `/manifest.webmanifest` 200, `/api/osint/catalog` 200, `/api/workflows` 200, launcher alive at 18 s |
+| Repo cleanup | PyInstaller output, the unreferenced vendored zip and three stray root binaries untracked and ignored; stale local servers stopped | `build/web/`, `weapons/.../icons_pack.zip` and the three binaries are now ignored - the files stay on disk and remain recoverable from history |
+| Metasploit install UX | The console can now detect and install the RPC daemon | `Settings.tsx` surfaces `/metasploit/install/status` and posts to `/metasploit/install`; the backend already quoted the embedded ruby invocation and omitted `-S` on Windows |
 | Packaged tree | The shipped binary provably carries every fix | `PACKAGED_230_OK`, 23/23 checks - non-daemon launcher, `server.join()`, no machine-specific path, the SPA import, the rebuilt bundle, `pegasus/VERSION` 2.3.0 |
 
 ### GUI / Frontend - still open
@@ -442,21 +445,18 @@ running code, not against a plan.
 - The Exit-Strategy fork (`Pegasus_Exit-Strategy/`) has only been verified through HTTP probes; it has never been rendered in a browser.
 
 ### Verification & Release - still open
-- **No install smoke test has been run against the 2.3.0 installer.** The 2.2.4 build produced `INSTALL_SMOKE_OK` (10/10 resources in the per-user root, four HTTP probes at 200, launcher still alive at 18 s); v2.3.0 carries the same packaged fixes but has only been asserted statically (`PACKAGED_230_OK`). The NSIS installer writes to the **per-user** root `%LOCALAPPDATA%\Programs\Pegasus Phantom Menace` and leaves `Program Files` empty, and upgrading over an existing build returns exit 1223 unless the previous build is uninstalled first.
 - Dependabot reports 497 advisories on the default branch (16 critical, 204 high) - untouched, and out of scope for the slices so far.
-- The `MemoryPrimitives` submodule is deliberately left dirty and unexamined.
+- `agents/specialized/MemoryPrimitives` is a **dangling gitlink**: the parent records it as mode 160000 at `b70656bc9cca82d8e4137917bfa27b98db6ad1e0`, which is the nested repository's current HEAD, but there is no `.gitmodules` entry and the nested repository has no remote. Its working tree carries uncommitted changes (`memory_primitives.py`, two test files and a new `__init__.py`) that exist only on this machine. De-gitlinking it would require deleting the nested `.git` directory and would destroy that history, so the entry stays a gitlink and the state is recorded rather than rewritten.
 
 ### Security and credentials - still open
 - **The GitHub PAT `ghp_<REDACTED-ROTATE-THIS-TOKEN>` is still live.** It is no longer in `remote.origin.url` and no literal remains in any tracked file, but it was exposed for the whole engagement and has to be revoked on the GitHub side. The tooling now authenticates through the Windows credential manager (`gh auth setup-git`, `credential.helper=manager`) using a keyring `gho_` token, so the PAT is redundant - revoke it.
 - The legacy `C:\Program Files\Pegasus Phantom Menace v2` install (30 October) still owns `pegasus` on PATH. Its bundled venv carries only colorama and psutil, so `pegasus menu` fails with `ModuleNotFoundError: No module named 'click'`. Both the venv's `site-packages` and the `launchers` directory raise `PermissionError` from a non-elevated shell, so the repair needs an elevated shell. The system Python can already drive the CLI (`python -m pegasus.core --help` exits 0 with click 8.4.2, rich, flask and requests present), so the fix is to repoint `pegasus.bat` at the repo and the system interpreter, to `pip install -r requirements.txt` into the legacy venv, or to uninstall the legacy tree.
 
 ### Tooling - still open
-- **msfrpcd still has no first-run install UX.** The RPC client works - `login -> ok:True, result:'success'` on `https://127.0.0.1:55553/api/` and `GET /api/metasploit/status -> connected:True` - but a fresh machine has to install and configure the daemon by hand. The legacy Scoop `msfrpcd.BAT` calls `ruby %FRAMEWORK%\%CMD%` unquoted and dies on paths with spaces, and msfrpcd's `-S` background flag is unsupported on Windows ("Background mode is not available on this platform").
+- **msfrpcd has no autostart entry.** The install and start flow is complete and live: `GET /api/metasploit/install/status` detects the hand-installed, Scoop and Chocolatey layouts, `POST /api/metasploit/install` downloads the official MSI behind a `confirm` gate and can run the silent `msiexec`, `POST /api/metasploit/start` launches the daemon and only reports "online" after a real RPC login, and the console Settings panel now surfaces the detection, the install action and the result. `services.msfrpcd_command()` invokes the embedded ruby and the msfrpcd script fully quoted, because the Scoop and Chocolatey wrapper's unquoted `ruby %FRAMEWORK%\%CMD%` dies on a path with a space, and `services.start_msfrpcd()` omits `-S` on Windows, where msfrpcd logs "Background mode is not available on this platform" and exits instead of listening. What is still missing is a registered autostart entry, so the daemon has to be started by hand after a reboot.
 
 ### Housekeeping - still open
-- `build/web/Pegasus-Web/base_library.zip` and the vendored `weapons/.../icons_pack.zip` remain tracked - pre-existing source artefacts, not build output, but worth pruning in a cleanup pass.
-- Three stray binaries sit untracked in the repository root: `Gemini_Generated_Gif_crtqyocrtqyocrtq.gif`, `Gemini_Generated_Image_43iwoj43iwoj43iw.jpg` and `LinesAndLogos_animated.gif`. They need either a gitignore rule or a move into the web public directory if the console uses them.
-- Stale local servers are still running and should be stopped: `http.server 8765` (twice), `http.server 8137` and `http.server 8799`.
+- The repository cleanup is done. The PyInstaller output under `build/web/`, the unreferenced vendored `weapons/.../icons_pack.zip` and the three stray root-level binaries are untracked and ignored, the files stay on disk and remain recoverable from history, and the four stale local static servers were stopped. Nothing remains on this list.
 
 ## Conclusion
 
