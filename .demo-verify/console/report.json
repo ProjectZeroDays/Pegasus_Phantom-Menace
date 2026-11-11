@@ -10,14 +10,14 @@
       "scrollWidth": 1280,
       "scrollHeight": 900,
       "horizontalOverflow": false,
-      "textLength": 3227,
+      "textLength": 3212,
       "hasPegasus": true,
       "headings": [
         "Mission Control"
       ],
       "links": 127,
       "buttons": 23,
-      "panels": 6,
+      "panels": 5,
       "images": 1,
       "brokenImages": [],
       "background": "rgb(10, 11, 14)",
@@ -30,7 +30,7 @@
         "background": "#0a0b0e"
       },
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\console\\desktop-1280.png",
-      "screenshotBytes": 172219
+      "screenshotBytes": 173690
     },
     "mobile-375": {
       "title": "Pegasus Phantom Menace v2 — Mission Control",
@@ -41,14 +41,14 @@
       "scrollWidth": 375,
       "scrollHeight": 812,
       "horizontalOverflow": false,
-      "textLength": 3227,
+      "textLength": 3212,
       "hasPegasus": true,
       "headings": [
         "Mission Control"
       ],
       "links": 127,
       "buttons": 23,
-      "panels": 6,
+      "panels": 5,
       "images": 1,
       "brokenImages": [],
       "background": "rgb(10, 11, 14)",
@@ -119,7 +119,7 @@
         "background": "#0a0b0e"
       },
       "screenshot": "C:\\Projects\\Pegasus_Phantom-Menace\\.demo-verify\\console\\mobile-375.png",
-      "screenshotBytes": 88156
+      "screenshotBytes": 88487
     }
   },
   "console": [],

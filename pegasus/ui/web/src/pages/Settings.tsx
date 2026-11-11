@@ -65,6 +65,47 @@ export default function Settings() {
     { interval: 15000 },
   );
 
+  // Metasploit install - what is on this host and what the official release
+  // would install.  The backend detects the hand-installed, Scoop and
+  // Chocolatey layouts, so a host that already has the framework is reported
+  // rather than reinstalled.
+  const msfInstall = useApi<{
+    install: {
+      installed: boolean;
+      binaries: string[];
+      msfrpcd: string;
+      msfconsole: string;
+      install_dir: string;
+      version: string | null;
+      sha256: string | null;
+    };
+    tools_dir: string;
+  }>("/metasploit/install/status", { interval: 30000 });
+  const [msfInstallBusy, setMsfInstallBusy] = useState(false);
+  const [msfInstallMsg, setMsfInstallMsg] = useState<string | null>(null);
+  const installMetasploit = async () => {
+    setMsfInstallBusy(true);
+    setMsfInstallMsg(null);
+    try {
+      const r = await api.post<{
+        installed?: boolean;
+        detail?: string;
+        plan?: { version?: string; asset?: string; size?: number };
+        downloaded?: { bytes?: number; sha256?: string };
+      }>("/metasploit/install", { confirm: true, install: true });
+      const sha = r.downloaded?.sha256 ? ` sha256 ${r.downloaded.sha256.slice(0, 12)}` : "";
+      setMsfInstallMsg(
+        `${r.installed ? "installed" : "downloaded"} ${r.plan?.version ?? "metasploit"} - ${r.detail ?? "done"}${sha}`,
+      );
+      void msfInstall.refresh();
+      void msf.refresh();
+    } catch (e: any) {
+      setMsfInstallMsg(`error: ${e?.message ?? "install failed"}`);
+    } finally {
+      setMsfInstallBusy(false);
+    }
+  };
+
   // Telegram remote control
   const tg = useApi<{ configured: boolean; running: boolean; bot: string | null; chatId: string | null }>("/telegram/status", { interval: 20000 });
   const [tgToken, setTgToken] = useState("");
@@ -238,6 +279,26 @@ export default function Settings() {
             </div>
           </div>
         </div>
+        <div className="mono tiny" style={{ marginTop: 10, opacity: 0.8 }}>
+          {msfInstall.data
+            ? msfInstall.data.install.installed
+              ? `metasploit present · ${msfInstall.data.install.msfrpcd || "msfrpcd not found"}${
+                  msfInstall.data.install.version ? ` · ${msfInstall.data.install.version}` : ""
+                }`
+              : "metasploit not detected on this host"
+            : "probing for a metasploit install…"}
+        </div>
+        <div className="row" style={{ gap: 8, marginTop: 8 }}>
+          <Button size="sm" disabled={msfInstallBusy} onClick={() => void installMetasploit()}>
+            {msfInstallBusy ? "installing…" : "Install Metasploit"}
+          </Button>
+          <Button size="sm" onClick={() => void msfInstall.refresh()}>Re-detect</Button>
+        </div>
+        <div className="mono tiny" style={{ marginTop: 6, opacity: 0.7 }}>
+          Downloads the official Metasploit release and runs the silent MSI install into {" "}
+          {msfInstall.data?.install.install_dir ?? "~/.pegasus/tools/metasploit"}. Installing may need elevation.
+        </div>
+        {msfInstallMsg && <div className="mono tiny" style={{ marginTop: 6 }}>{msfInstallMsg}</div>}
       </Panel>
 
               <Button size="sm" onClick={() => void saveAgentCfg()}>Save agent config</Button>
