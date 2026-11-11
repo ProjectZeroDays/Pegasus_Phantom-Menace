@@ -56,7 +56,7 @@ export default function CommandCenter() {
       />
 
       <div className="stat-grid">
-        <Stat value={data?.commands.length ?? "—"} label="Registered commands" tone="info" />
+        <Stat value={data?.commands?.length ?? "—"} label="Registered commands" tone="info" />
         <Stat value={plugins.length - 1} label="Owning plugins" />
         <Stat value={rows.length} label="Visible after filter" />
         <Stat value="isolated" label="Execution model" hint="thread per job" />
@@ -85,9 +85,9 @@ export default function CommandCenter() {
                   <Badge tone="primary">{cmd.plugin}</Badge>
                 </div>
                 <div className="cmd-desc">{cmd.description}</div>
-                {cmd.aliases.length > 0 && (
+                {(cmd.aliases ?? []).length > 0 && (
                   <div className="tag-row">
-                    {cmd.aliases.map((alias) => <span className="tag" key={alias}>{alias}</span>)}
+                    {(cmd.aliases ?? []).map((alias) => <span className="tag" key={alias}>{alias}</span>)}
                   </div>
                 )}
                 <div className="row">

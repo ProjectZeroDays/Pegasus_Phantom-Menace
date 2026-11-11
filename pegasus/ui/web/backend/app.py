@@ -265,6 +265,10 @@ from pegasus.ui.web.backend import daemon_routes
 from pegasus.ui.web.backend import cve_routes
 from pegasus.ui.web.backend import kyc_routes
 from pegasus.ui.web.backend import osint_routes
+from pegasus.ui.web.backend import physical_routes
+from pegasus.ui.web.backend import fastboot_routes
+from pegasus.ui.web.backend import tool_routes
+from pegasus.ui.web.backend import platform_routes
 from pegasus.ui.web.backend import workflow_routes
 
 
@@ -357,6 +361,15 @@ def create_app() -> Flask:
     cve_routes.register(app, ok, fail)
     kyc_routes.register(app, ok, fail)
     osint_routes.register(app, ok, fail)
+    # Physical device control (physical_routes): /api/physical/*
+    physical_routes.register(app, ok, fail)
+    # Bootloader surfaces (fastboot_routes): /api/fastboot/*
+    fastboot_routes.register(app, ok, fail)
+    # Tooling management (tool_routes): /api/tools/*
+    tool_routes.register(app, ok, fail)
+    # Platform surfaces (platform_routes): infrastructure,
+    # payloads, skills, campaigns, network and telegram
+    platform_routes.register(app, ok, fail)
     # Workflow runs (workflow_routes): /api/workflows, /api/workflows/run
     workflow_routes.register(app, ok, fail)
 
@@ -390,11 +403,6 @@ def create_app() -> Flask:
 
     @app.get("/api/system/tools")
     def system_tools():
-        return ok({"tools": scan_tools()})
-
-    # Aliases probed by smoke scripts / external clients
-    @app.get("/api/tools/status")
-    def tools_status_alias():
         return ok({"tools": scan_tools()})
 
     @app.get("/api/environment")

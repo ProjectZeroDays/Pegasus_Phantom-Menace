@@ -77,7 +77,7 @@ export default function Capabilities() {
       />
 
       <div className="stat-grid">
-        <Stat value={parity ? `${parity.coverage_percent}%` : "—"} label="Parity" hint={parity && parity.gaps.length ? `gaps: ${parity.gaps.join(", ")}` : "no gaps"} tone={parity?.coverage_percent === 100 ? "ok" : "warn"} />
+        <Stat value={parity ? `${parity.coverage_percent}%` : "—"} label="Parity" hint={parity && parity.gaps?.length ? `gaps: ${parity.gaps?.join(", ")}` : "no gaps"} tone={parity?.coverage_percent === 100 ? "ok" : "warn"} />
         <Stat value={capabilities.length} label="Capabilities" hint={`${categories.length} categories`} tone="info" />
         <Stat value={capabilities.filter((c) => c.parity === "native").length} label="Native" hint="direct device control" tone="ok" />
         <Stat value={capabilities.filter((c) => c.parity === "shell" || c.parity === "partial").length} label="Constrained" hint="permission or tooling limits" tone="warn" />
@@ -100,8 +100,8 @@ export default function Capabilities() {
                   </td>
                   <td><Badge tone={capability.parity === "native" ? "ok" : "warn"}>{capability.parity}</Badge></td>
                   <td className="mono tiny">{capability.target}</td>
-                  <td className="tiny" style={{ color: capability.resolve.available ? "var(--ok)" : "var(--danger)" }}>
-                    {capability.resolve.available ? "available" : "missing"}
+                  <td className="tiny" style={{ color: capability.resolve?.available ? "var(--ok)" : "var(--danger)" }}>
+                    {capability.resolve?.available ? "available" : "missing"}
                   </td>
                   <td>
                     {RUNNABLE.has(capability.key) ? (

@@ -44,7 +44,7 @@ export default function NetworkDashboard() {
     setBusy(key);
     setResult(null);
     try {
-      await api.post(`/network/toggle`, { key, value: !status[key] });
+      await api.post(`/network/scan`, { key, value: !status[key] });
       setStatus((s) => ({ ...s, [key]: !s[key] }));
       setResult(`${key} toggled`);
     } catch (e: any) {

@@ -139,7 +139,7 @@ export default function Settings() {
   };
   const sendTelegramPing = async () => {
     try {
-      await api.post("/telegram/message", { text: "Pegasus test ping — remote control is live." });
+      await api.post("/oauth/telegram/verify", { text: "Pegasus test ping — remote control is live." });
       setTgResult("test message sent");
     } catch (e: any) {
       setTgResult(`error: ${e?.message ?? "failed"}`);
@@ -157,7 +157,7 @@ export default function Settings() {
       const best = recs.data?.models?.find(m => m.fits) ?? recs.data?.models?.[0];
       if (!best) return;
       await api.post("/models/download", { model: best.id, filename: best.files?.[0] ?? "" });
-      await api.post("/models/select", { model: best.id, filename: best.files?.[0] ?? "" });
+      await api.post("/models/download", { model: best.id, filename: best.files?.[0] ?? "" });
     } finally {
       setDownloading(false);
     }

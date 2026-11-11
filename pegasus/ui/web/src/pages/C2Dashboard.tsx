@@ -96,7 +96,7 @@ export default function C2Dashboard() {
   const sendCommand = () => run(async () => {
     const cmd = prompt("adb shell command:");
     if (!cmd) return;
-    return await api.post("/api/command", { name: "session-command", args: [cmd] });
+    return await api.post("/api/commands/session-command/run", { args: [cmd] });
   }, "sending shell command");
 
   const refreshDevices = async () => run(async () => {
@@ -220,14 +220,14 @@ export default function C2Dashboard() {
           <div className="card" style={{ background: "var(--panel-2)" }}>
             <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
               <strong>Screenshot</strong>
-              <button className="small ghost" onClick={() => run(async () => await api.post("/api/screenshot/" + (activeSerial || "emulator-5554"), { method: "POST" }), "capturing screenshot")}>Capture</button>
+              <button className="small ghost" onClick={() => run(async () => await api.post("/api/physical/" + (activeSerial || "emulator-5554") + "/screenshot", { method: "POST" }), "capturing screenshot")}>Capture</button>
             </div>
             <p className="muted tiny">Take device screenshot</p>
           </div>
           <div className="card" style={{ background: "var(--panel-2)" }}>
             <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
               <strong>Beacon</strong>
-              <button className="small ghost" onClick={() => run(async () => await api.post("/api/c2/beacon", { serial: activeSerial || "" }))}>Start</button>
+              <button className="small ghost" onClick={() => run(async () => await api.post("/api/beacon/beacon", { serial: activeSerial || "" }))}>Start</button>
             </div>
             <p className="muted tiny">Send beacon to device</p>
           </div>

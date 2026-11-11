@@ -77,7 +77,7 @@ export default function Reports() {
                     <td className="mono tiny">{formatBytes(report.sizeBytes)}</td>
                     <td className="tiny mute">{formatDateTime(report.createdAt)}</td>
                     <td>
-                      <a className="btn btn-xs" href={`/api/reports/${encodeURIComponent(report.name)}`} target="_blank" rel="noreferrer">
+                      <a className="btn btn-xs" href={`/api/report/${encodeURIComponent(report.name)}`} target="_blank" rel="noreferrer">
                         <Download size={11} /> open
                       </a>
                     </td>

@@ -114,6 +114,11 @@ def login(user: str, password: str) -> str | None:
 def current() -> dict | None:
     token = session.get("op")
     if not token:
+        if not _auth_on():
+            # The gate is off, so the caller is the local single
+            # operator.  The routes read op["user"] for the owner
+            # name, so they need an identity to work against.
+            return _local_operator()
         return None
     row = _db().execute("SELECT o.user, o.role, s.csrf, s.expires FROM sessions s"
                         " JOIN operators o ON o.id = s.operator_id WHERE s.token=?",
@@ -123,10 +128,60 @@ def current() -> dict | None:
     return {"user": row[0], "role": row[1], "csrf": row[2]}
 
 
+AUTH_FLAG = "PEGASUS_REQUIRE_AUTH"
+
+
+def _auth_on() -> bool:
+    """Whether this deployment opted into the operator gate.
+
+    The device, physical, fastboot and tool route families have
+    always been gated this way: an unset flag means the local
+    single-operator console, a set flag means every route needs a
+    token or a session.  operator.require now honours the same
+    switch so the whole surface behaves the same way instead of
+    half of it always demanding a sign-in.
+    """
+    return os.environ.get(AUTH_FLAG, "").strip().lower() in (
+        "1", "true", "yes", "on")
+
+
+def _local_operator() -> dict:
+    """The identity the routes work against when the gate is off.
+
+    The account name is the local one, so an operator who signs
+    in later with the same name sees the same stored data.
+    """
+    try:
+        import getpass
+        user = getpass.getuser() or "local"
+    except Exception:
+        user = "local"
+    return {"user": user, "role": "admin", "csrf": ""}
+
+
+def session_info() -> dict:
+    """Whether the caller holds an operator session - never gated."""
+    op = current()
+    return {
+        "authenticated": op is not None,
+        "user": op["user"] if op else None,
+        "role": op["role"] if op else None,
+        "auth_required": _auth_on(),
+    }
+
+
 def require(role: str = "operator"):
     def deco(fn):
         @functools.wraps(fn)
         def inner(*args, **kwargs):
+            if not _auth_on():
+                # This deployment did not opt into the operator
+                # gate, so the console runs as the local
+                # single-operator tool it is.  The routes still
+                # read g.operator for the owner name, so give
+                # them the local identity.
+                g.operator = _local_operator()
+                return fn(*args, **kwargs)
             op = current()
             if not op:
                 return jsonify({"ok": False, "error": "auth required"}), 401

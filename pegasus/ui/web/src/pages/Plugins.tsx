@@ -26,7 +26,7 @@ export default function Plugins() {
 
       <div className="stat-grid">
         <Stat value={plugins.length} label="Plugins loaded" tone="info" />
-        <Stat value={plugins.reduce((acc, plugin) => acc + plugin.commands.length, 0)} label="Commands exposed" />
+        <Stat value={plugins.reduce((acc, plugin) => acc + (plugin.commands?.length ?? 0), 0)} label="Commands exposed" />
         <Stat value={categories.size} label="Categories" />
         <Stat value={plugins.filter((plugin) => plugin.initialized).length} label="Initialized" tone="ok" />
       </div>
@@ -56,7 +56,7 @@ export default function Plugins() {
                       </td>
                       <td className="mono tiny">{plugin.version}</td>
                       <td><Badge tone="dim">{plugin.category}</Badge></td>
-                      <td className="mono tiny">{plugin.commands.length}</td>
+                      <td className="mono tiny">{plugin.commands?.length ?? 0}</td>
                       <td><ChevronRight size={13} className="mute" /></td>
                     </tr>
                   ))}
@@ -74,15 +74,15 @@ export default function Plugins() {
                 </div>
                 <div className="kv" style={{ marginTop: 12 }}><span className="kv-k">Author</span><span className="kv-v">{active.author || "—"}</span></div>
                 <div className="kv"><span className="kv-k">Category</span><span className="kv-v">{titleCase(active.category)}</span></div>
-                <div className="kv"><span className="kv-k">UI modules</span><span className="kv-v mono tiny">{active.components.length}</span></div>
+                <div className="kv"><span className="kv-k">UI modules</span><span className="kv-v mono tiny">{active.components?.length ?? 0}</span></div>
               </Panel>
 
               <Panel title="Commands" tight>
-                {active.commands.length === 0 ? (
+                {(active.commands?.length ?? 0) === 0 ? (
                   <Empty icon={<Terminal size={14} />} title="No commands" detail="This plugin contributes hooks only." />
                 ) : (
                   <div style={{ maxHeight: 280, overflowY: "auto" }}>
-                    {active.commands.map((cmd) => (
+                    {(active.commands ?? []).map((cmd) => (
                       <div className="row" key={cmd.name} style={{ padding: "8px 14px", borderBottom: "1px solid var(--line-soft)", gap: 10 }}>
                         <Shield size={11} className="orange" />
                         <div style={{ flex: 1 }}>
@@ -95,7 +95,7 @@ export default function Plugins() {
                 )}
               </Panel>
 
-              {active.components.length > 0 && (
+              {!!active.components?.length && (
                 <Panel title="UI contributions">
                   <div className="col" style={{ gap: 0 }}>
                     {active.components.map((component) => (
