@@ -77,3 +77,8 @@ gh
 
 # Generated source archive - published on the v2.1.0 release, not in git
 dist/pegasus-source-v2.1.0.zip
+build/web/
+Gemini_Generated_*.gif
+Gemini_Generated_*.jpg
+LinesAndLogos_animated.gif
+weapons/remote-admin-tool/remote-admin-tool-main/assets/icons_pack.zip
