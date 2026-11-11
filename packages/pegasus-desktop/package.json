@@ -1,6 +1,6 @@
 {
   "name": "@ProjectZeroDays/pegasus-desktop",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Pegasus Phantom Menace desktop shell - Electron wrapper, Python backend launcher and Inno Setup installer scripts for Windows",
   "keywords": [
     "pegasus",
