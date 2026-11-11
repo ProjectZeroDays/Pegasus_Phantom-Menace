@@ -414,61 +414,58 @@ kubectl top pods
 - Post-quantum algorithms (Lamport one-time signatures - EXPERIMENTAL, single message per keypair)
 - Quantum-resistant security (PQC migration audit mapping RSA/DSA/ECC/DH/MD5/SHA-1 to NIST FIPS 203/204/205 guidance)
 
-## Incomplete Work (2026-11-11)
+## Incomplete Work (2026-11-11, refreshed after the v2.3.0 release)
 
 The working set below is the union of everything asked for in this engagement
 that is **still not done**. Everything listed here was verified against the
 running code, not against a plan.
 
-### Shipped since the previous pass (verified, no longer open)
+### Shipped and verified - no longer open
 
 | Area | What shipped | Evidence |
 |---|---|---|
-| Enterprise backend | 78 new routes across 11 modules - sessions/passkeys, profile+avatar+payments, watch-only wallets (BTC/ETH/DOGE/XRP/LTC/USDC/USDT), sealed vault, wiki/help/how-to/notes/bug-reports/stars, Venice.ai proxy, privacy tooling, ngrok/cloudflared, daemon+autostart, CVE framework, KYC | `create_app()` boots at **224 rules** (was 144) |
-| OSINT catalogue | 24 passive sources - shodan.io, censys.io, grep.app, searchcode.com, publicwww.com, urlscan.io, vuln ers.com, fullhunt.io, app.netlas.io, leakix.net, onyphe.io, binaryedge.io, pulsedive.com, viz.greynoise.io, socradar.io, fofa.info, zoomeye.org, ivre.rocks, wigle.net, intelx.io, hunter.io, crt.sh - plus MimiKATS and Maltego as installable tooling | `pegasus/modules/osint/` with an 8-route API and the OSINT console page |
-| Console frontend | 13 pages - Login, AdminLogin, Wallets, Vault, Wiki, Help, HowTo, BugReport, Privacy, Tunnels, CveFramework, Kyc, Osint - plus a Venice chat dock | `npm run typecheck` exit 0; bundle `index-CxXvYyzH.js` contains every new page and route |
-| Navigation and chrome | New `knowledge` / `finance` / `account` nav groups, the `/osint` route, the **retractable sidebar rail mode** (`pegasus.nav.rail`), the mojibake footer removed, the duplicate `<footer>` removed | `nav.ts`, `App.tsx`, `Sidebar.tsx`, `AppShell.tsx`, `index.css` |
-| CVE framework | `pegasus/cve_exploit_framework.py` CLI (list, search, show, fingerprint, validate, validators) and `pegasus/modules/cve/` - catalogue, fingerprinting, passive validators | registered in `BUILTIN_MODULES`; `cve_db.count()` returns 8 |
-| Quantum tooling | Authenticated loopback C2 listener and a CLI (`bb84`, `hybrid-key`, `resistant-check`, `audit`, `lamport`, `c2`) | `pegasus/modules/quantum/{c2,cli}.py` |
-| Metasploit control plane | Daemon installer (detects hand-installed, Scoop and Chocolatey layouts, official MSI, SHA-256, optional silent msiexec) and a **working MSGRPC client** | `login -> ok:True, result:'success'` on `https://127.0.0.1:55553/api/`; `GET /api/metasploit/status -> connected:True` |
-| Exit Strategy fork | `Pegasus_Exit-Strategy/` - close-out console reusing the original logo and colour tokens, with a teardown checklist, evidence inventory, access revocation and report sections | `GET /` 200, `/api/state` 200 (8 items, 6 sections), `/api/toggle` 200 |
-| Releases | v2.2.0, v2.2.1, v2.2.2, v2.2.3 and **v2.2.4** published, each with Setup, Portable, blockmap and latest.yml | v2.2.4: Setup 80,565,150 B, Portable 72,580,244 B, blockmap 84,671 B, latest.yml 368 B; `releases/latest -> v2.2.4` |
-| npm package | `@ProjectZeroDays/pegasus-desktop` published to GitHub Packages | published at 2.2.1 |
+| Twelve-loop test and debug pass | 12 iterations, every gate green on every iteration | `loops=12 passed=12 failed=0 total_s=3244.1`; each loop `typecheck=PASS pytest=PASS boot=PASS rules=223`; `.loops-report.json` committed |
+| GUI demo verification | `gui-demo.html` browser-verified at 1280 px and 375 px | `consoleErrors 0`, `failedRequests 0`, `httpErrors 0`; 375 px reports `innerWidth 375`, `scrollWidth 375`, `horizontalOverflow false`; artifacts in `.demo-verify/` |
+| Graphite + single signal | `:root` and `@theme` mirror each other exactly - graphite neutrals, one orange signal, blue demoted to a semantic `--info` | `--secondary`, `--primary-dim` and `--color-secondary` all report 0 occurrences; packaged CSS carries `#ff3d00`; contrast 5.24:1 on `#10141b` and 5.56:1 on `#0a0b0e` |
+| Workflow endpoints | `GET /api/workflows` and `POST /api/workflows/run` implemented on the main app | `pegasus/ui/web/backend/workflow_routes.py`; rule count 223 -> 225; `GET /api/workflows -> 200`; history persisted to `~/.pegasus/workflow_history.json` |
+| Console API defects | The chat dock no longer requests the operator-protected provider list on every page load; the backend guard is unchanged | `consoleErrors 4 -> 0` against the live backend; `/api/chat/providers` still answers 401 when called unauthenticated |
+| Duplicate routes | Three shadowed endpoints removed - one of which called a method that does not exist and always answered an empty list | 226 -> 223 rules, 189 distinct `/api` paths, no duplicate endpoint/method pair |
+| CLI version honesty | `pegasus version` reads `pegasus/VERSION` instead of a hardcoded string | reports the real release version |
+| Release | **v2.3.0** published with Setup, Portable, blockmap and latest.yml | `draft=false`, `prerelease=false`, `releases/latest -> v2.3.0`; Setup 80,566,941 B, Portable 72,584,400 B, blockmap 84,761 B, latest.yml 368 B |
+| npm | `@ProjectZeroDays/pegasus-desktop@2.3.0` published to GitHub Packages | `npm view` -> `['2.2.1', '2.2.4', '2.3.0']`; tag latest, public access |
+| Packaged tree | The shipped binary provably carries every fix | `PACKAGED_230_OK`, 23/23 checks - non-daemon launcher, `server.join()`, no machine-specific path, the SPA import, the rebuilt bundle, `pegasus/VERSION` 2.3.0 |
 
 ### GUI / Frontend - still open
-- **gui-demo.html has never been browser-verified** - no screenshot at 1280 px or 375 px, no console capture, no navigation click-through. This is the single oldest outstanding item.
-- The full GUI redesign is **not** finished: the console still carries a dual accent system. The `graphite + single signal` consolidation, the hardcoded footer IP removal and the complete sidebar/topbar rewire were only partially applied - the signal token is `--color-primary: #ff3d00` and the secondary accent `--color-secondary: #58a6ff` is still in the theme and in use.
-- Admin Users (`/admin-users`) has never been exercised end-to-end through a live browser session with a real operator and CSRF token.
+- **Admin Users (`/admin-users`) has never been exercised end-to-end** through a live browser session with a real operator and a CSRF token. The route exists and typecheck passes, but the interaction path is unproven.
 - `Pwa.tsx` byte-range rewrite was never re-validated after its edit; typecheck passes but the behaviour was not re-tested.
-- The OSINT catalogue, the wallet page, the vault and the KYC page are new and have only been verified through the API - they have **no browser-level verification**.
+- The OSINT catalogue, the wallet page, the vault and the KYC page are new and have only been verified through the API - they still have **no browser-level verification**. The Mission Control console itself is now verified in a browser, but those four pages are not.
+- The Exit-Strategy fork (`Pegasus_Exit-Strategy/`) has only been verified through HTTP probes; it has never been rendered in a browser.
 
 ### Verification & Release - still open
-- **The 12 full test/debug loops were never executed.** Everything so far is spot checks: pytest 45/45, `npm run typecheck` exit 0, a 224-rule boot, `version_check` 4/4, one SPA probe and one install smoke.
-- **The npm package is stale**: the registry still carries `@ProjectZeroDays/pegasus-desktop@2.2.1` while the code is at 2.2.4. It needs a 2.2.4 publish.
-- `.bootstrap-state` has not been refreshed since the module and tooling edits.
+- **No install smoke test has been run against the 2.3.0 installer.** The 2.2.4 build produced `INSTALL_SMOKE_OK` (10/10 resources in the per-user root, four HTTP probes at 200, launcher still alive at 18 s); v2.3.0 carries the same packaged fixes but has only been asserted statically (`PACKAGED_230_OK`). The NSIS installer writes to the **per-user** root `%LOCALAPPDATA%\Programs\Pegasus Phantom Menace` and leaves `Program Files` empty, and upgrading over an existing build returns exit 1223 unless the previous build is uninstalled first.
 - Dependabot reports 497 advisories on the default branch (16 critical, 204 high) - untouched, and out of scope for the slices so far.
 - The `MemoryPrimitives` submodule is deliberately left dirty and unexamined.
-- The electron-builder NSIS installer performs a **per-user** install into `%LOCALAPPDATA%\Programs\Pegasus Phantom Menace`; the `Program Files` tree is left empty. Any install verification must probe the per-user root, and upgrading over an existing build returns exit 1223 unless the previous build is uninstalled first.
 
 ### Security and credentials - still open
-- **The GitHub token `ghp_<REDACTED-ROTATE-THIS-TOKEN>` is still embedded in `remote.origin.url`** with `admin:repo`, `admin:org`, `admin:org_hook`, `write:packages` and `workflow` scopes. It has been exposed for the whole engagement and must be rotated into the Git credential manager, with the remote switched to a token-less HTTPS URL.
-- The legacy `C:\Program Files\Pegasus Phantom Menace v2` install (30 October) still owns `pegasus` on PATH. Its bundled venv carries only colorama and psutil, so `pegasus menu` fails with `ModuleNotFoundError: No module named 'click'`. It needs to be repointed at 2.2.x or removed.
+- **The GitHub PAT `ghp_<REDACTED-ROTATE-THIS-TOKEN>` is still live.** It is no longer in `remote.origin.url` and no literal remains in any tracked file, but it was exposed for the whole engagement and has to be revoked on the GitHub side. The tooling now authenticates through the Windows credential manager (`gh auth setup-git`, `credential.helper=manager`) using a keyring `gho_` token, so the PAT is redundant - revoke it.
+- The legacy `C:\Program Files\Pegasus Phantom Menace v2` install (30 October) still owns `pegasus` on PATH. Its bundled venv carries only colorama and psutil, so `pegasus menu` fails with `ModuleNotFoundError: No module named 'click'`. Both the venv's `site-packages` and the `launchers` directory raise `PermissionError` from a non-elevated shell, so the repair needs an elevated shell. The system Python can already drive the CLI (`python -m pegasus.core --help` exits 0 with click 8.4.2, rich, flask and requests present), so the fix is to repoint `pegasus.bat` at the repo and the system interpreter, to `pip install -r requirements.txt` into the legacy venv, or to uninstall the legacy tree.
+
+### Tooling - still open
+- **msfrpcd still has no first-run install UX.** The RPC client works - `login -> ok:True, result:'success'` on `https://127.0.0.1:55553/api/` and `GET /api/metasploit/status -> connected:True` - but a fresh machine has to install and configure the daemon by hand. The legacy Scoop `msfrpcd.BAT` calls `ruby %FRAMEWORK%\%CMD%` unquoted and dies on paths with spaces, and msfrpcd's `-S` background flag is unsupported on Windows ("Background mode is not available on this platform").
 
 ### Housekeeping - still open
-- The redundant `wip-electron` stash is still in `refs/stash`; its only content (the 2.2.2 version bump) is long committed.
-- `.gitignore` carries a duplicated `Pegasus_Phantom-Menace-main.zip` rule.
-- A stray zero-byte `gh` file and a `pr_body.md` scratch file sit in the repository root.
-- `build/web/Pegasus-Web/base_library.zip`, `dist/pegasus-source-v2.1.0.zip` and the vendored `weapons/.../icons_pack.zip` remain tracked - pre-existing source artefacts, not build output, but worth pruning in a cleanup pass.
+- `build/web/Pegasus-Web/base_library.zip` and the vendored `weapons/.../icons_pack.zip` remain tracked - pre-existing source artefacts, not build output, but worth pruning in a cleanup pass.
+- Three stray binaries sit untracked in the repository root: `Gemini_Generated_Gif_crtqyocrtqyocrtq.gif`, `Gemini_Generated_Image_43iwoj43iwoj43iw.jpg` and `LinesAndLogos_animated.gif`. They need either a gitignore rule or a move into the web public directory if the console uses them.
+- Stale local servers are still running and should be stopped: `http.server 8765` (twice), `http.server 8137` and `http.server 8799`.
 
-## Conclusion
 ## Conclusion
 
 Pegasus Phantom Menace v2 represents a comprehensive enterprise-grade penetration testing and security audit platform. The platform combines advanced Android device management, zero-click exploit development, and automated workflow execution with enterprise-grade security, scalability, and observability.
 
 The implementation follows industry best practices and is designed for continuous enhancement and feature addition as new threats and technologies emerge.
 
-**Version**: 2.1.0
-**Status**: Feature-complete; enterprise phases 15-24 backend + frontend implemented; device smoke run and clean-VM Electron build pending
+**Version**: 2.3.0
+**Status**: Feature-complete; enterprise phases 15-24 backend + frontend implemented; twelve-loop test pass 12/12, console browser-verified, release v2.3.0 published and marked latest
 **License**: MIT
 **Documentation**: [Docs](docs/) | [API Reference](https://pegasus-phantom-menace.readthedocs.io)=== HANDOFF SECTION ===
 
@@ -554,3 +551,15 @@ Push blocked: none
 Next: the twelve loop test and debug pass, the docs and .bootstrap-state refresh, the npm 2.2.4 publish, rotating the exposed GitHub token, and repointing the legacy PATH shim
 Author: Trey A. Smith | Authenticated, Inc. | @projectzerodays
 Notes: verified evidence - install smoke against the per-user root asserts 10/10 resources, a non-daemon start_server.py, a machine-path-free run_server.py and the SPA import; GET /api/health answers 200, GET / answers 200 with 1020 bytes of console shell, GET /manifest.webmanifest answers 200 and GET /api/osint/catalog answers 200 with 9266 bytes; the launcher is still alive after 6 seconds and after 18 seconds with /api/health still answering 200, which is the assertion that distinguishes this build from the self-killing one; the packaged tree assertion reports PACKAGED_224_OK; eleven defects were root-caused and fixed across the engagement, the launcher lifetime defect and the machine-specific import path being the last two
+
+## 66. HANDOFF
+
+Project: Pegasus Phantom Menace v2.3.0 / graphite + single signal console, workflow endpoints, deduplicated backend
+Status: verified - release v2.3.0 published with four API-verified assets and marked latest, the twelve-loop pass is 12/12, the console is browser-verified with zero console errors, and the packaged tree asserts every fix
+Features: the console theme is consolidated onto graphite neutrals with one orange signal, with blue demoted to a semantic info state; /api/workflows and /api/workflows/run now exist on the main application and drive the autonomous engine, so the Mission Control history panel and the Workflow Engine launch button have real endpoints; the chat dock no longer requests the operator-protected provider list on every page load; three shadowed duplicate routes are gone; the CLI reads the real version; and the GUI demo renders correctly at 375 px
+Log: log/events.jsonl
+Release: v2.3.0 published - releases/latest -> v2.3.0; npm @ProjectZeroDays/pegasus-desktop@2.3.0 published to GitHub Packages
+Push blocked: none
+Next: the install smoke test against the 2.3.0 installer, revoking the exposed GitHub PAT, repointing the legacy PATH shim, the msfrpcd first-run install UX, pruning the tracked zip artefacts, and working through the 497 Dependabot advisories
+Author: Trey A. Smith | Authenticated, Inc. | @projectzerodays
+Notes: verified evidence - the twelve-loop harness reports 12/12 with typecheck, pytest (45 passed) and a live boot green on every iteration and the route count asserted at 223; the console capture against the real backend reports consoleErrors 0, failedRequests 0 and httpErrors 0 with no horizontal overflow at 1280 px or 375 px; PACKAGED_230_OK asserts 23/23 properties of the packaged tree; the release API reports draft=false, prerelease=false and all four assets uploaded; and the theme consolidation removed every raw palette colour and hex literal from the TSX sources. Honest caveats - the operator session cookie is HttpOnly so the front end cannot detect it, which is why the chat provider list is fetched lazily rather than the backend guard being weakened; msfrpcd is still installed by hand; and the 2.3.0 installer has not yet been smoke-tested from a real installation.
