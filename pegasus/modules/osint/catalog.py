@@ -18,6 +18,7 @@ CATEGORIES = [
     ("threat-intel", "Threat Intelligence"),
     ("servers", "Servers & Networks"),
     ("osint", "WiFi Networks & OSINT"),
+    ("social-media", "Social Media & Profiles"),
     ("tools", "Tooling"),
 ]
 
@@ -203,6 +204,87 @@ SERVICES: List[Dict[str, Any]] = [
         "key_env": None, "key_required": False,
         "results": None,
         "notes": "Certificate transparency logs for domain research.",
+    },
+    # -------------------------------------------------------- social media
+    {
+        "id": "sherlock", "name": "Sherlock", "category": "social-media",
+        "url": "https://github.com/sherlock-project/sherlock", "kind": "tool",
+        "api": None, "key_env": None, "key_required": False,
+        "results": None,
+        "install": {"type": "pip", "package": "sherlock-project", "verify": "sherlock"},
+        "notes": "Hunt down social media accounts by username across 400+ networks.",
+    },
+    {
+        "id": "maigret", "name": "Maigret", "category": "social-media",
+        "url": "https://github.com/soxoj/maigret", "kind": "tool",
+        "api": None, "key_env": None, "key_required": False,
+        "results": None,
+        "install": {"type": "pip", "package": "maigret", "verify": "maigret"},
+        "notes": "Collect a dossier on a person by username from 3000+ sites. "
+                 "Supports recursive parsing of account pages for linked identities.",
+    },
+    {
+        "id": "socialscan", "name": "SocialScan", "category": "social-media",
+        "url": "https://github.com/iojw/socialscan", "kind": "tool",
+        "api": None, "key_env": None, "key_required": False,
+        "results": None,
+        "install": {"type": "pip", "package": "socialscan", "verify": "socialscan"},
+        "notes": "Check email and username availability across major platforms "
+                 "(Twitter, Instagram, GitHub, Reddit, etc.) without API keys.",
+    },
+    {
+        "id": "twint", "name": "Twint (Twitter)", "category": "social-media",
+        "url": "https://github.com/twintproject/twint", "kind": "tool",
+        "api": None, "key_env": None, "key_required": False,
+        "results": None,
+        "install": {"type": "pip", "package": "twint", "verify": "twint"},
+        "notes": "Scrape Twitter profiles, tweets, followers and trends without "
+                 "API rate limits. Passive reconnaissance only.",
+    },
+    {
+        "id": "instaloader", "name": "Instaloader (Instagram)", "category": "social-media",
+        "url": "https://github.com/instaloader/instaloader", "kind": "tool",
+        "api": None, "key_env": None, "key_required": False,
+        "results": None,
+        "install": {"type": "pip", "package": "instaloader", "verify": "instaloader"},
+        "notes": "Download Instagram posts, stories, profiles and metadata. "
+                 "Supports session-based access for private profiles.",
+    },
+    {
+        "id": "reddit_osint", "name": "Reddit Search (Pushshift)", "category": "social-media",
+        "url": "https://pushshift.io", "kind": "api",
+        "api": "https://api.pushshift.io/api/search/submission/?q={query}&size=25&sort=desc",
+        "key_env": None, "key_required": False,
+        "results": "data",
+        "notes": "Search historical Reddit submissions and comments for threat "
+                 "actor profiling and campaign tracking.",
+    },
+    {
+        "id": "haveibeenpwned", "name": "Have I Been Pwned", "category": "social-media",
+        "url": "https://haveibeenpwned.com", "kind": "api",
+        "api": "https://haveibeenpwned.com/api/v3/breachedaccount/{query}?truncateResponse=false",
+        "key_env": "HIBP_API_KEY", "key_required": True,
+        "results": None,
+        "notes": "Check if an email or username appears in known data breaches. "
+                 "Useful for credential reuse analysis and threat actor profiling.",
+    },
+    {
+        "id": "holehe", "name": "Holehe", "category": "social-media",
+        "url": "https://github.com/megadose/holehe", "kind": "tool",
+        "api": None, "key_env": None, "key_required": False,
+        "results": None,
+        "install": {"type": "pip", "package": "holehe", "verify": "holehe"},
+        "notes": "Check if an email is registered on 120+ sites including social "
+                 "media platforms. Maps email to account presence without passwords.",
+    },
+    {
+        "id": "social_links", "name": "Social Links (IntelX)", "category": "social-media",
+        "url": "https://intelx.io", "kind": "api",
+        "api": "https://2.intelx.io/phonebook/search?term={query}&buckets=social",
+        "key_env": "INTELX_API_KEY", "key_required": True,
+        "results": "search",
+        "notes": "Cross-platform social media search via IntelX. Covers Twitter, "
+                 "Facebook, LinkedIn, Telegram, Discord and paste sites.",
     },
     # ---------------------------------------------------------------- tooling
     {

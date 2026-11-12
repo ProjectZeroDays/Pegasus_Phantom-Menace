@@ -9,9 +9,10 @@ from dataclasses import dataclass
 from enum import Enum
 from datetime import datetime
 from typing_extensions import TypedDict, ParamSpec
+from pydantic import BaseModel
 import asyncio
 import logging
-from uuid import uuid
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ class MultiTenantManager:
         tenant_id = tenant_data.get("tenant_id", f"tenant_{uuid.uuid4()}")
         tenant = Tenant(
             tenant_id=tenant_id,
-            name=tenant_data.get("name", ""New Tenant"),
+            name=tenant_data.get("name", "New Tenant"),
             domain=tenant_data.get("domain", f"{tenant_id}.example.com"),
             tier=tenant_data.get("tier", "standard"),
             resources=tenant_data.get("resources", {}),
@@ -109,7 +110,8 @@ class MultiTenantManager:
             security_policy=tenant_data.get("security_policy", {}),
             settings=tenant_data.get("settings", {}),
             is_active=tenant_data.get("is_active", True),
-            created_at=datetime.now()
+            created_at=datetime.now(),
+            last_seen=datetime.now()
         )
 
         self.tenants[tenant_id] = tenant
@@ -166,17 +168,17 @@ class MultiTenantManager:
     def _cleanup_tenant_resources(self, tenant_id: str) -> None:
         """Clean up tenant resources"""
         # Remove tenant resource pools
-        pool_keys = [k for k in self.resource_pools.keys() if k.startswith(f"{tenant_id}-")
+        pool_keys = [k for k in self.resource_pools.keys() if k.startswith(f"{tenant_id}-")]
         for pool_key in pool_keys:
             del self.resource_pools[pool_key]
 
         # Remove tenant allocation policies
-        alloc_keys = [k for k in self.allocation_policies.keys() if k.startswith(f"{tenant_id}-")
+        alloc_keys = [k for k in self.allocation_policies.keys() if k.startswith(f"{tenant_id}-")]
         for alloc_key in alloc_keys:
             del self.allocation_policies[alloc_key]
 
         # Remove tenant quota managers
-        quota_keys = [k for k in self.quota_managers.keys() if k.startswith(f"{tenant_id}-")
+        quota_keys = [k for k in self.quota_managers.keys() if k.startswith(f"{tenant_id}-")]
         for quota_key in quota_keys:
             del self.quota_managers[quota_key]
 
@@ -244,7 +246,7 @@ class MultiTenantManager:
             resource_pool.available_capacity -= amount
 
             # Record allocation
-            await self._record_tenant_usage(
+            self._record_tenant_usage(
                 tenant_id=tenant_id,
                 resource_type=resource_type,
                 amount=amount,
@@ -300,7 +302,7 @@ class MultiTenantManager:
             resource_pool.available_capacity += amount
 
             # Record deallocation
-            await self._record_tenant_usage(
+            self._record_tenant_usage(
                 tenant_id=tenant_id,
                 resource_type=resource_type,
                 amount=-amount,
@@ -323,7 +325,7 @@ class MultiTenantManager:
                 "pool_id": pool_id
             }
 
-    async def _record_tenant_usage(
+    def _record_tenant_usage(
         self,
         tenant_id: str,
         resource_type: str,
@@ -494,6 +496,6 @@ class MultiTenantManager:
         logger.info("Multi-tenant manager started")
 
     async def stop(self) -> None:
-        """Stop multi-tenant manager""""
+        """Stop multi-tenant manager."""
         self.is_running = False
         logger.info("Multi-tenant manager stopped")

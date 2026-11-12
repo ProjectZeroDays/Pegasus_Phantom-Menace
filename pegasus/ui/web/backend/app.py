@@ -619,28 +619,29 @@ def create_app() -> Flask:
         success = delete_keyword(keyword_id)
         return ok({"success": success})
 
-    # NSO capability endpoints
+    # NSO capability endpoints — served by the live registry so the console
+    # shows real names, targets and resolve state instead of the placeholder
+    # stub that was only ever written to satisfy a test count.
     @app.get("/api/nso/capabilities")
     def nso_capabilities():
-        from pegasus.modules.nso import get_capabilities, get_parity_stats
-        capabilities = get_capabilities()
-        # If capabilities is empty, provide some default capabilities
-        if not capabilities:
-            capabilities = [{"key": "device_profile", "name": "Device Profile", "category": "device", "parity": "full", "description": "Device profiling capability"}]
-        return ok({"capabilities": capabilities, "parity": get_parity_stats()})
+        from pegasus.modules.access_workflow.nso_capabilities import (
+            list_capabilities, parity_report,
+        )
+        return ok({"capabilities": list_capabilities(), "parity": parity_report()})
 
     @app.get("/api/nso/manifest")
     def nso_manifest():
-        return ok({"manifest": {}})
+        from pegasus.modules.access_workflow.capabilities import manifest
+        return ok({"manifest": manifest()})
 
     @app.post("/api/nso/run/<string:capability_key>")
     def run_capability(capability_key: str):
         data = request.get_json() or {}
         serial = data.get("serial", "TEST")
-        from pegasus.modules.nso import run_capability as run_cap
+        from pegasus.modules.access_workflow.nso_capabilities import run as nso_run
         job = job_manager.submit(
             "nso", f"NSO {capability_key}",
-            lambda ctx: run_cap(ctx, capability_key, serial))
+            lambda ctx: nso_run(capability_key, serial))
         job_id = job.id
         # Store the job metadata in the job store
         with _jobs_lock:
