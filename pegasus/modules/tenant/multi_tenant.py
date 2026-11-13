@@ -489,13 +489,3 @@ class MultiTenantManager:
 
 
         return records
-
-    async def start(self) -> None:
-        """Start multi-tenant manager"""
-        self.is_running = True
-        logger.info("Multi-tenant manager started")
-
-    async def stop(self) -> None:
-        """Stop multi-tenant manager."""
-        self.is_running = False
-        logger.info("Multi-tenant manager stopped")
