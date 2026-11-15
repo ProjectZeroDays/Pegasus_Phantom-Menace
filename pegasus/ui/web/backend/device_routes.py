@@ -17,7 +17,7 @@ from flask import Response, request, session
 from pegasus.core.config import get_settings
 from pegasus.ui.web.backend import telemetry
 from pegasus.ui.web.backend.jobs import jobs as job_manager
-from pegasus.ui.web.backend.tools import run
+from pegasus.ui.web.backend.tools import local_subnet, run
 import pathlib
 import os
 import platform
@@ -262,7 +262,10 @@ def register(app, ok, fail) -> None:  # noqa: ANN001
     @_require_token
     def dr_network_scan():
         body = request.get_json(silent=True) or {}
-        target = body.get("target") or "192.168.1.0/24"
+        # Default to the operator's real subnet. The previous hardcoded
+        # 192.168.1.0/24 scanned a dead range on most networks and nmap
+        # correctly reported "0 hosts up", which looked like a broken scanner.
+        target = body.get("target") or local_subnet()
         ports = body.get("ports") or "1-1000"
 
         def work(ctx):

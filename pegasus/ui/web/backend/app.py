@@ -251,6 +251,7 @@ from pegasus.modules.social_engineering import se_routes
 from pegasus.modules.webhook import webhook_routes
 from pegasus.modules.relay import relay_routes
 from pegasus.ui.web.backend import log_routes
+from pegasus.ui.web.backend import c2_routes
 from pegasus.ui.web.backend import agent_routes
 from pegasus.ui.web.backend import metasploit_routes
 from pegasus.ui.web.backend import session_routes
@@ -343,6 +344,10 @@ def create_app() -> Flask:
     delivery.landing.register(app, ok, fail)
     delivery.carrier_routes.register(app, ok, fail)
     c2.beacon_routes.register(app, ok, fail)
+    # Console-facing C2 controls (start/stop/status/kill). These previously
+    # existed only on the separate access_workflow dashboard server, so the
+    # Start C2 / Stop C2 / Kill buttons 404'd against this app.
+    c2_routes.register(app, ok, fail)
     relay_routes.register(app, ok, fail)
     report.report_routes.register(app, ok, fail)
     parity.parity_routes.register(app, ok, fail)
@@ -796,6 +801,10 @@ def create_app() -> Flask:
         except Exception:
             return send_file(DIST_DIR / "index.html")
 
+    # NOTE: C2 autostart deliberately does NOT happen here. Starting a second
+    # WSGI listener inside create_app() left the process alive but the main app
+    # never serving (/api/health unreachable, no output). Autostart is invoked
+    # from start_server.py once this app is actually listening instead.
     return app
 
 

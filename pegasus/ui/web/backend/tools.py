@@ -244,6 +244,41 @@ def local_ip() -> str:
         return "127.0.0.1"
 
 
+def local_subnet() -> str:
+    """The operator's own subnet as CIDR, e.g. ``10.1.10.0/24``.
+
+    Network scanning used to default to a hardcoded ``192.168.1.0/24``.  On any
+    other network that scans a dead range and nmap correctly reports
+    ``0 hosts up`` - which reads exactly like a broken scanner, and costs ~8x
+    longer because every probe has to time out through the router instead of
+    resolving on-link via ARP.  Derive the real prefix from the live interface
+    instead, honouring the actual netmask rather than assuming /24.
+    """
+    ip = local_ip()
+    if not ip or ip.startswith("127."):
+        return "127.0.0.1/32"
+    prefix = 24
+    try:
+        import psutil
+
+        for addrs in psutil.net_if_addrs().values():
+            for entry in addrs:
+                mask = getattr(entry, "netmask", None)
+                if getattr(entry, "address", None) == ip and mask and "." in mask:
+                    bits = sum(bin(int(part)).count("1")
+                               for part in mask.split(".") if part.isdigit())
+                    if 0 < bits <= 32:
+                        prefix = bits
+    except Exception:
+        pass
+    try:
+        import ipaddress
+
+        return str(ipaddress.ip_network(f"{ip}/{prefix}", strict=False))
+    except Exception:
+        return f"{ip.rsplit('.', 1)[0]}.0/24"
+
+
 def hostname() -> str:
     try:
         return socket.gethostname()

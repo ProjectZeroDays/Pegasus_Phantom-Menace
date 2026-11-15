@@ -5,7 +5,7 @@
  * pointed at it, and installs Windows auto-start via the Run registry key
  * (or a scheduled task when elevation is unavailable).
  */
-const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -116,6 +116,10 @@ function stopBackend() {
 // Window management
 // ---------------------------------------------------------------------------
 function createWindow() {
+  // The console is a single-purpose operator surface, so the native menu bar
+  // (File / Edit / View ...) is removed entirely rather than auto-hidden.
+  Menu.setApplicationMenu(null);
+
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -123,6 +127,8 @@ function createWindow() {
     minHeight: 700,
     title: 'Pegasus Phantom Menace',
     icon: path.join(__dirname, 'build', 'icon.png'),
+    fullscreen: true,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -130,6 +136,18 @@ function createWindow() {
       sandbox: false,
     },
     show: false,
+  });
+
+  mainWindow.setMenu(null);
+
+  // Removing the application menu also removes its accelerators, including the
+  // default F11 fullscreen toggle. Re-bind it here so the operator is never
+  // trapped in fullscreen with no visible way out. Escape is deliberately NOT
+  // used: the console's modals already close on Escape.
+  mainWindow.webContents.on('before-input-event', (_event, input) => {
+    if (input.type === 'keyDown' && input.key === 'F11') {
+      mainWindow.setFullScreen(!mainWindow.isFullScreen());
+    }
   });
 
   mainWindow.once('ready-to-show', () => {
