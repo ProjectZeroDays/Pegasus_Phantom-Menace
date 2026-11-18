@@ -1,6 +1,6 @@
 {
   "name": "pegasus-phantom-menace",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "Pegasus Phantom Menace - Android Device Management & Security Audit Platform (Desktop)",
   "main": "main.js",
   "author": "ProjectZeroDays",
@@ -63,6 +63,10 @@
       {
         "from": "../start_server.py",
         "to": "start_server.py"
+      },
+      {
+        "from": "../packaging/tool_bootstrap.py",
+        "to": "tool_bootstrap.py"
       },
       {
         "from": "../run_server.py",

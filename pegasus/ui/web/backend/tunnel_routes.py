@@ -39,11 +39,17 @@ def _write(data: Dict[str, Any]) -> None:
 
 
 def _binary(name: str) -> str:
+    from pegasus.core.tool_installer import TOOLS_DIR, ensure_path
+
+    ensure_path()
     found = shutil.which(name)
     if found:
         return found
-    local = pathlib.Path.home() / ".pegasus" / "bin" / (name + ".exe")
-    return str(local) if local.is_file() else ""
+    for candidate in (TOOLS_DIR / (name + ".exe"), TOOLS_DIR / name,
+                      pathlib.Path.home() / ".pegasus" / "bin" / (name + ".exe")):
+        if candidate.is_file():
+            return str(candidate)
+    return ""
 
 
 def _pids(provider: str) -> List[int]:

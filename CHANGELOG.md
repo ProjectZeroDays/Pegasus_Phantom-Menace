@@ -4,6 +4,26 @@ All notable changes to Pegasus Phantom Menace. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.5] — 2026-11-18
+
+The Windows installer now bootstraps the external operator toolchain on install, using the latest release of each tool.
+
+### Added
+
+- **First-run tool bootstrap** — `packaging/tool_bootstrap.py`: installs ADB/platform-tools, scrcpy, nmap, Metasploit, Frida, apktool, jadx, tshark, ngrok, ssh, socat and **cloudflared** into `~/.pegasus/tools` and persists that directory onto the user PATH (HKCU on Windows). Idempotent, logged to `~/.pegasus/logs/tool_bootstrap.log`, never aborts an install. Wired into the NSIS `customInstall` macro (runs via `python` and `py -3`) and into the Electron main process as a first-launch fallback (`PEGASUS_SKIP_TOOL_BOOTSTRAP=1` disables).
+- **cloudflared support** — `cloudflared` is now in the console tool inventory and gets its own installer (latest GitHub release, `releases/latest/download` with API fallback). The relay/tunnel and `tunnel_routes` paths prepend the tools directory to PATH before probing for it, and resolve it from `~/.pegasus/tools` directly.
+
+### Fixed
+
+- **jadx installer** — resolved the latest GitHub release instead of a stale pin, extracted the flat zip into a versioned directory (`~/.pegasus/tools/jadx-<ver>`), and rebuilt the `jadx.bat` trampoline on every install (it previously pointed at a nonexistent path).
+- **apktool / scrcpy** — resolved from the latest GitHub release with the previous pinned URLs as fallback (scrcpy asseets matched by name).
+- **package-lock.json corruption** — both lockfiles carried a bogus bulk version substitution (`"version": "2.3.4"` for hundreds of dependencies). electron's lock was regenerated and both were repaired in place against their `resolved` tarball URLs; root versions bumped to 2.3.5.
+
+### Notes
+
+- The tools installed by the bootstrap can require UAC for winget-managed packages (nmap, Wireshark/tshark, Metasploit) on locked-down machines; failures are logged and can be retried from the console's tool page. Direct-download tools (platform-tools, cloudflared, scrcpy, jadx, apktool, ngrok, frida) need no elevation.
+- The Android agent's `agent-android/app/build.gradle` in the working tree contains local-network C2 identifiers and is deliberately not part of this release.
+
 ## [2.3.4] — 2026-11-18
 
 The console's C2 surface is now wired through the main backend and the Python tree compiles and lints clean.

@@ -30,6 +30,7 @@ TOOL_SPECS: List[Dict[str, str]] = [
     {"key": "tshark", "label": "TShark", "binary": "tshark", "purpose": "Packet capture", "required": "optional"},
     {"key": "wireshark", "label": "Wireshark", "binary": "wireshark", "purpose": "Packet analysis", "required": "optional"},
     {"key": "ngrok", "label": "ngrok", "binary": "ngrok", "purpose": "Tunnel management", "required": "optional"},
+    {"key": "cloudflared", "label": "cloudflared", "binary": "cloudflared", "purpose": "Cloudflare tunnels / relay", "required": "optional"},
     {"key": "ssh", "label": "SSH", "binary": "ssh", "purpose": "Secure shell / tunneling", "required": "optional"},
     {"key": "socat", "label": "socat", "binary": "socat", "purpose": "TCP relay / MITM chaining", "required": "optional"},
     {"key": "openssl", "label": "OpenSSL", "binary": "openssl", "purpose": "Certificates / crypto", "required": "optional"},

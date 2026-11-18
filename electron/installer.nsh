@@ -14,6 +14,16 @@
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "PegasusPhantomMenace" "$INSTDIR\${APP_EXECUTABLE_FILENAME}"
   ; Record for uninstall.
   WriteRegStr HKCU "Software\${APP_FILENAME}" "InstallDir" "$INSTDIR"
+
+  ; Bootstrap the external operator toolchain (ADB/platform-tools, cloudflared,
+  ; scrcpy, jadx, apktool, ngrok, frida, nmap, Wireshark/tshark, Metasploit,
+  ; ssh, socat) into ~/.pegasus/tools, using the latest release of each tool.
+  ; Tools are added to the user PATH (HKCU Environment). Best-effort and
+  ; never fatal: the log is ~/.pegasus/logs/tool_bootstrap.log and the console
+  ; can retry from the tool page. Runs through both python launchers so it
+  ; works whether or not `py` is registered on the machine.
+  nsExec::ExecToLog '"$SYSDIR\cmd.exe" /C python "$INSTDIR\resources\tool_bootstrap.py" --all'
+  nsExec::ExecToLog '"$SYSDIR\cmd.exe" /C py -3 "$INSTDIR\resources\tool_bootstrap.py" --all'
 !macroend
 
 !macro customUnInstall

@@ -14,6 +14,9 @@ class Tunnel:
         self.url: str | None = None
 
     def start(self, port: int) -> str | None:
+        from pegasus.core.tool_installer import ensure_path
+
+        ensure_path()
         if shutil.which("cloudflared"):
             cmd = ["cloudflared", "tunnel", "--url", f"http://127.0.0.1:{port}",
                    "--no-autoupdate"]

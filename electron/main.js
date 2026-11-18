@@ -113,6 +113,38 @@ function stopBackend() {
 }
 
 // ---------------------------------------------------------------------------
+// First-run tool bootstrap (fallback for when the NSIS installer could not
+// run python at install time, or the app runs straight from the repo).
+// The NSIS installer runs the same script right after files are extracted.
+// ---------------------------------------------------------------------------
+function maybeToolBootstrap() {
+  if (process.env.PEGASUS_SKIP_TOOL_BOOTSTRAP) return;
+  const marker = path.join(app.getPath('home'), '.pegasus', '.tools-bootstrapped');
+  if (fs.existsSync(marker)) return;
+  const candidates = [
+    process.resourcesPath ? path.join(process.resourcesPath, 'tool_bootstrap.py') : null,
+    path.join(app.getAppPath(), '..', 'packaging', 'tool_bootstrap.py'),
+    path.join(app.getAppPath(), 'packaging', 'tool_bootstrap.py'),
+  ].filter(Boolean);
+  const script = candidates.find((c) => fs.existsSync(c));
+  if (!script) return;
+  const python = process.env.PEGASUS_PYTHON || 'python';
+  try {
+    const child = spawn(python, [script, '--all'], {
+      detached: false,
+      windowsHide: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: Object.assign({}, process.env, { PYTHONUNBUFFERED: '1' }),
+    });
+    child.stdout.on('data', (d) => process.stdout.write(`[tools] ${d}`));
+    child.stderr.on('data', (d) => process.stderr.write(`[tools:err] ${d}`));
+    child.on('error', () => {});
+  } catch (_) {
+    // best-effort: the console can retry from the tool page
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Window management
 // ---------------------------------------------------------------------------
 function createWindow() {
@@ -238,6 +270,7 @@ app.whenReady().then(() => {
   startBackend();
   createWindow();
   registerAutoStart();
+  maybeToolBootstrap();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

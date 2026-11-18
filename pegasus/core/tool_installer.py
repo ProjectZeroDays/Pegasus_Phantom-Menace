@@ -60,6 +60,43 @@ def _winget_available() -> bool:
     return rc == 0
 
 
+def _github_latest_asset(repo: str, *predicates) -> str | None:
+    """Return the browser_download_url of an asset in the repo's latest release."""
+    import requests
+
+    try:
+        r = requests.get(
+            f"https://api.github.com/repos/{repo}/releases/latest",
+            timeout=30,
+            headers={"User-Agent": "pegasus-tool-installer", "Accept": "application/vnd.github+json"},
+        )
+        r.raise_for_status()
+        for asset in r.json().get("assets", []):
+            name = str(asset.get("name", ""))
+            if all(p(name) for p in predicates):
+                url = asset.get("browser_download_url")
+                if url:
+                    return url
+    except Exception:
+        return None
+    return None
+
+
+def _github_latest_tag(repo: str) -> str | None:
+    import requests
+
+    try:
+        r = requests.get(
+            f"https://api.github.com/repos/{repo}/releases/latest",
+            timeout=30,
+            headers={"User-Agent": "pegasus-tool-installer", "Accept": "application/vnd.github+json"},
+        )
+        r.raise_for_status()
+        return r.json().get("tag_name")
+    except Exception:
+        return None
+
+
 def _download(url: str, dest: Path) -> Path:
     import requests
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -97,8 +134,10 @@ APKTOOL_JAR_URLS = [
 def _install_apktool() -> tuple[str, str]:
     jar = TOOLS_DIR / "apktool.jar"
     if not jar.exists():
+        gh = _github_latest_asset("iBotPeaches/Apktool", lambda n: n.startswith("apktool_") and n.endswith(".jar"))
+        urls = ([gh] if gh else []) + APKTOOL_JAR_URLS
         last_err = None
-        for url in APKTOOL_JAR_URLS:
+        for url in urls:
             try:
                 _download(url, jar)
                 break
@@ -120,39 +159,38 @@ def _install_apktool() -> tuple[str, str]:
 
 def _install_jadx() -> tuple[str, str]:
     suffix = "zip" if _win() else "tar.gz"
-    ver = "1.5.0"
+    # Resolve the latest release from GitHub; fall back to the pinned version.
+    tag = _github_latest_tag("skylot/jadx") or "v1.5.0"
+    ver = tag[1:] if tag.startswith("v") else tag
     name = f"jadx-{ver}"
     dest_dir = TOOLS_DIR / name
     bin_name = "jadx.bat" if _win() else "jadx"
-    if (dest_dir / "bin" / bin_name).exists():
-        # link into tools dir root
+
+    def _trampoline() -> None:
         link = TOOLS_DIR / bin_name
-        if not link.exists():
-            if _win():
-                link.write_text(f'@echo off\r\n"{dest_dir}\\bin\\jadx.bat" %*\r\n')
-            else:
-                try:
-                    link.symlink_to(dest_dir / "bin" / "jadx")
-                except OSError:
-                    shutil.copy2(dest_dir / "bin" / "jadx", link)
-                    _mark_executable(link)
-        return ("present", str(dest_dir))
-    url = f"https://github.com/skylot/jadx/releases/download/v{ver}/jadx-{ver}.zip" if _win() else \
-          f"https://github.com/skylot/jadx/releases/download/v{ver}/jadx-{ver}.zip"
-    z = _download(url, TOOLS_DIR / f"jadx-{ver}.zip")
-    with zipfile.ZipFile(z) as zf:
-        zf.extractall(TOOLS_DIR)
-    z.unlink()
-    link = TOOLS_DIR / bin_name
-    if not link.exists():
+        try:
+            if link.exists() or link.is_symlink():
+                link.unlink()
+        except OSError:
+            pass
         if _win():
-            link.write_text(f'@echo off\r\n"{dest_dir}\\bin\\jadx.bat" %*\r\n')
+            link.write_text(f'@echo off\r\n"{dest_dir}\\bin\\{bin_name}" %*\r\n', encoding="utf-8")
         else:
             try:
                 link.symlink_to(dest_dir / "bin" / "jadx")
             except OSError:
                 shutil.copy2(dest_dir / "bin" / "jadx", link)
                 _mark_executable(link)
+
+    if (dest_dir / "bin" / bin_name).exists():
+        _trampoline()
+        return ("present", str(dest_dir))
+    url = f"https://github.com/skylot/jadx/releases/download/{tag}/jadx-{ver}.zip"
+    z = _download(url, TOOLS_DIR / f"jadx-{ver}.zip")
+    with zipfile.ZipFile(z) as zf:
+        zf.extractall(dest_dir)
+    z.unlink()
+    _trampoline()
     return ("installed", str(dest_dir))
 
 
@@ -250,11 +288,17 @@ SCRCPY_URLS = {
 
 
 def _install_scrcpy() -> tuple[str, str]:
-    """scrcpy screen mirroring from Genymobile releases."""
+    """scrcpy screen mirroring - resolved from Genymobile's latest GitHub release."""
     if shutil.which("scrcpy") or shutil.which("scrcpy.exe"):
         return ("present", "scrcpy already on PATH")
     key = "windows" if _win() else ("darwin" if platform.system() == "Darwin" else "linux")
-    url = SCRCPY_URLS[key]
+    if key == "windows":
+        url = _github_latest_asset("Genymobile/scrcpy", lambda n: n.startswith("scrcpy-win64-") and n.endswith(".zip"))
+    elif key == "darwin":
+        url = _github_latest_asset("Genymobile/scrcpy", lambda n: n.startswith("scrcpy-macos-") and n.endswith(".tar.gz"))
+    else:
+        url = _github_latest_asset("Genymobile/scrcpy", lambda n: n.startswith("scrcpy-linux-") and n.endswith(".tar.xz"))
+    url = url or SCRCPY_URLS[key]
     if _win():
         archive = TOOLS_DIR / "scrcpy.zip"
         try:
@@ -372,6 +416,41 @@ def _install_ngrok() -> tuple[str, str]:
     return ("installed", str(exe))
 
 
+def _install_cloudflared() -> tuple[str, str]:
+    """cloudflared - Cloudflare Tunnel / TryCloudflare (anonymous tunnels).
+
+    Always the latest release: GitHub's releases/latest/download/<asset>
+    resolves to whatever is newest. Falls back to the releases API in case
+    the asset naming ever changes.
+    """
+    for cand in ("cloudflared", "cloudflared.exe"):
+        if shutil.which(cand):
+            return ("present", f"{cand} already on PATH")
+    exe = TOOLS_DIR / ("cloudflared.exe" if _win() else "cloudflared")
+    base = "https://github.com/cloudflare/cloudflared/releases/latest/download/"
+    if _win():
+        url = base + "cloudflared-windows-amd64.exe"
+    else:
+        machine = platform.machine().lower()
+        arch = "arm64" if ("arm64" in machine or "aarch64" in machine) else "amd64"
+        system = "darwin" if platform.system() == "Darwin" else "linux"
+        url = f"{base}cloudflared-{system}-{arch}"
+    try:
+        _download(url, exe)
+    except Exception as exc:  # noqa: BLE001 -- asset naming may change; use the API
+        fallback = _github_latest_asset("cloudflare/cloudflared", lambda n: "cloudflared" in n.lower())
+        if not fallback:
+            return ("error", f"cloudflared download failed: {exc}")
+        try:
+            _download(fallback, exe)
+        except Exception as exc2:  # noqa: BLE001
+            return ("error", f"cloudflared download failed: {exc2}")
+    _mark_executable(exe)
+    _persist_path()
+    ensure_path()
+    return ("installed", str(exe))
+
+
 def _install_ssh() -> tuple[str, str]:
     """OpenSSH client (ssh / ssh.exe). Usually part of the OS."""
     for cand in ("ssh", "ssh.exe"):
@@ -444,6 +523,7 @@ INSTALLERS: dict[str, Callable[[], tuple[str, str]]] = {
     "tshark": _install_tshark_wireshark,
     "wireshark": _install_tshark_wireshark,
     "ngrok": _install_ngrok,
+    "cloudflared": _install_cloudflared,
     "ssh": _install_ssh,
     "socat": _install_socat,
     "adb": _install_adb,
