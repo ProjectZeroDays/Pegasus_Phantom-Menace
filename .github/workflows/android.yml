@@ -32,7 +32,7 @@ jobs:
         run: |
           echo "$KEYSTORE_BASE64" | base64 -d > keystore.properties
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: pegasus-apks
           path: |
