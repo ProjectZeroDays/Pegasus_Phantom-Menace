@@ -26,4 +26,13 @@ except Exception as e:
     print("Check error:", e)
 
 # Block until the server stops.
+# C2 autostart. Deliberately NOT inside create_app(): starting a second
+# WSGI listener while the first app is still being constructed stops the
+# backend serving. This runs once the socket is already listening.
+try:
+    from pegasus.ui.web.backend import c2_routes as _c2_routes
+    _c2_routes.maybe_autostart()
+except Exception as _exc:  # autostart must never take the console down
+    print(f"C2 autostart skipped: {_exc}")
+
 server.join()

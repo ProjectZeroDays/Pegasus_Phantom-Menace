@@ -3,23 +3,56 @@
 The console's Start/Stop/Kill buttons POST to /api/c2/*, but those routes only
 ever existed on the separate access_workflow dashboard server, so every button
 404'd against this app. The real listener already exists in
-``pegasus.modules.c2.server`` (a threaded Flask app serving the signed beacon
-endpoints); this module exposes it to the console and reports the port the
-listener actually bound rather than echoing back the requested one.
+``pegasus.modules.c2.server``; this module exposes it to the console and reports
+the port the listener actually bound rather than echoing the requested one.
 
-Security note: ``server.start()`` binds 0.0.0.0, so an autostarted listener is
-reachable from the network, not just loopback. Autostart is therefore driven by
-PEGASUS_C2_AUTOSTART and announced in the response so the operator can see it.
+Bind posture: loopback by default, matching the console. ``POST /api/c2/start``
+accepts a ``host``, which is validated against the three wildcard/loopback
+sentinels plus the host's own interface addresses, so a typo cannot produce an
+unbindable listener. ``PEGASUS_C2_TLS`` enables TLS for ``wss://`` clients.
 """
 from __future__ import annotations
 
 import os
+import socket
 import time
 
 from flask import request
 
-_STATE: dict = {"running": False, "port": None, "started_at": None,
+_STATE: dict = {"running": False, "port": None, "host": None, "started_at": None,
                 "autostarted": False}
+
+_ALWAYS_OK = {"127.0.0.1", "0.0.0.0", "::1", "::"}
+
+
+def _local_addresses() -> set[str]:
+    addrs = set(_ALWAYS_OK)
+    try:
+        import psutil
+        for _, entries in psutil.net_if_addrs().items():
+            for entry in entries:
+                addr = getattr(entry, "address", None)
+                if addr:
+                    addrs.add(str(addr).split("%")[0])
+    except Exception:
+        try:
+            addrs.add(socket.gethostbyname(socket.gethostname()))
+        except Exception:
+            pass
+    return addrs
+
+
+def _resolve_host(value) -> str | None:
+    """None means 'use the configured default'. Raises ValueError on a typo."""
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    if raw in _local_addresses():
+        return raw
+    raise ValueError(
+        "host %r is not a local interface address; use 127.0.0.1, 0.0.0.0, "
+        "::1 or one of: %s" % (raw, ", ".join(sorted(_local_addresses())))
+    )
 
 
 def _uptime() -> str:
@@ -42,19 +75,23 @@ def _clients() -> int:
         return 0
 
 
-def start_listener(port: int, autostarted: bool = False) -> dict:
-    """Start the real C2 listener and record its bound port."""
+def start_listener(port: int, autostarted: bool = False,
+                   host: str | None = None) -> dict:
+    """Start the real C2 listener and record its bound port and host."""
     from pegasus.modules.c2 import server
 
     if _STATE["running"]:
-        return {"started": True, "port": _STATE["port"], "already_running": True,
-                "uptime": _uptime(), "connected_clients": _clients()}
-    bound = server.start(port)
-    _STATE.update(running=True, port=int(bound), started_at=time.time(),
-                  autostarted=autostarted)
-    return {"started": True, "port": int(bound), "already_running": False,
-            "uptime": _uptime(), "connected_clients": _clients(),
-            "autostarted": autostarted}
+        return {"started": True, "port": _STATE["port"], "host": _STATE["host"],
+                "already_running": True, "uptime": _uptime(),
+                "connected_clients": _clients(), "tls": server.tls_enabled()}
+    bound_host = host or server.c2_host()
+    bound = server.start(port, bound_host)
+    _STATE.update(running=True, port=int(bound), host=bound_host,
+                  started_at=time.time(), autostarted=autostarted)
+    return {"started": True, "port": int(bound), "host": bound_host,
+            "already_running": False, "uptime": _uptime(),
+            "connected_clients": _clients(), "autostarted": autostarted,
+            "tls": server.tls_enabled()}
 
 
 def stop_listener() -> dict:
@@ -63,15 +100,16 @@ def stop_listener() -> dict:
     was = _STATE["running"]
     if was:
         server.stop()
-    _STATE.update(running=False, port=None, started_at=None, autostarted=False)
+    _STATE.update(running=False, port=None, host=None, started_at=None,
+                  autostarted=False)
     return {"stopped": bool(was), "was_running": bool(was)}
 
 
 def maybe_autostart() -> dict | None:
     """Honour PEGASUS_C2_AUTOSTART so the listener comes up with the app.
 
-    Defaults to on because the operator asked for it; set to 0/false/no to keep
-    the listener off until it is started from the console.
+    Called from start_server.py AFTER the main app is listening - starting a
+    second WSGI listener inside create_app() stops the backend serving.
     """
     raw = os.environ.get("PEGASUS_C2_AUTOSTART", "1").strip().lower()
     if raw in ("0", "false", "no", "off", ""):
@@ -90,9 +128,13 @@ def maybe_autostart() -> dict | None:
 def register(app, ok, fail):
     @app.get("/api/c2/status")
     def c2_status():
+        from pegasus.modules.c2 import server
         return ok({
             "running": _STATE["running"],
             "port": _STATE["port"],
+            "host": _STATE["host"],
+            "bind_default": server.c2_host(),
+            "tls": server.tls_enabled(),
             "uptime": _uptime(),
             "connected_clients": _clients(),
             "autostarted": _STATE["autostarted"],
@@ -111,7 +153,11 @@ def register(app, ok, fail):
         if port < 0 or port > 65535:
             return fail("port out of range")
         try:
-            return ok(start_listener(port))
+            host = _resolve_host(body.get("host"))
+        except ValueError as exc:
+            return fail(str(exc))
+        try:
+            return ok(start_listener(port, host=host))
         except OSError as exc:
             return fail(f"cannot bind C2 listener: {exc}", 500)
 

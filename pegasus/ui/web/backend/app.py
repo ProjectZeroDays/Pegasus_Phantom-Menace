@@ -47,8 +47,9 @@ try:
     logging.getLogger("werkzeug").disabled = True
 except Exception: pass
 
-from . import telemetry
-from flask import jsonify
+from . import telemetry, q9_routes
+from flask import Response, jsonify
+from pegasus.core.config import get_settings
 from .jobs import JobContext, _jsonable, jobs, patch_prompts, restore_prompts
 from .tools import (
     adb_devices,
@@ -368,6 +369,10 @@ def create_app() -> Flask:
     osint_routes.register(app, ok, fail)
     # Physical device control (physical_routes): /api/physical/*
     physical_routes.register(app, ok, fail)
+    # 84 Q9 capability endpoints; defined since the Q9 integration but
+    # never registered, so every /api/q9/* path 404'd.
+    q9_routes.register(app, ok, fail)
+
     # Bootloader surfaces (fastboot_routes): /api/fastboot/*
     fastboot_routes.register(app, ok, fail)
     # Tooling management (tool_routes): /api/tools/*
@@ -808,7 +813,10 @@ def create_app() -> Flask:
     return app
 
 
-def host() -> str: return os.getenv("PEGASUS_HOST", "0.0.0.0")
+def host() -> str:
+    # Loopback by default: the console is a local single-operator tool and
+    # the docs say so. Set PEGASUS_HOST=0.0.0.0 to publish it.
+    return os.getenv("PEGASUS_HOST", "127.0.0.1").strip() or "127.0.0.1"
 def port() -> int: return int(os.getenv("PEGASUS_PORT", "5000"))
 
 if __name__ == "__main__":

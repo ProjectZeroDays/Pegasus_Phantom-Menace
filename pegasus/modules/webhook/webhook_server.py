@@ -21,7 +21,7 @@ from typing_extensions import Literal
 logger = logging.getLogger(__name__)
 
 class WebhookEvent(BaseModel):
-    """"Webhook event model"""
+    """Webhook event model"""
     event_id: str
     event_type: str
     source: str

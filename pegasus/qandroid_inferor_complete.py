@@ -71,7 +71,7 @@ def cprint(s, t=None):
         print(s)
 def hdr(s):
     print(); print(_c("cyn", "=" * 74)); print(_c("cyn", f" {s}")); print(_c("cyn", "=" * 74))
-def sec(s): print(); cprint(f"  -- {s} --, "blu")
+def sec(s): print(); cprint(f"  -- {s} --", "blu")
 def ok(s): cprint(f"  [+] {s}", "grn")
 def bad(s): cprint(f"  [-] {s}", "red")
 def warn(s): cprint(f"  [!] {s}", "yel")
@@ -2383,7 +2383,9 @@ def main_operations(args):
     ok("security: 6 CVE exploits loaded")
     ok("harvest: SMS/calls/contacts/calendar/media")
     ok("payload: WASM / MP4 / GIF")
-    tasks_main(args)
+    # tasks_main is not defined anywhere in this module; keep this a safe no-op
+    # rather than raising NameError if main_operations is ever wired up.
+    info("task dispatch unavailable in this build")
 
 MENU_OPTIONS = [("1","Check Device"),("2","Connect"),("3","Disconnect"),("4","Screen Recording"),("5","Screen Mirror"),("6","Show APK List"),("7","Take Screenshot"),("8","Power Off"),("9","Install APK"),("10","Delete APK"),("11","Pull File"),("12","Push File"),("13","Send SMS"),("14","Dump Contacts"),("15","Reboot Device"),("16","Start App"),("17","Get Device Logs"),("18","Toggle Wi-Fi"),("19","Check Storage"),("20","Take Photo"),("q","Quit"),("21","Troubleshoot Connection"),("22","Unlock Advanced Security Tools"),("23","View Device Connection History")]
 

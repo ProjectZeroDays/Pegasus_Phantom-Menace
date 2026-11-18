@@ -4,6 +4,32 @@ All notable changes to Pegasus Phantom Menace. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.4] — 2026-11-18
+
+The console's C2 surface is now wired through the main backend and the Python tree compiles and lints clean.
+
+### Added
+
+- **C2 console routes** — `pegasus/ui/web/backend/c2_routes.py`: Start/Stop/Kill/Beacon endpoints POST to the real listener in `pegasus.modules.c2.server`. Bind posture is loopback by default (`PEGASUS_C2_HOST`), the `/api/c2/start` host argument is validated against wildcard/loopback sentinels plus the machine's own interface addresses, and `PEGASUS_C2_TLS` enables TLS for `wss://` clients. Autostart runs from `start_server.py` after the main socket is listening.
+- **Q9 capability surface** — `q9_routes.register(...)` in `create_app()`: the 84 Q9 endpoints defined since the Q9 integration (previously every `/api/q9/*` path 404'd) are now routable. `_wipe_traces()`, `_local_base()` and the missing `zlib` import are implemented; `test_route_registration.py` fails the build if a declared route is not registered.
+- **Contract tests** — `test_c2_routes_contract.py` covers C2 status/start/kill/beacon validation and host resolution; `test_route_registration.py` statically checks every `*_routes.py` path is served.
+- **Docs** — `docs/C2.md`, `docs/SECURITY.md`, `docs/REVIEW_CHECKLIST.md`.
+- **Repo hygiene** — `.github/dependabot.yml` (electron, pegasus-desktop, web UI, pip, github-actions); `.gitignore` secret-material rules; `.secret-hygiene-tmp/`.
+
+### Fixed
+
+- Syntax repairs: `access_workflow/agent/factory.py` (unterminated string in skill install check), `pwa/service_worker.py` and `webhook/webhook_server.py`, `pdf_generator.py`, `social_media.py` (docstring quotes, dataclass annotations, stray quotes), `ui/web/api/social_media.py` (unterminated docstrings), `qandroid_inferor_complete.py` (unterminated f-string, dead `tasks_main` call).
+- `mitm/module.py` — Frida method-trace payload used single-brace `{className}`/`{methodName}` inside an f-string (runtime `NameError`); replaced with JS string concatenation.
+- `ui/web/backend/app.py` — missing `get_settings` import and `Response` return annotations; console now binds loopback unless `PEGASUS_HOST` is set.
+- `pwa/manifest.py` — missing `Any` import and `logger` definition; `pegasus/modules/social_media.py` — latent `NameError` for `timeframe_hours` in `_generate_summary`.
+- **Credential scrub** — `weapons/PoCGen/config/config.py` and its README: hardcoded LLM provider URLs and API keys replaced with environment placeholders. (Keys are still in git history; `secret_hygiene.py --rewrite` handles the gated history rewrite separately.)
+- `.githooks/commit-msg` — phase-prefix pattern `P[0-9]+[a-c]?` so two-digit phases pass.
+
+### Notes
+
+- `pegasus/ui/web/src/lib/accent.ts` is committed as build-required source (guard added to `.gitignore`); the web console rebuilt cleanly (`tsc --noEmit` + `vite build`), 390 routes probed with no duplicates, 57/57 tests pass.
+- The dependency advisory triage from earlier 2.3.x releases carries forward; `weapons/` advisories remain tracked separately (see docs/PLAN.md).
+
 ## [2.2.0] — 2026-11-10
 
 Enterprise build completed on top of the 2.1.0 production baseline. Web console gained full enterprise surfaces and defensive ML/blockchain/quantum modules; release tooling moved to a single 2.2.0 version across all packaging surfaces.

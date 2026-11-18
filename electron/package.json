@@ -1,6 +1,6 @@
 {
   "name": "pegasus-phantom-menace",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Pegasus Phantom Menace - Android Device Management & Security Audit Platform (Desktop)",
   "main": "main.js",
   "author": "ProjectZeroDays",
@@ -129,5 +129,10 @@
       "icon": "build/icon.png",
       "category": "Utility"
     }
-  }
+  },
+  "allowScripts": [
+    "electron",
+    "electron-builder",
+    "esbuild"
+  ]
 }

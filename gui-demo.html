@@ -2,7 +2,7 @@
 <!--
   PEAK VIEW — Pegasus Phantom Menace v2.2.0 GUI DEMO
   One self-contained demo: 48 pages, every widget/state, single token system.
-  Theme: "graphite + signal" — deep charcoal surfaces, ONE signal accent (hot orange #ff5a1f)
+  Theme: "graphite + signal" — deep charcoal surfaces, ONE signal accent (hot orange #ff3d00)
   for CTA/active state, steel blue #58a6ff reserved for info/links, Inter for UI, Space Mono for data.
   No build step. No network. No data fetching. Open directly in any browser.
 -->
@@ -22,7 +22,7 @@
   --bg:#07090d; --surface:#0c0f16; --surface2:#10151f; --surface3:#161d29;
   --line:#1f2733; --line2:#2a3442;
   --ink:#e8edf3; --ink-dim:#9aa7b6; --ink-mute:#67727f;
-  --signal:#ff5a1f; --signal-deep:#e04a14; --signal-soft:rgba(255,90,31,.14); --signal-soft2:rgba(255,90,31,.28);
+  --signal:#ff3d00; --signal-deep:#e04a14; --signal-soft:rgba(255,90,31,.14); --signal-soft2:rgba(255,90,31,.28);
   --info:#58a6ff; --info-soft:rgba(88,166,255,.14); --ok:#3fb950; --ok-soft:rgba(63,185,80,.14);
   --warn:#d29922; --warn-soft:rgba(210,153,34,.16); --err:#d73a49; --err-soft:rgba(215,58,73,.16);
   --radius:10px; --radius-sm:6px; --radius-lg:14px;
@@ -452,7 +452,7 @@ const meter = (label, pct, val, color='var(--info)') => `<div class="meter-row">
 const terminal = lines => `<pre class="terminal">${lines.join('\n')}</pre>`;
 const killchain = steps => `<div class="killchain">${steps.map(s=>`<div class="kc-step ${s.state}"><div class="kc-node">${s.icon||'•'}</div><div class="kc-label">${esc(s.label)}</div></div>`).join('')}</div>`;
 const pager = (cur, total) => `<div class="pager">${Array.from({length:total},(_,i)=>`<button class="${i+1===cur?'on':''}">${i+1}</button>`).join('')}</div>`;
-const spark = (points, color='#ff5a1f') => `<svg class="sparkline" viewBox="0 0 100 38" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="1.6" points="${points}"/></svg>`;
+const spark = (points, color='#ff3d00') => `<svg class="sparkline" viewBox="0 0 100 38" preserveAspectRatio="none"><polyline fill="none" stroke="${color}" stroke-width="1.6" points="${points}"/></svg>`;
 
 /* ---------- page registry ---------- */
 const PAGES = {};

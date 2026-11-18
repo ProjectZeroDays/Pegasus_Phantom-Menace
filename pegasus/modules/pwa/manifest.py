@@ -6,10 +6,13 @@ Manages application metadata, icons, and configuration for offline capabilities
 """
 
 from dataclasses import dataclass
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 from datetime import datetime
 import json
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class WebAppManifest:

@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /electron
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+    groups:
+      electron-devtooling:
+        patterns: ["*"]
+        exclude-patterns: ["electron"]
+    ignore:
+      # 2 unpatched alerts, no fixed release exists. See docs/PLAN.md #73.
+      - dependency-name: extract-zip
+      # 88 alerts, all cleared only at >=42.11.16; a major migration, tracked
+      # separately rather than drip-fed by Dependabot.
+      - dependency-name: electron
+  - package-ecosystem: npm
+    directory: /packages/pegasus-desktop
+    schedule: { interval: weekly }
+    ignore:
+      - dependency-name: electron
+  - package-ecosystem: npm
+    directory: /pegasus/ui/web
+    schedule: { interval: weekly }
+  - package-ecosystem: pip
+    directory: /pegasus
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+# Deliberately no entry for weapons/: 396 of the 497 alerts live there and each
+# needs a vendoring decision, not a bot PR.

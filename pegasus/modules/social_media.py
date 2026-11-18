@@ -1,16 +1,15 @@
-""""pegasus modules social media
-"""# Social Media Integration Module
-# Pegasus Phantom Menace v2 - Social Media Intelligence Gathering
-#
-# This module provides social media platform integration for reconnaissance, intelligence gathering, and threat intelligence sharing.
-#
-# Implements comprehensive social media scraping, analysis, and correlation capabilities.
-#
-# Part of Pegasus v2 Phase 15 implementation
+"""Social Media Integration Module
+
+Pegasus Phantom Menace v2 - Social Media Intelligence Gathering
+Social media platform integration for reconnaissance, intelligence gathering, and threat intelligence sharing.
+Implements comprehensive social media scraping, analysis, and correlation capabilities.
+
+Part of Pegasus v2 Phase 15 implementation
+"""
 
 
 from __future__ import annotations
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, asdict
 import asyncio
 import logging
@@ -28,34 +27,34 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SocialMediaPost:
-    "id": str
-    "platform": str
-    "author": str
-    "content": str
-    "timestamp": datetime
-    "url": str
-    "likes": int
-    "shares": int
-    "comments": List[Dict]
-    "mentions": List[str]
-    "hashtags": List[str]
-    "raw_data": Dict
+    id: str
+    platform: str
+    author: str
+    content: str
+    timestamp: datetime
+    url: str
+    likes: int
+    shares: int
+    comments: List[Dict]
+    mentions: List[str]
+    hashtags: List[str]
+    raw_data: Dict
     
 @dataclass
 class SocialMediaAccount:
-    "platform": str
-    "username": str
-    "profile_url": str
-    "followers_count": int
-    "following_count": int
-    "posts_count": int
-    "bio": str
-    "verified": bool
-    "private": bool
-    "last_post_timestamp": Optional[datetime]
+    platform: str
+    username: str
+    profile_url: str
+    followers_count: int
+    following_count: int
+    posts_count: int
+    bio: str
+    verified: bool
+    private: bool
+    last_post_timestamp: Optional[datetime]
     
 class SocialMediaAnalyzer:
-    """"Social media intelligence analyzer for threat intelligence gathering and correlation."""""
+    """Social media intelligence analyzer for threat intelligence gathering and correlation."""
     
     def __init__(self):
         self.platform_clients: Dict[str, Any] = {}
@@ -63,12 +62,12 @@ class SocialMediaAnalyzer:
         self.monitoring_enabled = True
         
     def register_platform_client(self, platform: str, client: Any):
-        """Register a social media platform client for monitoring and data collection.""""
+        """Register a social media platform client for monitoring and data collection."""
         self.platform_clients[platform] = client
         logger.info(f"Registered social media client for {platform}")
         
     def load_threat_patterns(self):
-        """Load threat intelligence patterns for correlation.""""
+        """Load threat intelligence patterns for correlation."""
         self.threat_patterns = {
             "phishing": [
                 "clickbait",
@@ -100,7 +99,7 @@ class SocialMediaAnalyzer:
         }
         
     def analyze_content(self, content: str, platform: str) -> Dict[str, float]:
-        """Analyze content for threat patterns and intelligence.""""
+        """Analyze content for threat patterns and intelligence."""
         scores = {}
         
         for pattern, keywords in self.threat_patterns.items():
@@ -111,7 +110,7 @@ class SocialMediaAnalyzer:
         return scores
     
     def collect_threat_intelligence(self, timeframe_hours: int = 24) -> List[SocialMediaPost]:
-        """Collect threat intelligence from all registered platforms.""""
+        """Collect threat intelligence from all registered platforms."""
         intelligence: List[SocialMediaPost] = []
         
         for platform, client in self.platform_clients.items():
@@ -135,7 +134,7 @@ class SocialMediaAnalyzer:
         return self._filter_and_rank_intelligence(intelligence)
     
     def _collect_twitter_posts(self, client, timeframe_hours: int) -> List[SocialMediaPost]:
-        """Collect Twitter/X posts within timeframe.""""
+        """Collect Twitter/X posts within timeframe."""
         posts: List[SocialMediaPost] = []
         
         try:
@@ -151,7 +150,7 @@ class SocialMediaAnalyzer:
                 url="https://twitter.com/example/status/123",
                 likes=1500,
                 shares=800,
-                comments=[{"user": "@attacker", "text": "Seems legit!""],
+                comments=[{"user": "@attacker", "text": "Seems legit!"}],
                 mentions=["phishing", "urgency"],
                 hashtags=["limited", "offer"],
                 raw_data={"raw": "sample data"}
@@ -164,7 +163,7 @@ class SocialMediaAnalyzer:
         return posts
     
     def _collect_linkedin_posts(self, client, timeframe_hours: int) -> List[SocialMediaPost]:
-        """Collect LinkedIn posts within timeframe.""""
+        """Collect LinkedIn posts within timeframe."""
         posts: List[SocialMediaPost] = []
         
         try:
@@ -179,7 +178,7 @@ class SocialMediaAnalyzer:
                 url="https://linkedin.com/in/johndoe",
                 likes=2500,
                 shares=1200,
-                comments=[{"user": "Jane Smith", "text": "Great insight!""],
+                comments=[{"user": "Jane Smith", "text": "Great insight!"}],
                 mentions=["tech", "leadership"],
                 hashtags=["exclusive", "tech"],
                 raw_data={"raw": "sample data"}
@@ -192,7 +191,7 @@ class SocialMediaAnalyzer:
         return posts
     
     def _collect_instagram_posts(self, client, timeframe_hours: int) -> List[SocialMediaPost]:
-        """Collect Instagram posts within timeframe.""""
+        """Collect Instagram posts within timeframe."""
         posts: List[SocialMediaPost] = []
         
         try:
@@ -207,7 +206,7 @@ class SocialMediaAnalyzer:
                 url="https://instagram.com/example",
                 likes=5000,
                 shares=2500,
-                comments=[{"user": "Friend", "text": "This is wild!""],
+                comments=[{"user": "Friend", "text": "This is wild!"}],
                 mentions=["behind", "scenes"],
                 hashtags=["exclusive", "behind"],
                 raw_data={"raw": "sample data"}
@@ -220,7 +219,7 @@ class SocialMediaAnalyzer:
         return posts
     
     def _collect_facebook_posts(self, client, timeframe_hours: int) -> List[SocialMediaPost]:
-        """Collect Facebook posts within timeframe.""""
+        """Collect Facebook posts within timeframe."""
         posts: List[SocialMediaPost] = []
         
         try:
@@ -235,7 +234,7 @@ class SocialMediaAnalyzer:
                 url="https://facebook.com/example",
                 likes=3000,
                 shares=1500,
-                comments=[{"user": "Admin", "text": "Verify now!""],
+                comments=[{"user": "Admin", "text": "Verify now!"}],
                 mentions=["verification", "urgent"],
                 hashtags=["verify", "account"],
                 raw_data={"raw": "sample data"}
@@ -248,7 +247,7 @@ class SocialMediaAnalyzer:
         return posts
     
     def _filter_and_rank_intelligence(self, intelligence: List[SocialMediaPost]) -> List[SocialMediaPost]:
-        """Filter and rank intelligence based on threat potential.""""
+        """Filter and rank intelligence based on threat potential."""
         # Apply threat scoring
         scored_intelligence = []
         
@@ -266,7 +265,7 @@ class SocialMediaAnalyzer:
         return scored_intelligence[:50]  # Return top 50 most threatening posts
     
     def analyze_threat_patterns(self, content: str) -> Dict[str, float]:
-        """Analyze content for threat patterns.""""
+        """Analyze content for threat patterns."""
         content_lower = content.lower()
         patterns_found = {}
         
@@ -313,7 +312,7 @@ class SocialMediaAnalyzer:
         return patterns_found
     
     def monitor_threat_activity(self, alert_threshold: float = 0.3) -> List[Dict]:
-        """Monitor for threat activity above threshold.""""
+        """Monitor for threat activity above threshold."""
         intelligence = self.collect_threat_intelligence()
         alerts: List[Dict] = []
         
@@ -336,7 +335,7 @@ class SocialMediaAnalyzer:
         return alerts
     
     def get_intel_report(self, timeframe_hours: int = 24) -> Dict:
-        """Generate intelligence report for specified timeframe.""""
+        """Generate intelligence report for specified timeframe."""
         intelligence = self.collect_threat_intelligence(timeframe_hours)
         alerts = self.monitor_threat_activity(0.3)
         
@@ -357,13 +356,13 @@ class SocialMediaAnalyzer:
                 }
                 for post in intelligence[:5]  # Top 5 posts
             ],
-            "summary": self._generate_summary(intelligence, alerts),
+            "summary": self._generate_summary(intelligence, alerts, timeframe_hours),
         }
         
         return report
     
-    def _generate_summary(self, intelligence: List[SocialMediaPost], alerts: List[Dict]) -> str:
-        """Generate human-readable summary of intelligence.""""
+    def _generate_summary(self, intelligence: List[SocialMediaPost], alerts: List[Dict], timeframe_hours: int = 24) -> str:
+        """Generate human-readable summary of intelligence."""
         total_threat_score = sum(p.raw_data.get("threat_score", 0) for p in intelligence)
         risk_level = "HIGH" if total_threat_score > 10 else "MEDIUM" if total_threat_score > 5 else "LOW"
         
@@ -372,9 +371,7 @@ class SocialMediaAnalyzer:
         summary += f"Timeframe: {timeframe_hours} hours\n"
         summary += f"Posts Analyzed: {len(intelligence)}\n"
         summary += f"Threat Posts: {len([p for p in intelligence if p.raw_data.get('threat_score', 0) > 0])}\n"
-"
         summary += f"High-Risk Posts: {len([p for p in intelligence if p.raw_data.get('threat_score', 0) > 0.7])}\n"
-"
         summary += f"Alerts Generated: {len(alerts)}\n"
         summary += f"Risk Level: {risk_level}\n"
         summary += f"\n\nTop 5 Most Threatening Posts:\n"

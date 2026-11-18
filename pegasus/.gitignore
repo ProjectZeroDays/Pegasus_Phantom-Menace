@@ -17,7 +17,7 @@ downloads/
 eggs/
 .eggs/
 parts/
-lib/
+/lib/
 lib64/
 sdist/
 var/
@@ -207,3 +207,7 @@ Thumbs.db
 
 # NetBeans
 .nb/
+
+# src/lib is build-required source, not an artefact
+!ui/web/src/lib/
+!ui/web/src/lib/**

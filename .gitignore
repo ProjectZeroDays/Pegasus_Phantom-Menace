@@ -73,6 +73,7 @@ PegasusPhantomMenace-main.zip
 # Stray local scratch files (never committed)
 pr_body.md
 .pytest-tmp/
+.secret-hygiene-tmp/
 gh
 
 # Generated source archive - published on the v2.1.0 release, not in git
@@ -82,3 +83,23 @@ Gemini_Generated_*.gif
 Gemini_Generated_*.jpg
 LinesAndLogos_animated.gif
 weapons/remote-admin-tool/remote-admin-tool-main/assets/icons_pack.zip
+
+# accent.ts is build-required source, not a build artefact
+!pegasus/ui/web/src/lib/accent.ts
+*.crdownload
+
+# Secret material & local-only config (never commit; templates like *.env.example stay tracked)
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.crt
+.env.*
+!.env.example
+!*.env.example
+secrets.*
+credentials*.json
+**/local_config.*
+**/secret_config.*
+.push_token

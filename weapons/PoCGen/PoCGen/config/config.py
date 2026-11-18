@@ -33,13 +33,13 @@ class LLMSettings(BaseModel):
         if not providers:
             providers = {
                 "qwen": ProviderSettings(
-                    base_url=os.getenv("POCGEN_QWEN_BASE_URL", "http://222.20.126.36:30000/v1"),
-                    api_key=os.getenv("POCGEN_QWEN_API_KEY", "QWEN3@C402"),
+                    base_url=os.getenv("POCGEN_QWEN_BASE_URL", ""),
+                    api_key=os.getenv("POCGEN_QWEN_API_KEY", ""),
                     model=os.getenv("POCGEN_QWEN_MODEL", "qwen"),
                 ),
                 "deepseek": ProviderSettings(
-                    base_url=os.getenv("POCGEN_DS_BASE_URL", "http://222.20.126.10:3333/v1"),
-                    api_key=os.getenv("POCGEN_DS_API_KEY", "sk-IpyjtAxK47UZqLHtYc1lS4ck69W7Qzo3fnc5p5DEiNOblWZk"),
+                    base_url=os.getenv("POCGEN_DS_BASE_URL", ""),
+                    api_key=os.getenv("POCGEN_DS_API_KEY", ""),
                     model=os.getenv("POCGEN_DS_MODEL", "deepseek-chat"),
                 )               
             }

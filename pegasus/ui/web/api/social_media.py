@@ -24,11 +24,11 @@ social_media_analyzer.register_platform_client("facebook", None)  # Would use fa
 social_media_bp = Blueprint("social_media")
 @social_media_bp.get("/health")
 def health_check():
-    """Health check for social media API.""""
+    """Health check for social media API."""
     return jsonify({"ok": True, "status": "healthy", "service": "social_media"})
 @social_media_bp.get("/intelligence")
 def get_intelligence():
-    """Get threat intelligence from social media platforms.""""
+    """Get threat intelligence from social media platforms."""
     try:
         timeframe = request.args.get("hours", 24, type=int)
         report = social_media_analyzer.get_intel_report(timeframe)
@@ -37,7 +37,7 @@ def get_intelligence():
         return jsonify({"ok": False, "error": str(e)}), 500
 @social_media_bp.get("/threats")
 def get_threats():
-    """Get current threat alerts.""""
+    """Get current threat alerts."""
     try:
         threshold = float(request.args.get("threshold", 0.3))
         alerts = social_media_analyzer.monitor_threat_activity(threshold)
@@ -46,7 +46,7 @@ def get_threats():
         return jsonify({"ok": False, "error": str(e)}), 500
 @social_media_bp.post("/analyze")
 def analyze_content():
-    """Analyze content for threat patterns.""""
+    """Analyze content for threat patterns."""
     try:
         data = request.get_json() or {}
         content = data.get("content", "")
@@ -61,12 +61,12 @@ def analyze_content():
         return jsonify({"ok": False, "error": str(e)}), 500
 @social_media_bp.get("/platforms")
 def get_platforms():
-    """Get supported social media platforms.""""
+    """Get supported social media platforms."""
     platforms = list(social_media_analyzer.platform_clients.keys())
     return jsonify({"ok": True, "data": platforms})
 @social_media_bp.post("/register")
 def register_platform():
-    """Register a new social media platform client.""""
+    """Register a new social media platform client."""
     try:
         data = request.get_json() or {}
         platform = data.get("platform", "")
@@ -81,7 +81,7 @@ def register_platform():
         return jsonify({"ok": False, "error": str(e)}), 500
 @social_media_bp.get("/reports")
 def get_reports():
-    """Generate intelligence reports for different timeframes.""""
+    """Generate intelligence reports for different timeframes."""
     try:
         timeframe = request.args.get("hours", 24, type=int)
         report = social_media_analyzer.get_intel_report(timeframe)

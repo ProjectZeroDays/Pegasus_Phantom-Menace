@@ -26,6 +26,7 @@ import tempfile
 import threading
 import time
 import zipfile
+import zlib
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any, Dict
@@ -397,6 +398,24 @@ def _local_ip() -> str:
         return ip
     except OSError:
         return ""
+
+
+def _wipe_traces() -> None:
+    """Clear the persisted device target and in-memory serial."""
+    global DEVICE_SERIAL
+    DEVICE_SERIAL = ""
+    try:
+        (Path.home() / ".pegasus" / "target").unlink()
+    except OSError:
+        pass
+
+
+def _local_base() -> str:
+    """Derive the /24 subnet base (e.g. '192.168.1') from the local IP."""
+    ip = _local_ip()
+    if not ip:
+        return ""
+    return ".".join(ip.split(".")[:3])
 
 
 def _tcp_probe(host: str, port: int, timeout: float = 0.6) -> bool:

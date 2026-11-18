@@ -19,7 +19,7 @@ from fpdf.enums import XPosition
 logger = logging.getLogger(__name__)
 
 class ReportTemplate(BaseModel):
-    """"PDF report template configuration"""
+    """PDF report template configuration"""
     template_id: str
     name: str
     description: str

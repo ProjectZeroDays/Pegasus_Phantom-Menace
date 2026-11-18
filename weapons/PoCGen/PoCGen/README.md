@@ -54,8 +54,8 @@ python -m PoCGen.cli --desc desc.txt --code src/*.c \
 ## 配置（环境变量）
 | 变量 | 说明 | 默认 |
 | --- | --- | --- |
-| `POCGEN_QWEN_BASE_URL` / `POCGEN_QWEN_API_KEY` / `POCGEN_QWEN_MODEL` | Qwen 提供商配置 | http://222.20.126.36:30000/v1 / QWEN3@C402 / qwen |
-| `POCGEN_DS_BASE_URL` / `POCGEN_DS_API_KEY` / `POCGEN_DS_MODEL` | DeepSeek 提供商配置 | http://222.20.126.32:30000/v1 / DeepseekV3.1_32@C402 / deepseek |
+| `POCGEN_QWEN_BASE_URL` / `POCGEN_QWEN_API_KEY` / `POCGEN_QWEN_MODEL` | Qwen 提供商配置 | http://<POCGEN_BASE_URL>/v1 / <POCGEN_PASSWORD> / qwen |
+| `POCGEN_DS_BASE_URL` / `POCGEN_DS_API_KEY` / `POCGEN_DS_MODEL` | DeepSeek 提供商配置 | http://<POCGEN_BASE_URL>/v1 / <POCGEN_PASSWORD> / deepseek |
 | `POCGEN_DEFAULT_PROVIDER` | 默认模型提供商 | qwen |
 | `POCGEN_TIMEOUT` | LLM 请求超时（秒） | 60 |
 | `POCGEN_OUTPUT_ROOT` | 输出根目录 | `PoCGen/output` |
@@ -76,8 +76,8 @@ python -m PoCGen.cli --desc desc.txt --code src/*.c \
 示例（PowerShell）：
 ```powershell
 $env:POCGEN_DEFAULT_PROVIDER = "deepseek"
-$env:POCGEN_DS_BASE_URL = "http://222.20.126.32:30000/v1"
-$env:POCGEN_DS_API_KEY = "DeepseekV3.1_32@C402"
+$env:POCGEN_DS_BASE_URL = "http://<POCGEN_BASE_URL>/v1"
+$env:POCGEN_DS_API_KEY = "<POCGEN_PASSWORD>"
 
 ```
 

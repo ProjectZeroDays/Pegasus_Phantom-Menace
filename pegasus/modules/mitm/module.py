@@ -172,12 +172,12 @@ Java.perform(function() {{
                     methodName.indexOf("loadUrl") >= 0 ||
                     methodName.indexOf("verify") >= 0) {{
                     clazz[methodName].implementation = function() {{
-                        console.log("[+] {className}.{methodName} called");
-                        return this[{methodName}].apply(this, arguments);
+                        console.log("[+] " + className + "." + methodName + " called");
+                        return this[methodName].apply(this, arguments);
                     }};
                 }}
             }});
-            console.log("[+] Tracing {className}");
+            console.log("[+] Tracing " + className);
         }} catch (e) {{ console.log("[-] " + className + ": " + e); }}
     }});
     console.log("[*] Method trace active for {app}");

@@ -18,7 +18,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 class CacheEntry(BaseModel):
-    """"Cache entry model for offline storage""""
+    """Cache entry model for offline storage"""
     key: str
     value: Any
     timestamp: datetime
@@ -26,7 +26,7 @@ class CacheEntry(BaseModel):
     size: int = 0
     metadata: Dict[str, Any] = {}
 class ServiceWorker:
-    """Service Worker for Progressive Web Application""""
+    """Service Worker for Progressive Web Application"""
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
@@ -195,7 +195,7 @@ class ServiceWorker:
 
 
     async def _notification_worker_loop(self) -> None:
-        """Push notification worker loop""""
+        """Push notification worker loop"""
         while self.is_running:
             try:
                 # Check for pending notifications
@@ -220,7 +220,7 @@ class ServiceWorker:
             notification_data = {
                 "notification_id": notification_id,
                 "title": notification.get("title", "Notification"),
-                "body": notification.get("body", """),
+                "body": notification.get("body", ""),
                 "data": notification.get("data"),
                 "type": notification.get("type", "info"),
                 "priority": notification.get("priority", "normal"),
@@ -261,7 +261,7 @@ class ServiceWorker:
 
 
     async def heartbeat(self) -> None:
-        """Send heartbeat signal""""
+        """Send heartbeat signal"""
         heartbeat_data = {
             "type": "heartbeat",
             "timestamp": datetime.now().isoformat(),
