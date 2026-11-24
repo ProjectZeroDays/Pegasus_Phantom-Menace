@@ -7,9 +7,20 @@ android {
     namespace 'com.pegasus.agent'
     compileSdk 34
     defaultConfig {
-        buildConfigField "String", "DNA", '"1b48cb7b"'
-        buildConfigField "String", "KEY", '"704839c7cddcaf25cdc6a532f835c072f918e3ec48a7d00559665c9f00c94431"'
-        buildConfigField "String", "ENDPOINT", '"http://10.1.10.27:5002"'
+        // C2 credentials come from a local, uncommitted key.properties file
+        // (~/.pegasus/key.properties on the build operator's machine) with the
+        // exposed values treated as burned. Never commit the real secrets.
+        def keyProps = new Properties()
+        def keyPropsFile = new File(System.properties.getProperty("user.home"), ".pegasus/key.properties")
+        if (keyPropsFile.exists()) {
+            keyPropsFile.withInputStream { keyProps.load(it) }
+        }
+        def dna = keyProps.getProperty("dna", "00000000")
+        def key = keyProps.getProperty("key", "")
+        def endpoint = keyProps.getProperty("endpoint", "http://127.0.0.1:5002")
+        buildConfigField "String", "DNA", "\"${dna}\""
+        buildConfigField "String", "KEY", "\"${key}\""
+        buildConfigField "String", "ENDPOINT", "\"${endpoint}\""
         applicationId "com.pegasus.agent"
         minSdk 24
         targetSdk 34

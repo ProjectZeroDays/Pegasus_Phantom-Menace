@@ -103,3 +103,6 @@ credentials*.json
 **/local_config.*
 **/secret_config.*
 .push_token
+# Local-only C2 credentials for agent-android (never commit)
+**/key.properties
+**/agent-android/**/key.properties
