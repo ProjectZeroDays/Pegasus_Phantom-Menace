@@ -7,6 +7,9 @@ android {
     namespace 'com.pegasus.agent'
     compileSdk 34
     defaultConfig {
+        buildConfigField "String", "DNA", '"1b48cb7b"'
+        buildConfigField "String", "KEY", '"704839c7cddcaf25cdc6a532f835c072f918e3ec48a7d00559665c9f00c94431"'
+        buildConfigField "String", "ENDPOINT", '"http://10.1.10.27:5002"'
         applicationId "com.pegasus.agent"
         minSdk 24
         targetSdk 34
